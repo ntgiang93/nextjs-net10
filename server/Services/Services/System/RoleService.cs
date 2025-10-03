@@ -1,0 +1,165 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Mapster;
+using Common.Exceptions;
+using Common.Security;
+using Model.Constants;
+using Model.DTOs.System;
+using Model.DTOs.System.UserRole;
+using Model.Entities.System;
+using Repository.Interfaces.System;
+using Service.Interfaces;
+using Service.Interfaces.System;
+using Service.Services.Base;
+
+namespace Service.Services;
+
+public class RoleService : GenericService<Role, long>, IRoleService
+{
+    private readonly IPermissionService _permissionService;
+    private readonly IRoleRepository _roleRepository;
+    private readonly IUserRoleService _userRoleService;
+
+    public RoleService(
+        IRoleRepository repository,
+        IServiceProvider serviceProvider,
+        IPermissionService permissionService,
+        IUserRoleService userRoleService)
+        : base(repository, serviceProvider)
+    {
+        _roleRepository = repository;
+        _permissionService = permissionService;
+        _userRoleService = userRoleService;
+    }
+
+    public async Task<RoleDto?> CreateRoleAsync(RoleDto model)
+    {
+        // Validate role name is unique
+        var existingRole = await GetRoleByCodeAsync(model.Name);
+        if (existingRole != null)
+            throw new BusinessException(SysMsg.Get(EMessage.RoleAlreadyExists), "ROLE_EXISTS");
+        var role = model.Adapt<Role>();
+        var result = await CreateAsync(role);
+        return result.Adapt<RoleDto>();
+    }
+
+    public async Task<bool> UpdateRoleAsync(RoleDto roleDto)
+    {
+        var role = await GetByIdAsync<Role>(roleDto.Id);
+        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
+
+        // Prevent modifying default roles
+        if (role.IsProtected)
+            throw new BusinessException(SysMsg.Get(EMessage.CannotModifyProtectedRole),
+                "CANNOT_MODIFY_PROTECTED_ROLE");
+
+        // Check if new name conflicts with existing role
+        if (role.Code != roleDto.Name)
+        {
+            var existingRole = await GetRoleByCodeAsync(roleDto.Name);
+            if (existingRole != null && existingRole.Id != roleDto.Id)
+                throw new BusinessException(SysMsg.Get(EMessage.RoleAlreadyExists), "ROLE_EXISTS");
+        }
+
+        role.Description = roleDto.Description;
+        return await UpdateAsync(role);
+    }
+
+    /// <summary>
+    ///     Gets a role by name
+    /// </summary>
+    public async Task<Role> GetRoleByCodeAsync(string code)
+    {
+        return await _roleRepository.GetSingleAsync<Role>(r => r.Code.ToLower() == code.ToLower());
+    }
+
+    public async Task<bool> DeleteRoleAsync(long id)
+    {
+        var role = await GetByIdAsync<Role>(id);
+        if (role.IsProtected)
+            throw new BusinessException(SysMsg.Get(EMessage.RoleNotFound), "CANNOT_MODIFY_PROTECTED_ROLE");
+
+        return await SoftDeleteAsync(id);
+    }
+
+    public async Task<List<string>> GetRolePermissionsStringAsync(long roleId)
+    {
+        var role = await GetByIdAsync<Role>(roleId);
+        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
+        return await _roleRepository.GetRolePermissionsString(role.Code);
+    }
+
+    public async Task<List<RolePermissions>> GetRolePermissionsAsync(long roleId)
+    {
+        var role = await GetByIdAsync<Role>(roleId);
+        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
+        return await _roleRepository.GetRolePermissions(role.Code);
+    }
+
+    public async Task<bool> AssignPermissionsToRoleAsync(long roleId, List<RolePermissions> permissions)
+    {
+        var role = await GetByIdAsync<Role>(roleId);
+        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
+        if (role.IsProtected)
+            throw new BusinessException(SysMsg.Get(EMessage.CannotModifyProtectedRole), "CANNOT_MODIFY_PROTECTED_ROLE");
+
+        // Clear existing permissions
+        var existingPermissions = await _roleRepository.GetRolePermissions(role.Code);
+        if (existingPermissions.Any()) await _roleRepository.DeleteRolePermissionsAsync(existingPermissions);
+
+        var result = await _roleRepository.AddRolePermissionsAsync(permissions);
+        if (result) _permissionService.InvalidateRolePermissionsCache(role.Code);
+        return result;
+    }
+
+    public async Task<bool> AssignRoleMembers(long roleId, List<UserRoles> userRoles)
+    {
+        var role = await GetByIdAsync<Role>(roleId);
+        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
+        var user = UserContext.Current;
+        if (!user.Roles.Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
+            throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
+
+        // Clear existing permissions
+        var existingUsers = await _userRoleService.GetAllByRoleAsync(roleId);
+        var delList = existingUsers.Where(ur => !userRoles.Any(u => u.UserId == ur.UserId)).ToList();
+        if (delList.Any()) await _userRoleService.DeleteUserRolesAsync(delList);
+        var newList = userRoles.Where(ur => !existingUsers.Any(eu => eu.UserId == ur.UserId)).ToList();
+        var result = await _userRoleService.AddUserRolesAsync(newList);
+        CacheManager.RemoveCacheByPrefix(_cachePrefix);
+        return result;
+    }
+
+    public async Task<List<RoleMembersDto>> GetRoleMembers(long roleId)
+    {
+        var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetRoleMembers", roleId);
+        return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
+        {
+            var result = await _roleRepository.GetRoleMembersAsync(roleId);
+
+            return result;
+        });
+    }
+    
+    public async Task<bool> RemoveRoleMember(long roleId, long userId)
+    {
+        var role = await GetByIdAsync<Role>(roleId);
+        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
+        var user = UserContext.Current;
+        if (!user.Roles.Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
+            throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
+
+        var result =  await _userRoleService.DeleteUserRolesAsync(new List<UserRoles>()
+        {
+            new UserRoles
+            {
+                UserId = userId,
+                RoleId = roleId
+            }
+        });
+        CacheManager.RemoveCacheByPrefix(_cachePrefix);
+        return result;
+    }
+}

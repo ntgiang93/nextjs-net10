@@ -1,0 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+
+public class CreateUserDto
+{
+    public string FullName { get; set; }
+
+    [EmailAddress] public string? Email { get; set; }
+
+    public string? PhoneNumber { get; set; }
+    public List<string> Roles { get; set; }
+}
