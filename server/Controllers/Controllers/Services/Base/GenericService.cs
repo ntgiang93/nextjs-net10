@@ -4,9 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Dapper;
-using IdGen;
-using Microsoft.EntityFrameworkCore.Query;
-using Microsoft.Extensions.DependencyInjection;
 using Common.Exceptions;
 using Common.Security;
 using Model.Constants;
@@ -32,17 +29,15 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
 
     protected ISysMessageService SysMsg => _serviceProvider.GetRequiredService<ISysMessageService>();
     protected CacheManager CacheManager => _serviceProvider.GetRequiredService<CacheManager>();
-    protected IdGenerator IdGenerator => _serviceProvider.GetRequiredService<IdGenerator>();
 
     public virtual async Task<TDto> GetByIdAsync<TDto>(TKey id)
     {
         return await _repository.GetByIdAsync<TDto>(id);
     }
 
-    public virtual async Task<TDto?> GetSingleAsync<TDto>(Expression<Func<TEntity, bool>> predicate,
-        bool trackChanges = false)
+    public virtual async Task<TDto?> GetSingleAsync<TDto>(Expression<Func<TEntity, bool>> predicate)
     {
-        return await _repository.GetSingleAsync<TDto>(predicate, trackChanges);
+        return await _repository.GetSingleAsync<TDto>(predicate);
     }
 
     public virtual async Task<IEnumerable<TDto>> GetAllAsync<TDto>()
@@ -52,10 +47,9 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
             async () => { return await _repository.GetAllAsync<TDto>(); });
     }
 
-    public virtual async Task<IEnumerable<TDto>> FindAsync<TDto>(Expression<Func<TEntity, bool>> predicate,
-        bool trackChanges = false)
+    public virtual async Task<IEnumerable<TDto>> FindAsync<TDto>(Expression<Func<TEntity, bool>> predicate)
     {
-        return await _repository.FindAsync<TDto>(predicate, trackChanges);
+        return await _repository.FindAsync<TDto>(predicate);
     }
 
     public virtual async Task<bool> UpdateAsync(TEntity entity, string username = "System")
@@ -72,16 +66,6 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
         entity.UpdatedAt = DateTime.UtcNow;
         var result = await _repository.UpdateAsync(entity);
         if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
-        return result;
-    }
-
-    public virtual async Task<int> BatchUpdateAsync(Expression<Func<TEntity, bool>> predicate,
-        Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> setPropertyCalls)
-    {
-        var result = await _repository.BatchUpdateAsync(predicate, setPropertyCalls);
-        if (result > 0)
-            // Clear cache when batch update is successful
-            CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return result;
     }
 
@@ -106,21 +90,11 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
 
     public virtual async Task<bool> HardDeleteAsync(TKey id)
     {
-        var result = await _repository.DeleteAsync(id);
+        var entity = await _repository.GetByIdAsync<TEntity>(id);
+        if (entity == null) return true;
+        var result = await _repository.DeleteAsync(entity);
         if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return result;
-    }
-
-    // Query access methods
-    public virtual async Task<IQueryable<TEntity>> GetQueryableAsync(bool trackChanges = false)
-    {
-        return await _repository.GetQueryable(trackChanges);
-    }
-
-    public virtual async Task<(IEnumerable<TDto> Items, int TotalCount)> FindPaginationAsync<TDto>(
-        Expression<Func<TEntity, bool>> predicate, int pageIndex, int pageSize, bool trackChanges = false)
-    {
-        return await _repository.FindPaginationAsync<TDto>(predicate, pageIndex, pageSize, trackChanges);
     }
 
     public virtual async Task<IEnumerable<T>> ExecuteSPAsync<T>(string storedProcedure,
@@ -145,9 +119,10 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
         entity.CreatedBy = UserContext.Current?.Username ?? username;
         entity.CreatedAt = DateTime.UtcNow;
         if (typeof(TKey) == typeof(long) && Convert.ToInt64(entity.Id) == 0)
-            entity.Id = (TKey)(object)IdGenerator.CreateId();
-        var createdEntity = await _repository.AddAsync(entity);
-        if (createdEntity != null) CacheManager.RemoveCacheByPrefix(_cachePrefix);
+            entity.Id = (TKey)(object)Ulid.NewUlid();
+        var id = await _repository.InsertAsync(entity);
+        var createdEntity = await _repository.GetByIdAsync<TEntity>(id);
+        if(createdEntity != null)CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return createdEntity;
     }
 }

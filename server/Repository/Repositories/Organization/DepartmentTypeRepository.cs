@@ -5,6 +5,7 @@ using Model.Entities.Organization;
 using Model.Models;
 using Repository.Interfaces.Organization;
 using Repository.Repositories.Base;
+using Repository.Interfaces.Base;
 
 namespace Repository.Repositories.Organization
 {
@@ -12,7 +13,7 @@ namespace Repository.Repositories.Organization
     {
         private readonly StringBuilder _sqlBuilder;
 
-        public DepartmentTypeRepository(AppSettings appSettings) : base(appSettings)
+        public DepartmentTypeRepository(IDbConnectionFactory factory) : base(factory)
         {
             _sqlBuilder = new StringBuilder();
         }
@@ -26,7 +27,8 @@ namespace Repository.Repositories.Organization
 
             var compiledQuery = _compiler.Compile(query);
             
-            using var connection = Connection;
+            using var connection = _connection;
+            connection.Open();
             var result = await connection.QueryAsync<DepartmentType>(compiledQuery.Sql, compiledQuery.NamedBindings);
             
             return result.ToList();
@@ -40,7 +42,8 @@ namespace Repository.Repositories.Organization
 
             var compiledQuery = _compiler.Compile(query);
             
-            using var connection = Connection;
+            using var connection = _connection;
+            connection.Open();
             var result = await connection.QueryFirstOrDefaultAsync<DepartmentType>(compiledQuery.Sql, compiledQuery.NamedBindings);
             
             return result;

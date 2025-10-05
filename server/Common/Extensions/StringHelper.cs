@@ -1,4 +1,6 @@
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Reflection;
 using System.Text;
 
 namespace Common.Extensions;
@@ -77,5 +79,43 @@ public static class StringHelper
         }
 
         return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+    }
+
+    /// <summary>
+    /// Gets the database table name for the specified entity type.
+    /// First checks for [Table] attribute, if found returns the attribute's Name property.
+    /// If no [Table] attribute is found, returns the entity class name.
+    /// </summary>
+    /// <typeparam name="TEntity">The entity type to get table name for</typeparam>
+    /// <returns>
+    /// The database table name. Returns the value from [Table(Name = "TableName")] attribute 
+    /// if present, otherwise returns the entity class name.
+    /// </returns>
+    /// <example>
+    /// <code>
+    /// // For entity with [Table("Users")] attribute
+    /// string tableName = StringHelper.GetTableName&lt;User&gt;(); // Returns "Users"
+    /// 
+    /// // For entity without [Table] attribute  
+    /// string tableName = StringHelper.GetTableName&lt;Product&gt;(); // Returns "Product"
+    /// </code>
+    /// </example>
+    public static string GetTableName<TEntity>()
+    {
+        // Lấy Type của TEntity
+        Type entityType = typeof(TEntity);
+
+        // Tìm TableAttribute trên Type đó
+        var tableAttribute = entityType.GetCustomAttribute<TableAttribute>();
+
+        if (tableAttribute != null && !string.IsNullOrWhiteSpace(tableAttribute.Name))
+        {
+            // Nếu có TableAttribute và Name được set, trả về Name đó
+            return tableAttribute.Name;
+        }
+        else
+        {
+            return entityType.Name;
+        }
     }
 }

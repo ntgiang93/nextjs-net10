@@ -57,7 +57,7 @@ public class UserService : GenericService<User, string>, IUserService
         });
     }
 
-    public async Task<UserDto> GetDetailAsync(long userId)
+    public async Task<UserDto> GetDetailAsync(string userId)
     {
         var user = await _userRepository.GetDetailAsync(userId);
         if (user != null)
@@ -86,7 +86,7 @@ public class UserService : GenericService<User, string>, IUserService
         });
     }
 
-    public async Task<UserDto> CreateUserAsync(CreateUserDto model)
+    public async Task<string> CreateUserAsync(CreateUserDto model)
     {
         var name = model.FullName.Split(' ');
         var prefix = name[^1].ToLower() + model.FullName.Replace(name[^1], "").Trim().GetInitials();
@@ -115,17 +115,17 @@ public class UserService : GenericService<User, string>, IUserService
         };
 
         // Add user to database
-        var createdUser = await CreateAsync(user);
-        if (createdUser != null)
+        var id = await CreateAsync(user);
+        if (!string.IsNullOrEmpty(id))
         {
-            await _userRoleService.AddUserRolesAsync(model.Roles.Select(r => new UserRoles()
+            await _userRoleService.AddUserRoleAsync(model.Roles.Select(r => new UserRole()
             {
-                UserId = createdUser.Id,
-                RoleId = long.Parse(r)
+                UserId = id,
+                RoleId = int.Parse(r)
             }));
         }
 
-        return createdUser.Adapt<UserDto>();
+        return id;
     }
 
     public async Task<bool> UpdateUserAsync(UpdateUserDto model)
@@ -140,10 +140,10 @@ public class UserService : GenericService<User, string>, IUserService
         var updatedUser = await UpdateAsync(user);
         if (updatedUser)
         {
-            await _userRoleService.UpdateUserRolesAsync(model.Roles.Select(r => new UserRoles()
+            await _userRoleService.UpdateUserRoleAsync(model.Roles.Select(r => new UserRole()
             {
                 UserId = user.Id,
-                RoleId = long.Parse(r)
+                RoleId = int.Parse(r)
             }), user.Id);
         }
 
@@ -195,20 +195,20 @@ public class UserService : GenericService<User, string>, IUserService
         return result;
     }
 
-    public async Task<bool> AssignRolesAsync(long userId, List<UserRoles> roles)
+    public async Task<bool> AssignRolesAsync(string userId, List<UserRole> roles)
     {
         var user = await _userRepository.GetByIdAsync<User>(userId);
         if (user == null) throw new NotFoundException(SysMsg.Get(EMessage.UserNotFound), "USER_NOT_FOUND");
 
         // Clear existing roles
         var existingRoles = await _userRoleService.GetAllByUserAsync(userId);
-        if (existingRoles.Any()) await _userRoleService.DeleteUserRolesAsync(existingRoles);
+        if (existingRoles.Any()) await _userRoleService.DeleteUserRoleAsync(existingRoles);
 
-        var result = await _userRoleService.AddUserRolesAsync(roles);
+        var result = await _userRoleService.AddUserRoleAsync(roles);
         return result;
     }
 
-    public async Task<bool> ChangeActiveStatus(long id)
+    public async Task<bool> ChangeActiveStatus(string id)
     {
         var user = await _userRepository.GetByIdAsync<User>(id);
         if (user == null)
@@ -220,7 +220,7 @@ public class UserService : GenericService<User, string>, IUserService
     }
 
     public async Task<bool> ValidateUniqueUser(string? email, string? phoneNumber, string? username,
-        long userId = default)
+        string userId = default)
     {
         User existingUser;
         if (userId != default)
@@ -238,18 +238,18 @@ public class UserService : GenericService<User, string>, IUserService
         return true;
     }
 
-    public async Task<IEnumerable<string>> GetUserRolesAsync(long userId)
+    public async Task<IEnumerable<string>> GetUserRoleAsync(string userId)
     {
         return await _userRepository.GetRolesAsync(userId);
     }
 
-    public async Task<IEnumerable<string>> GetUserPermissionsAsync(long userId)
+    public async Task<IEnumerable<string>> GetUserPermissionsAsync(string userId)
     {
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetUserPermissionsAsync", userId);
         return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
         {
             // Get all roles for the user
-            var userRoles = await GetUserRolesAsync(userId);
+            var userRoles = await GetUserRoleAsync(userId);
             if (userRoles == null || !userRoles.Any())
                 return Enumerable.Empty<string>();
 
@@ -257,7 +257,7 @@ public class UserService : GenericService<User, string>, IUserService
             var allPermissions = new HashSet<string>();
             foreach (var role in userRoles)
             {
-                var rolePermissions = await _permissionService.GetRolePermissionsStringAsync(role);
+                var rolePermissions = await _permissionService.GetRolePermissionStringAsync(role);
                 if (rolePermissions != null)
                 {
                     foreach (var permission in rolePermissions)
@@ -275,14 +275,14 @@ public class UserService : GenericService<User, string>, IUserService
     {
         // Get the current user ID from the context
         var currentUser = UserContext.Current;
-        if (currentUser == null || currentUser.UserId <= 0)
+        if (currentUser == null || string.IsNullOrEmpty(currentUser.UserId))
             return Enumerable.Empty<string>();
 
         // Get permissions for the current user
         return await GetUserPermissionsAsync(currentUser.UserId);
     }
 
-    public async Task<bool> UpdateAvatarAsync(IFormFile file, long userId)
+    public async Task<bool> UpdateAvatarAsync(IFormFile file, string userId)
     {
         var user = await GetByIdAsync<User>(userId);
         if (user == null)

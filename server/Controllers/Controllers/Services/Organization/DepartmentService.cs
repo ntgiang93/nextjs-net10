@@ -67,7 +67,6 @@ public class DepartmentService : GenericService<Department, int>, IDepartmentSer
     public async Task<bool> DeleteDepartmentAsync(int id)
     {
         var success = await SoftDeleteAsync(id);
-        if (success) await BatchUpdateAsync(d => d.ParentId == id, d => d.SetProperty(x => x.IsDeleted, true));
         return success;
     }
 }

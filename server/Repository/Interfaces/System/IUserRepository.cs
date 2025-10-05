@@ -12,14 +12,14 @@ public interface IUserRepository : IGenericRepository<User, string>
     /// </summary>
     /// <param name="userId">The ID of the user whose roles are being retrieved</param>
     /// <returns>A list of role names assigned to the user</returns>
-    Task<List<string>> GetRolesAsync(long userId);
+    Task<List<string>> GetRolesAsync(string userId);
 
     /// <summary>
     ///     Retrieves detailed information for a specific user by their ID
     /// </summary>
     /// <param name="userId">The ID of the user to retrieve details for</param>
     /// <returns>A UserDto containing detailed user information</returns>
-    Task<UserDto> GetDetailAsync(long userId);
+    Task<UserDto> GetDetailAsync(string userId);
 
     /// <summary>
     ///     Finds users whose usernames start with the specified prefix

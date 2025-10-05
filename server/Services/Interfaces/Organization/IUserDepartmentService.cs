@@ -28,7 +28,7 @@ public interface IUserDepartmentService : IGenericService<UserDepartment, int>
     ///     Creates a new user department assignment
     ///     If the assignment is marked as primary, any existing primary assignments will be updated
     /// </summary>
-    Task<UserDepartment> CreateUserDepartmentAsync(UserDepartment userDepartment);
+    Task<int> CreateUserDepartmentAsync(UserDepartment userDepartment);
 
     /// <summary>
     ///     Updates a user department assignment

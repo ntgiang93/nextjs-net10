@@ -1,12 +1,13 @@
-using System.Text;
 using Dapper;
-using SqlKata;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
 using Model.Entities.Organization;
-using Model.Models;
+using Model.Entities.System;
+using Repository.Interfaces.Base;
 using Repository.Interfaces.Organization;
 using Repository.Repositories.Base;
+using SqlKata;
+using System.Text;
 
 namespace Repository.Repositories.Organization;
 
@@ -14,7 +15,7 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
 {
     private readonly StringBuilder _sqlBuilder;
 
-    public UserDepartmentRepository(AppSettings appSettings) : base(appSettings)
+    public UserDepartmentRepository(IDbConnectionFactory factory) : base(factory)
     {
         _sqlBuilder = new StringBuilder();
     }
@@ -47,7 +48,8 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
             INNER JOIN {nameof(User)}s u ON ud.{nameof(UserDepartment.UserId)} = u.{nameof(User.Id)}
             WHERE ").Append(whereClause);
 
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var totalCount = await connection.QuerySingleAsync<int>(_sqlBuilder.ToString(), parameters);
 
         // Get paginated results
@@ -88,7 +90,8 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryFirstOrDefaultAsync<UserDepartment>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result;
@@ -109,7 +112,8 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
             INNER JOIN {nameof(Department)}s d ON ud.{nameof(UserDepartment.DepartmentId)} = d.{nameof(Department.Id)}
             WHERE ud.{nameof(UserDepartment.UserId)} = @userId AND ud.{nameof(UserDepartment.IsDeleted)} = 0");
 
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryAsync<UserDepartmentDto>(_sqlBuilder.ToString(), new { userId });
         
         return result.ToList();
@@ -123,7 +127,8 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryAsync<UserDepartment>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();

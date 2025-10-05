@@ -3,17 +3,18 @@ using Dapper;
 using SqlKata;
 using Model.DTOs.Organization;
 using Model.Entities.Organization;
-using Model.Models;
 using Repository.Interfaces.Organization;
 using Repository.Repositories.Base;
+using Repository.Interfaces.Base;
+using Model.Entities.System;
 
 namespace Repository.Repositories.Organization;
 
 public class DepartmentRepository : GenericRepository<Department, int>, IDepartmentRepository
 {
-    private readonly StringBuilder _sqlBuilder;
+    private readonly StringBuilder _sqlBuilder;     
 
-    public DepartmentRepository(AppSettings appSettings) : base(appSettings)
+    public DepartmentRepository(IDbConnectionFactory factory) : base(factory)   
     {
         _sqlBuilder = new StringBuilder();
     }
@@ -38,7 +39,8 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
             WHERE d.{nameof(Department.IsActive)} = 1 AND d.{nameof(Department.IsDeleted)} = 0
             ORDER BY d.{nameof(Department.Id)} DESC");
 
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var allDepartments = await connection.QueryAsync<TableDepartmentDto>(_sqlBuilder.ToString());
         
         return BuildDepartmentTree(allDepartments.ToList());
@@ -78,7 +80,8 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryAsync<Department>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
@@ -94,7 +97,8 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryAsync<Department>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();

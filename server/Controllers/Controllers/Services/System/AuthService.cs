@@ -56,7 +56,7 @@ public class AuthService : IAuthService
 
     public async Task<TokenDto?> RefreshTokenAsync(RefreshTokenDto dto)
     {
-        var session = await _userTokenService.GetSingleAsync<UserTokens>(x =>
+        var session = await _userTokenService.GetSingleAsync<UserToken>(x =>
             x.RefreshToken == dto.RefreshToken && x.Expires > DateTime.UtcNow && x.IsDeleted == false);
         if (session == null) return null;
         var user = await _userService.GetByIdAsync<User>(session.UserId);
@@ -96,7 +96,7 @@ public class AuthService : IAuthService
         var user = UserContext.Current;
         foreach (var deviceId in deviceIds)
         {
-            var session = await _userTokenService.GetSingleAsync<UserTokens>(x =>
+            var session = await _userTokenService.GetSingleAsync<UserToken>(x =>
                 x.UserId == user.UserId && x.Device == deviceId);
             if (session != null)
             {
@@ -198,7 +198,7 @@ public class AuthService : IAuthService
         var success = await _userService.UpdateAsync(user);
         if (success)
             // Revoke all tokens for this user
-            await RevokeAllUserTokensAsync(currentUser.UserId);
+            await RevokeAllUserRoleAsync(currentUser.UserId);
         return success;
     }
 
@@ -237,10 +237,10 @@ public class AuthService : IAuthService
         await _emailSmsService.SendSmsAsync(phoneNumber, content);
     }
 
-    private async Task RevokeAllUserTokensAsync(long userId)
+    private async Task RevokeAllUserRoleAsync(string userId)
     {
         var user = UserContext.Current;
-        var sessions = await _userTokenService.FindAsync<UserTokens>(x => x.UserId == userId && x.IsDeleted == false);
+        var sessions = await _userTokenService.FindAsync<UserToken>(x => x.UserId == userId && x.IsDeleted == false);
         await RevokeTokenAssync(sessions.Select(x => x.Device).ToList());
     }
 }

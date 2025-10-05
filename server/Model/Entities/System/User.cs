@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model.Entities.System;
 
+[Table("Users")]
 public class User : BaseEntity<string>
 {
     [Required] [StringLength(100)] public string Username { get; set; }

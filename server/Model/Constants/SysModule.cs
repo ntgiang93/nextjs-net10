@@ -7,7 +7,7 @@ public enum ESysModule
     Auth,
     Users,
     Roles,
-    UserRoles,
+    UserRole,
     Menu,
     UserProfile,
     Files,
@@ -23,7 +23,7 @@ public static class SysModule
     {
         { nameof(ESysModule.Users), "Users management" },
         { nameof(ESysModule.Roles), "Roles management" },
-        { nameof(ESysModule.UserRoles), "User's Roles management" },
+        { nameof(ESysModule.UserRole), "User's Roles management" },
         { nameof(ESysModule.Menu), "Menu management" },
         { nameof(ESysModule.UserProfile), "User Profile" },
         { nameof(ESysModule.Files), "Files management" },

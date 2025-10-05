@@ -6,9 +6,9 @@ namespace Service.Interfaces.System;
 
 public interface IUserRoleService
 {
-    Task<List<UserRoles>> GetAllByUserAsync(long userId);
-    Task<List<UserRoles>> GetAllByRoleAsync(long roleId);
-    Task<bool> AddUserRolesAsync(IEnumerable<UserRoles> userRoles);
-    Task<bool> DeleteUserRolesAsync(IEnumerable<UserRoles> userRoles);
-    Task<bool> UpdateUserRolesAsync(IEnumerable<UserRoles> userRoles, long userId);
+    Task<List<UserRole>> GetAllByUserAsync(string userId);
+    Task<List<UserRole>> GetAllByRoleAsync(int roleId);
+    Task<bool> AddUserRoleAsync(IEnumerable<UserRole> userRoles);
+    Task<bool> DeleteUserRoleAsync(IEnumerable<UserRole> userRoles);
+    Task<bool> UpdateUserRoleAsync(IEnumerable<UserRole> userRoles, string userId);
 }

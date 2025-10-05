@@ -15,29 +15,29 @@ public class UserRoleService : IUserRoleService
         _userRoleRepository = userRoleRepository;
     }
 
-    public async Task<bool> AddUserRolesAsync(IEnumerable<UserRoles> userRoles)
+    public async Task<bool> AddUserRoleAsync(IEnumerable<UserRole> userRoles)
     {
-        return await _userRoleRepository.AddUserRolesAsync(userRoles);
+        return await _userRoleRepository.AddUserRoleAsync(userRoles);
     }
 
-    public async Task<bool> DeleteUserRolesAsync(IEnumerable<UserRoles> userRoles)
+    public async Task<bool> DeleteUserRoleAsync(IEnumerable<UserRole> userRoles)
     {
-        return await _userRoleRepository.DeleteUserRolesAsync(userRoles);
+        return await _userRoleRepository.DeleteUserRoleAsync(userRoles);
     }
 
-    public async Task<bool> UpdateUserRolesAsync(IEnumerable<UserRoles> userRoles, long userId)
+    public async Task<bool> UpdateUserRoleAsync(IEnumerable<UserRole> userRoles, string userId)
     {
         var existedRole = await _userRoleRepository.GetAllByUserAsync(userId);
-        if (existedRole.Any()) await DeleteUserRolesAsync(existedRole);
-        return await AddUserRolesAsync(userRoles);
+        if (existedRole.Any()) await DeleteUserRoleAsync(existedRole);
+        return await AddUserRoleAsync(userRoles);
     }
 
-    public async Task<List<UserRoles>> GetAllByRoleAsync(long roleId)
+    public async Task<List<UserRole>> GetAllByRoleAsync(int roleId)
     {
         return await _userRoleRepository.GetAllByRoleAsync(roleId);
     }
 
-    public async Task<List<UserRoles>> GetAllByUserAsync(long userId)
+    public async Task<List<UserRole>> GetAllByUserAsync(string userId)
     {
         return await _userRoleRepository.GetAllByUserAsync(userId);
     }

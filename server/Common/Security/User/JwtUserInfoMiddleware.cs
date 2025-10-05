@@ -22,7 +22,7 @@ public class JwtUserInfoMiddleware
         {
             var currentUser = new CurrentUser
             {
-                UserId = GetClaimValue<long>(context.User, ClaimTypes.NameIdentifier),
+                UserId = GetClaimValue<string>(context.User, ClaimTypes.NameIdentifier),
                 Username = GetClaimValue<string>(context.User, ClaimTypes.Name),
                 Email = GetClaimValue<string>(context.User, ClaimTypes.Email),
                 FirstName = GetClaimValue<string>(context.User, "FirstName"),

@@ -6,7 +6,7 @@ using Service.Interfaces.Base;
 
 namespace Service.Interfaces;
 
-public interface IUserTokenService : IGenericService<UserTokens, int>
+public interface IUserTokenService : IGenericService<UserToken, long>
 {
     Task<KeyValuePair<string, string>> GenerateToken(User user);
 

@@ -19,7 +19,7 @@ public class SysCategoryService : GenericService<SysCategory, int>, ISysCategory
     {
     }
 
-    public async Task<CategoryDto> CreateCategoryAsync(CreateCategoryDto categoryDto)
+    public async Task<int> CreateCategoryAsync(CreateCategoryDto categoryDto)
     {
         var category = new SysCategory
         {
@@ -27,9 +27,9 @@ public class SysCategoryService : GenericService<SysCategory, int>, ISysCategory
             Description = categoryDto.Description
         };
 
-        category = await CreateAsync(category);
+        var id = await CreateAsync(category);
 
-        return category.Adapt<CategoryDto>();
+        return id;
     }
 
     public async Task<bool> UpdateCategoryAsync(UpdateCategoryDto categoryDto)

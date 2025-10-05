@@ -1,10 +1,10 @@
-using System.Text;
 using Dapper;
-using SqlKata;
 using Model.Entities.System;
-using Model.Models;
+using Repository.Interfaces.Base;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
+using SqlKata;
+using System.Text;
 
 namespace Repository.Repositories.System;
 
@@ -12,7 +12,7 @@ public class FileRepository : GenericRepository<FileStorage, int>, IFileReposito
 {
     private readonly StringBuilder _sqlBuilder;
 
-    public FileRepository(AppSettings appSettings) : base(appSettings)
+    public FileRepository(IDbConnectionFactory factory) : base(factory)
     {
         _sqlBuilder = new StringBuilder();
     }
@@ -27,7 +27,8 @@ public class FileRepository : GenericRepository<FileStorage, int>, IFileReposito
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryAsync<FileStorage>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();

@@ -38,12 +38,12 @@ public class UserDepartmentService : GenericService<UserDepartment, int>, IUserD
         return cachedResult;
     }
 
-    public async Task<UserDepartment> CreateUserDepartmentAsync(UserDepartment userDepartment)
+    public async Task<int> CreateUserDepartmentAsync(UserDepartment userDepartment)
     {
         if (userDepartment.IsPrimary) await UpdatePrimaryFlagAsync(userDepartment.UserId, userDepartment.Id);
-        var result = await _userDepartmentRepository.AddAsync(userDepartment);
+        var id = await _userDepartmentRepository.InsertAsync(userDepartment);
 
-        return result;
+        return id;
     }
 
     public async Task<bool> UpdateUserDepartmentAsync(UserDepartment userDepartment)

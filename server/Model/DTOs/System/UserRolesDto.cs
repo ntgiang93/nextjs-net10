@@ -1,6 +1,6 @@
 namespace Model.DTOs.System.UserRole;
 
-public class UserRolesDto
+public class UserRoleDto
 {
     public string RolesId { get; set; }
     public string RoleCode { get; set; } = string.Empty;

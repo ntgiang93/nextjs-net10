@@ -7,16 +7,21 @@ using Model.Entities.System;
 using Model.Models;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
+using Repository.Interfaces.Base;
+using Common.Extensions;
 
 namespace Repository.Repositories.System;
 
 public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
 {
     private readonly StringBuilder _sqlBuilder;
+    private readonly string _tableName;
 
-    public MenuRepository(AppSettings appSettings) : base(appSettings)
+    public MenuRepository(IDbConnectionFactory factory) : base(factory)
     {
         _sqlBuilder = new StringBuilder();
+        _tableName = StringHelper.GetTableName<Menu>();
+
     }
 
     public async Task<List<MenuDto>> GetMenuTreeAsync()
@@ -27,7 +32,8 @@ public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
             .OrderBy(nameof(Menu.ParentId), nameof(Menu.DisplayOrder));
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var allMenus = await connection.QueryAsync<MenuDto>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return BuildMenuTree(allMenus.ToList());
@@ -40,14 +46,15 @@ public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
 
         _sqlBuilder.Clear();
         _sqlBuilder.Append($@"
-            SELECT * FROM {nameof(Menu)} 
+            SELECT * FROM {_tableName} 
             WHERE {nameof(Menu.IsDeleted)} = 0 AND {nameof(Menu.IsActive)} = 1 
             AND ({nameof(Menu.Sysmodule)} IS NULL OR CONCAT({nameof(Menu.Sysmodule)}, '.', @viewPermission) IN @permissions)
             ORDER BY {nameof(Menu.ParentId)}, {nameof(Menu.DisplayOrder)}");
 
         parameters.Add("viewPermission", nameof(EPermission.View));
 
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var allMenus = await connection.QueryAsync<MenuDto>(_sqlBuilder.ToString(), parameters);
         
         return BuildMenuTree(allMenus.ToList());

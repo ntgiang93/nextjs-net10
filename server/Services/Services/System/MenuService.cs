@@ -50,7 +50,7 @@ public class MenuService : GenericService<Menu, int>, IMenuService
             var permissions = new List<string>();
             foreach (var role in user.Roles)
             {
-                var rolePermissions = await _permissionService.GetRolePermissionsStringAsync(role);
+                var rolePermissions = await _permissionService.GetRolePermissionStringAsync(role);
                 var viewPermission = rolePermissions
                     .Where(p => p.EndsWith($"{EPermission.View}"))
                     .ToList();

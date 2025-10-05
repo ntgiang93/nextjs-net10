@@ -3,9 +3,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model.Entities.System;
 
-public class UserTokens : BaseEntity<long>
+[Table("UserRole", Schema = "System")]
+public class UserToken : BaseEntity<long>
 {
-    [Required] public long UserId { get; set; }
+    [Required] public string UserId { get; set; }
 
     [Required] [StringLength(200)] public string AccessTokenId { get; set; }
 

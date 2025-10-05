@@ -6,7 +6,7 @@ public class VerificationCacheData
     {
     }
 
-    public VerificationCacheData(string code, string email, string phoneNumber, long userId)
+    public VerificationCacheData(string code, string email, string phoneNumber, string userId)
     {
         UserId = userId;
         Code = code;
@@ -14,7 +14,7 @@ public class VerificationCacheData
         PhoneNumber = phoneNumber;
     }
 
-    public long UserId { get; set; }
+    public string UserId { get; set; }
     public string Code { get; set; }
     public string Email { get; set; }
     public string PhoneNumber { get; set; }

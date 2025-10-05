@@ -5,7 +5,7 @@ namespace Service.Interfaces.System
 {
     public interface IPermissionService
     {
-        Task<IEnumerable<string>> GetRolePermissionsStringAsync(string role);
-        void InvalidateRolePermissionsCache(string role);
+        Task<IEnumerable<string>> GetRolePermissionStringAsync(string role);
+        void InvalidateRolePermissionCache(string role);
     }
 }

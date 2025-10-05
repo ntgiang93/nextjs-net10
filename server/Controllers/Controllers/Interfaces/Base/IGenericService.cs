@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Dapper;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
-using Dapper;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace Service.Interfaces.Base;
 
@@ -25,7 +20,7 @@ public interface IGenericService<TEntity, TKey>
     /// <param name="predicate">The predicate to filter entities.</param>
     /// <param name="trackChanges">Whether to track changes.</param>
     /// <returns>The single entity that matches the predicate.</returns>
-    Task<TDto?> GetSingleAsync<TDto>(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false);
+    Task<TDto?> GetSingleAsync<TDto>(Expression<Func<TEntity, bool>> predicate);
 
     /// <summary>
     ///     Gets all entities.
@@ -47,7 +42,7 @@ public interface IGenericService<TEntity, TKey>
     ///     A task that represents the asynchronous operation. The task result contains a collection of data transfer
     ///     objects.
     /// </returns>
-    Task<IEnumerable<TDto>> FindAsync<TDto>(Expression<Func<TEntity, bool>> predicate, bool trackChanges = false);
+    Task<IEnumerable<TDto>> FindAsync<TDto>(Expression<Func<TEntity, bool>> predicate);
 
     /// <summary>
     ///     Creates a new entity.
@@ -83,31 +78,6 @@ public interface IGenericService<TEntity, TKey>
     Task<bool> HardDeleteAsync(TKey id);
 
     /// <summary>
-    ///     Gets a queryable collection of entities.
-    /// </summary>
-    /// <param name="trackChanges">Indicates whether to track changes.</param>
-    /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains a queryable collection of
-    ///     entities.
-    /// </returns>
-    Task<IQueryable<TEntity>> GetQueryableAsync(bool trackChanges = false);
-
-    /// <summary>
-    ///     Finds entities with pagination.
-    /// </summary>
-    /// <typeparam name="TDto">The type of the data transfer object.</typeparam>
-    /// <param name="predicate">The predicate to filter entities.</param>
-    /// <param name="pageIndex">The index of the page.</param>
-    /// <param name="pageSize">The size of the page.</param>
-    /// <param name="trackChanges">Indicates whether to track changes.</param>
-    /// <returns>
-    ///     A task that represents the asynchronous operation. The task result contains a collection of data transfer
-    ///     objects and the total count of entities.
-    /// </returns>
-    Task<(IEnumerable<TDto> Items, int TotalCount)> FindPaginationAsync<TDto>(Expression<Func<TEntity, bool>> predicate,
-        int pageIndex, int pageSize, bool trackChanges = false);
-
-    /// <summary>
     ///     Executes a stored procedure and returns a collection of results.
     /// </summary>
     /// <typeparam name="T">The type of the result.</typeparam>
@@ -139,13 +109,4 @@ public interface IGenericService<TEntity, TKey>
     /// </returns>
     Task<(IEnumerable<T> Items, int TotalCount)> ExecuteSPWithPaginationAsync<T>(string storedProcedure,
         DynamicParameters? parameters = null, int pageIndex = 1, int pageSize = 10);
-
-    /// <summary>
-    ///     Performs a batch update on entities matching the predicate.
-    /// </summary>
-    /// <param name="predicate">The predicate to filter entities for updating.</param>
-    /// <param name="setPropertyCalls">The expression specifying the property updates.</param>
-    /// <returns>A task that represents the asynchronous operation. The task result contains the number of affected rows.</returns>
-    Task<int> BatchUpdateAsync(Expression<Func<TEntity, bool>> predicate,
-        Expression<Func<SetPropertyCalls<TEntity>, SetPropertyCalls<TEntity>>> setPropertyCalls);
 }

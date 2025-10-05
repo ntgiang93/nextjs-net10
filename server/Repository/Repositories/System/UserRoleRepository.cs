@@ -1,50 +1,52 @@
-using System.Text;
 using Dapper;
 using Dapper.Contrib.Extensions;
-using SqlKata;
 using Model.Entities.System;
-using Model.Models;
+using Repository.Interfaces.Base;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
+using SqlKata;
+using System.Text;
 
 namespace Repository.Repositories.System;
 
-public class UserRoleRepository : GenericRepository<User, long>, IUserRoleRepository
+public class UserRoleRepository : GenericRepository<User, string>, IUserRoleRepository
 {
     private readonly StringBuilder _sqlBuilder;
 
-    public UserRoleRepository(AppSettings appSettings) : base(appSettings)
+    public UserRoleRepository(IDbConnectionFactory factory) : base(factory)
     {
         _sqlBuilder = new StringBuilder();
     }
 
-    public async Task<List<UserRoles>> GetAllByUserAsync(long userId)
+    public async Task<List<UserRole>> GetAllByUserAsync(string userId)
     {
-        var query = new Query(nameof(UserRoles))
-            .Where(nameof(UserRoles.UserId), userId);
+        var query = new Query(nameof(UserRole))
+            .Where(nameof(UserRole.UserId), userId);
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
-        var result = await connection.QueryAsync<UserRoles>(compiledQuery.Sql, compiledQuery.NamedBindings);
+        using var connection = _connection;
+        connection.Open();
+        var result = await connection.QueryAsync<UserRole>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
     }
 
-    public async Task<List<UserRoles>> GetAllByRoleAsync(long roleId)
+    public async Task<List<UserRole>> GetAllByRoleAsync(int roleId)
     {
-        var query = new Query(nameof(UserRoles))
-            .Where(nameof(UserRoles.RoleId), roleId);
+        var query = new Query(nameof(UserRole))
+            .Where(nameof(UserRole.RoleId), roleId);
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
-        var result = await connection.QueryAsync<UserRoles>(compiledQuery.Sql, compiledQuery.NamedBindings);
+        using var connection = _connection;
+        connection.Open();
+        var result = await connection.QueryAsync<UserRole>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
     }
 
-    public async Task<bool> AddUserRolesAsync(IEnumerable<UserRoles> userRoles)
+    public async Task<bool> AddUserRoleAsync(IEnumerable<UserRole> userRoles)
     {
         return await ExecuteInTransactionAsync(async (connection, transaction) =>
         {
@@ -56,7 +58,7 @@ public class UserRoleRepository : GenericRepository<User, long>, IUserRoleReposi
         });
     }
 
-    public async Task<bool> DeleteUserRolesAsync(IEnumerable<UserRoles> userRoles)
+    public async Task<bool> DeleteUserRoleAsync(IEnumerable<UserRole> userRoles)
     {
         return await ExecuteInTransactionAsync(async (connection, transaction) =>
         {
@@ -69,37 +71,37 @@ public class UserRoleRepository : GenericRepository<User, long>, IUserRoleReposi
     }
 
     // Bulk operations for better performance
-    public async Task<bool> BulkAddUserRolesAsync(IEnumerable<UserRoles> userRoles)
+    public async Task<bool> BulkAddUserRoleAsync(IEnumerable<UserRole> userRoles)
     {
         return await ExecuteInTransactionAsync(async (connection, transaction) =>
         {
             _sqlBuilder.Clear();
             _sqlBuilder.Append($@"
-                INSERT INTO {nameof(UserRoles)} ({nameof(UserRoles.UserId)}, {nameof(UserRoles.RoleId)})
-                VALUES (@{nameof(UserRoles.UserId)}, @{nameof(UserRoles.RoleId)})");
+                INSERT INTO {nameof(UserRole)} ({nameof(UserRole.UserId)}, {nameof(UserRole.RoleId)})
+                VALUES (@{nameof(UserRole.UserId)}, @{nameof(UserRole.RoleId)})");
             
             await connection.ExecuteAsync(_sqlBuilder.ToString(), userRoles, transaction);
             return true;
         });
     }
 
-    public async Task<bool> DeleteUserRolesByUserIdAsync(long userId)
+    public async Task<bool> DeleteUserRoleByUserIdAsync(long userId)
     {
         return await ExecuteInTransactionAsync(async (connection, transaction) =>
         {
             _sqlBuilder.Clear();
-            _sqlBuilder.Append($"DELETE FROM {nameof(UserRoles)} WHERE {nameof(UserRoles.UserId)} = @UserId");
+            _sqlBuilder.Append($"DELETE FROM {nameof(UserRole)} WHERE {nameof(UserRole.UserId)} = @UserId");
             await connection.ExecuteAsync(_sqlBuilder.ToString(), new { UserId = userId }, transaction);
             return true;
         });
     }
 
-    public async Task<bool> DeleteUserRolesByRoleIdAsync(long roleId)
+    public async Task<bool> DeleteUserRoleByRoleIdAsync(long roleId)
     {
         return await ExecuteInTransactionAsync(async (connection, transaction) =>
         {
             _sqlBuilder.Clear();
-            _sqlBuilder.Append($"DELETE FROM {nameof(UserRoles)} WHERE {nameof(UserRoles.RoleId)} = @RoleId");
+            _sqlBuilder.Append($"DELETE FROM {nameof(UserRole)} WHERE {nameof(UserRole.RoleId)} = @RoleId");
             await connection.ExecuteAsync(_sqlBuilder.ToString(), new { RoleId = roleId }, transaction);
             return true;
         });

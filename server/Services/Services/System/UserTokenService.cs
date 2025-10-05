@@ -13,14 +13,14 @@ using System.Text;
 
 namespace Service.Services;
 
-public class UserTokenService : GenericService<UserTokens, long>, IUserTokenService
+public class UserTokenService : GenericService<UserToken, long>, IUserTokenService
 {
     private readonly AppSettings _appSettings;
     private readonly IUserService _userService;
 
     public UserTokenService(IUserService userService,
         AppSettings appSettings,
-        IGenericRepository<UserTokens, long> repository,
+        IGenericRepository<UserToken, long> repository,
         IServiceProvider serviceProvider) : base(repository, serviceProvider)
     {
         _userService = userService;
@@ -29,7 +29,7 @@ public class UserTokenService : GenericService<UserTokens, long>, IUserTokenServ
 
     public async Task<KeyValuePair<string, string>> GenerateToken(User user)
     {
-        var roles = await _userService.GetUserRolesAsync(user.Id);
+        var roles = await _userService.GetUserRoleAsync(user.Id);
         var tokenId = Guid.NewGuid().ToString();
         var claims = new List<Claim>
         {
@@ -56,7 +56,7 @@ public class UserTokenService : GenericService<UserTokens, long>, IUserTokenServ
 
     public async Task<bool> RevokeTokenAsync(string refreshToken)
     {
-        var session = await GetSingleAsync<UserTokens>(x => x.RefreshToken == refreshToken);
+        var session = await GetSingleAsync<UserToken>(x => x.RefreshToken == refreshToken);
         if (session == null) return true;
         session.Expires = default;
         session.RefreshToken = string.Empty;
@@ -73,7 +73,7 @@ public class UserTokenService : GenericService<UserTokens, long>, IUserTokenServ
         rng.GetBytes(randomNumber);
         var refreshToken = Convert.ToBase64String(randomNumber);
         var userToken =
-            await GetSingleAsync<UserTokens>(x =>
+            await GetSingleAsync<UserToken>(x =>
                 x.DeviceId == deviceId && x.UserId == user.Id && x.IsDeleted == false);
         if (userToken != null)
         {
@@ -85,7 +85,7 @@ public class UserTokenService : GenericService<UserTokens, long>, IUserTokenServ
         }
         else
         {
-            userToken = new UserTokens
+            userToken = new UserToken
             {
                 UserId = user.Id,
                 DeviceId = deviceId,

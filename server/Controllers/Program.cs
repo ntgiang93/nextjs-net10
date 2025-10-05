@@ -3,28 +3,35 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using Api.Filters;
 using Common.Security;
 using Common.Security.Policies;
 using Model.Models;
-using Repository.Data;
 using Repository.Interfaces.Base;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
 using Service.Interfaces.Base;
 using Service.Services.Base;
-using Service.Services.System;
+using Service.Services;
 using Serilog;
-using Service.Interfaces.Base;
-using Service.Services.Base;
-using System;
-using System.Reflection.Emit;
 using System.Text;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Controllers.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Use Autofac as the service provider factory
+builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());
+
+// Register Autofac modules
+builder.Host.ConfigureContainer<ContainerBuilder>(containerBuilder =>
+{
+    containerBuilder.RegisterModule<AutofacModule>();
+});
+
 var appSettings = builder.Configuration.GetSection("AppSettings").Get<AppSettings>();
 builder.Services.AddSingleton(appSettings ?? new AppSettings());
+
 // Add Memory Cache Service
 builder.Services.AddMemoryCache();
 
@@ -42,7 +49,7 @@ builder.Services.AddCors(options =>
         });
 });
 
-// Add authentiaction service with JWT
+// Add authentication service with JWT
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -63,37 +70,21 @@ builder.Services.AddAuthentication(options =>
                 : "$3!kP#r2^Lq@v9&yFgXwNzTb8Uj*JhV5mDchfyresds845HGYR9843hhdsu!@hre83uDFG0HD"))
         };
     });
+
 builder.Services.AddAuthorization();
+
 // Add permission policy service
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 builder.Services.AddSingleton<CacheManager>();
 
-
-// Config scan repository and resigter to DI
-builder.Services.Scan(scan => scan
-    .FromAssemblyOf<IUserRepository>()
-    .AddClasses(c => c.AssignableTo(typeof(IGenericRepository<,>)))
-    .AsImplementedInterfaces()
-    .WithScopedLifetime());
-// Config scan service and resigter to DI
-builder.Services.AddScoped(typeof(IGenericRepository<,>), typeof(GenericRepository<,>));
-builder.Services.AddScoped(typeof(IGenericService<,>), typeof(GenericService<,>));
-builder.Services.Scan(scan => scan
-    .FromAssemblyOf<EmailSmsService>()
-    .AddClasses(c => c.Where(type => type.Name.EndsWith("Service")))
-    .AsImplementedInterfaces()
-    .WithScopedLifetime());
-// Trong Program.cs, thêm vào phần ConfigureServices
+// Add controllers with filters
 builder.Services.AddControllers(options => { options.Filters.Add<GlobalExceptionFilter>(); });
-// builder.Services.Configure<CookiePolicyOptions>(options =>
-// {
-//     options.MinimumSameSitePolicy = builder.Environment.IsDevelopment() ? SameSiteMode.None : SameSiteMode.Strict;
-// });
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// read serilog cofiguration from appsetting.json
+// Read serilog configuration from appsetting.json
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .CreateLogger();
@@ -103,7 +94,8 @@ builder.Host.UseSerilog();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) app.MapOpenApi();
+if (app.Environment.IsDevelopment()) 
+    app.MapOpenApi();
 
 app.UseHttpsRedirection();
 
@@ -116,6 +108,7 @@ app.UseStaticFiles(new StaticFileOptions
         Path.Combine(Directory.GetCurrentDirectory(), "uploads")),
     RequestPath = "/uploads"
 });
+
 app.UseAuthentication(); // Add authentication middleware
 app.UseJwtUserInfo(); // Add our custom JWT user info middleware
 app.UseAuthorization();

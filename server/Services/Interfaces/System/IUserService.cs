@@ -17,12 +17,12 @@ public interface IUserService : IGenericService<User, string>
     /// </summary>
     /// <param name="userId">ID of the user</param>
     /// <returns>Collection of permission strings assigned to the user</returns>
-    Task<IEnumerable<string>> GetUserPermissionsAsync(long userId);
+    Task<IEnumerable<string>> GetUserPermissionsAsync(string userId);
 
     /// <summary>
     /// Gets detailed information of a user by their ID
     /// </summary>
-    Task<UserDto> GetDetailAsync(long userId);
+    Task<UserDto> GetDetailAsync(string userId);
 
     /// <summary>
     ///     Gets permissions of the currently authenticated user
@@ -35,7 +35,7 @@ public interface IUserService : IGenericService<User, string>
     /// </summary>
     /// <param name="userId">ID of the user</param>
     /// <returns>Collection of role names assigned to the user</returns>
-    Task<IEnumerable<string>> GetUserRolesAsync(long userId);
+    Task<IEnumerable<string>> GetUserRoleAsync(string userId);
 
     /// <summary>
     ///     Gets paginated list of users based on filter criteria
@@ -55,8 +55,8 @@ public interface IUserService : IGenericService<User, string>
     ///     Creates a new user in the system
     /// </summary>
     /// <param name="model">Data for creating the new user</param>
-    /// <returns>True if user creation was successful, otherwise false</returns>
-    Task<UserDto> CreateUserAsync(CreateUserDto model);
+    /// <returns>userId</returns>
+    Task<string> CreateUserAsync(CreateUserDto model);
 
     /// <summary>
     ///     Updates an existing user's information
@@ -73,14 +73,14 @@ public interface IUserService : IGenericService<User, string>
     /// <param name="username">Username to validate</param>
     /// <param name="userId">User ID to exclude from validation (for updates)</param>
     /// <returns>True if all provided values are unique, otherwise false</returns>
-    Task<bool> ValidateUniqueUser(string? email, string? phoneNumber, string? username, long userId = default);
+    Task<bool> ValidateUniqueUser(string? email, string? phoneNumber, string? username, string userId = default);
 
     /// <summary>
     ///     Toggles a user's active status (active/inactive)
     /// </summary>
     /// <param name="id">ID of the user to update</param>
     /// <returns>True if status was changed successfully, otherwise false</returns>
-    Task<bool> ChangeActiveStatus(long id);
+    Task<bool> ChangeActiveStatus(string id);
 
     /// <summary>
     ///     Verifies a user's email change request
@@ -103,7 +103,7 @@ public interface IUserService : IGenericService<User, string>
     /// <param name="userId">ID of the user</param>
     /// <param name="roles">List of user-role relationships to assign</param>
     /// <returns>True if roles were assigned successfully, otherwise false</returns>
-    Task<bool> AssignRolesAsync(long userId, List<UserRoles> roles);
+    Task<bool> AssignRolesAsync(string userId, List<UserRole> roles);
 
     /// <summary>
     ///     Updates a user's avatar/profile picture
@@ -111,5 +111,5 @@ public interface IUserService : IGenericService<User, string>
     /// <param name="file">The image file to use as the new avatar</param>
     /// <param name="userId">ID of the user whose avatar is being updated</param>
     /// <returns>True if avatar was updated successfully, otherwise false</returns>
-    Task<bool> UpdateAvatarAsync(IFormFile file, long userId);
+    Task<bool> UpdateAvatarAsync(IFormFile file, string userId);
 }

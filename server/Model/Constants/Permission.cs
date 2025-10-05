@@ -14,7 +14,7 @@ public enum EPermission
 
 public static class Permission
 {
-    public static readonly string PermissionCacheKeyPrefix = "RolePermissions_";
+    public static readonly string PermissionCacheKeyPrefix = "RolePermission_";
 
     public static readonly Dictionary<string, string> Permissions = new()
     {

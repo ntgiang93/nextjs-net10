@@ -1,20 +1,16 @@
 using Dapper;
 using Model.Entities.System;
-using Model.Models;
+using Repository.Interfaces.Base;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
 using SqlKata;
-using System.Text;
 
 namespace Repository.Repositories.System
 {
     public class UserProfileRepository : GenericRepository<UserProfile, int>, IUserProfileRepository
     {
-        private readonly StringBuilder _sqlBuilder;
-
-        public UserProfileRepository(AppSettings appSettings) : base(appSettings)
+        public UserProfileRepository(IDbConnectionFactory factory) : base(factory)
         {
-            _sqlBuilder = new StringBuilder();
         }
 
         // GET methods can be implemented as needed
@@ -26,12 +22,11 @@ namespace Repository.Repositories.System
 
             var compiledQuery = _compiler.Compile(query);
             
-            using var connection = Connection;
+            using var connection = _connection;
+            connection.Open();
             var result = await connection.QueryFirstOrDefaultAsync<UserProfile>(compiledQuery.Sql, compiledQuery.NamedBindings);
             
             return result;
         }
-
-        // UPDATE methods can be implemented as needed
     }
 }

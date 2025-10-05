@@ -112,22 +112,23 @@ public class FileService : GenericService<FileStorage, int>, IFileService
 
     public async Task<PaginatedResultDto<FileDto>> GetPaginatedAsync(FileFilterDto filter)
     {
-        var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetPaginatedFiles", filter);
-        var cachedResult = await CacheManager.GetOrCreateAsync(cacheKey, async () =>
-        {
-            var paginatedResult = await FindPaginationAsync<FileDto>(
-                f => f.FileName.Contains(filter.SearchTerm ?? string.Empty) && f.ReferenceType == filter.ReferenceType,
-                filter.PageNumber, filter.PageSize, true);
+        //var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetPaginatedFiles", filter);
+        //var cachedResult = await CacheManager.GetOrCreateAsync(cacheKey, async () =>
+        //{
+        //    var paginatedResult = await GetAllAsync<FileDto>(
+        //        f => f.FileName.Contains(filter.SearchTerm ?? string.Empty) && f.ReferenceType == filter.ReferenceType,
+        //        filter.PageNumber, filter.PageSize, true);
 
-            return new PaginatedResultDto<FileDto>
-            {
-                Items = paginatedResult.Items.ToList(),
-                TotalCount = paginatedResult.TotalCount,
-                PageIndex = filter.PageNumber,
-                PageSize = filter.PageSize
-            };
-        });
-        return cachedResult;
+        //    return new PaginatedResultDto<FileDto>
+        //    {
+        //        Items = paginatedResult.Items.ToList(),
+        //        TotalCount = paginatedResult.TotalCount,
+        //        PageIndex = filter.PageNumber,
+        //        PageSize = filter.PageSize
+        //    };
+        //});
+        //return cachedResult;
+        return null;
     }
 
     public async Task<bool> DeleteFileAsync(int id)

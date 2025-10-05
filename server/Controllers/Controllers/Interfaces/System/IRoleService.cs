@@ -7,7 +7,7 @@ using Service.Interfaces.Base;
 
 namespace Service.Interfaces;
 
-public interface IRoleService : IGenericService<Role, long>
+public interface IRoleService : IGenericService<Role, int>
 {
     /// <summary>
     ///     Creates a new role
@@ -28,7 +28,7 @@ public interface IRoleService : IGenericService<Role, long>
     /// </summary>
     /// <param name="id">ID of the role to delete</param>
     /// <returns>True if successful, false otherwise</returns>
-    Task<bool> DeleteRoleAsync(long id);
+    Task<bool> DeleteRoleAsync(int id);
 
     /// <summary>
     ///     Gets a role by name
@@ -42,14 +42,14 @@ public interface IRoleService : IGenericService<Role, long>
     /// </summary>
     /// <param name="roleId">ID of the role</param>
     /// <returns>List of role permissions</returns>
-    Task<List<RolePermissions>> GetRolePermissionsAsync(long roleId);
+    Task<List<RolePermission>> GetRolePermissionAsync(int roleId);
 
     /// <summary>
     ///     Retrieves the permissions associated with a specific role as strings.
     /// </summary>
     /// <param name="roleId">ID of the role</param>
     /// <returns>List of permission strings</returns>
-    Task<List<string>> GetRolePermissionsStringAsync(long roleId);
+    Task<List<string>> GetRolePermissionStringAsync(int roleId);
 
     /// <summary>
     ///     Assigns a list of permissions to a specified role.
@@ -57,7 +57,7 @@ public interface IRoleService : IGenericService<Role, long>
     /// <param name="roleId">ID of the role to assign permissions to</param>
     /// <param name="rolePermissions">List of permissions to assign to the role</param>
     /// <returns>True if successful, false otherwise</returns>
-    Task<bool> AssignPermissionsToRoleAsync(long roleId, List<RolePermissions> rolePermissions);
+    Task<bool> AssignPermissionsToRoleAsync(int roleId, List<RolePermission> rolePermissions);
 
     /// <summary>
     ///     Adds users to a specified role
@@ -65,14 +65,14 @@ public interface IRoleService : IGenericService<Role, long>
     /// <param name="roleId">ID of the role</param>
     /// <param name="userRoles">List of user-role relationships to add</param>
     /// <returns>True if successful, false otherwise</returns>
-    Task<bool> AssignRoleMembers(long roleId, List<UserRoles> userRoles);
+    Task<bool> AssignRoleMembers(int roleId, List<UserRole> userRoles);
 
     /// <summary>
     ///     Gets all users assigned to a specific role
     /// </summary>
     /// <param name="roleId">ID of the role</param>
     /// <returns>List of role members with their details</returns>
-    Task<List<RoleMembersDto>> GetRoleMembers(long roleId);
+    Task<List<RoleMembersDto>> GetRoleMembers(int roleId);
     
     /// <summary>
     ///     Removes a user from a specific role
@@ -80,5 +80,5 @@ public interface IRoleService : IGenericService<Role, long>
     /// <param name="roleId">ID of the role</param>
     /// <param name="userId">ID of the user to remove from the role</param>
     /// <returns>True if removal was successful, false otherwise</returns>
-    Task<bool> RemoveRoleMember(long roleId, long userId);
+    Task<bool> RemoveRoleMember(int roleId, string userId);
 }

@@ -5,6 +5,7 @@ using Model.Entities.Organization;
 using Model.Models;
 using Repository.Interfaces.Organization;
 using Repository.Repositories.Base;
+using Repository.Interfaces.Base;
 
 namespace Repository.Repositories.Organization;
 
@@ -12,7 +13,7 @@ public class JobTitleRepository : GenericRepository<JobTitle, int>, IJobTitleRep
 {
     private readonly StringBuilder _sqlBuilder;
 
-    public JobTitleRepository(AppSettings appSettings) : base(appSettings)
+    public JobTitleRepository(IDbConnectionFactory factory) : base(factory)
     {
         _sqlBuilder = new StringBuilder();
     }
@@ -26,7 +27,8 @@ public class JobTitleRepository : GenericRepository<JobTitle, int>, IJobTitleRep
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryAsync<JobTitle>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
@@ -42,7 +44,8 @@ public class JobTitleRepository : GenericRepository<JobTitle, int>, IJobTitleRep
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryAsync<JobTitle>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();

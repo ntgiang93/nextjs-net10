@@ -115,14 +115,14 @@ public class FileService : GenericService<FileStorage, int>, IFileService
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetPaginatedFiles", filter);
         var cachedResult = await CacheManager.GetOrCreateAsync(cacheKey, async () =>
         {
-            var paginatedResult = await FindPaginationAsync<FileDto>(
-                f => f.FileName.Contains(filter.SearchTerm ?? string.Empty) && f.ReferenceType == filter.ReferenceType,
-                filter.PageNumber, filter.PageSize, true);
+            //var paginatedResult = await FindPaginationAsync<FileDto>(
+            //    f => f.FileName.Contains(filter.SearchTerm ?? string.Empty) && f.ReferenceType == filter.ReferenceType,
+            //    filter.PageNumber, filter.PageSize, true);
 
             return new PaginatedResultDto<FileDto>
             {
-                Items = paginatedResult.Items.ToList(),
-                TotalCount = paginatedResult.TotalCount,
+                Items = [],
+                TotalCount = 0,
                 PageIndex = filter.PageNumber,
                 PageSize = filter.PageSize
             };

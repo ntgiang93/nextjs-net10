@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model.Entities.System;
+
+[Table("Roles")]
 
 public class Role : BaseEntity<int>
 {

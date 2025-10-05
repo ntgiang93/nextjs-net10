@@ -8,20 +8,20 @@ public interface IUserRoleRepository : IGenericRepository<User, string>
     /// <summary>
     ///     Gets all roles for a specific user
     /// </summary>
-    Task<List<UserRoles>> GetAllByUserAsync(string userId);
+    Task<List<UserRole>> GetAllByUserAsync(string userId);
 
     /// <summary>
     ///     Gets all users with a specific role
     /// </summary>
-    Task<List<UserRoles>> GetAllByRoleAsync(int roleId);
+    Task<List<UserRole>> GetAllByRoleAsync(int roleId);
 
     /// <summary>
-    ///     Adds multiple UserRoles
+    ///     Adds multiple UserRole
     /// </summary>
-    Task<bool> AddUserRolesAsync(IEnumerable<UserRoles> userRoles);
+    Task<bool> AddUserRoleAsync(IEnumerable<UserRole> userRoles);
 
     /// <summary>
-    ///     Deletes multiple UserRoles
+    ///     Deletes multiple UserRole
     /// </summary>
-    Task<bool> DeleteUserRolesAsync(IEnumerable<UserRoles> userRoles);
+    Task<bool> DeleteUserRoleAsync(IEnumerable<UserRole> userRoles);
 }

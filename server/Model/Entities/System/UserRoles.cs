@@ -5,12 +5,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model.Entities.System;
 
-[Table("UserRoles")]
-public class UserRoles
+[Table("UserRole")]
+public class UserRole
 {
-    [Required] public long UserId { get; set; }
+    [Required] public string UserId { get; set; }
 
-    [Required] public long RoleId { get; set; }
-
-    // Note: Configure composite keys using Fluent API.
+    [Required] public int RoleId { get; set; }
 }

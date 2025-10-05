@@ -6,9 +6,9 @@ namespace Repository.Interfaces.System;
 
 public interface IRoleRepository : IGenericRepository<Role, int>
 {
-    Task<List<string>> GetRolePermissionsString(string role);
-    Task<List<RolePermissions>> GetRolePermissions(string role);
-    Task<bool> AddRolePermissionsAsync(IEnumerable<RolePermissions> rolePermissions);
-    Task<bool> DeleteRolePermissionsAsync(IEnumerable<RolePermissions> rolePermissions);
+    Task<List<string>> GetRolePermissionString(string role);
+    Task<List<RolePermission>> GetRolePermission(string role);
+    Task<bool> AddRolePermissionAsync(IEnumerable<RolePermission> rolePermissions);
+    Task<bool> DeleteRolePermissionAsync(IEnumerable<RolePermission> rolePermissions);
     Task<List<RoleMembersDto>> GetRoleMembersAsync(int roleId);
 }

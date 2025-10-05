@@ -6,23 +6,31 @@ using Model.Entities.System;
 using Model.Models;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
+using Repository.Interfaces.Base;
+using Common.Extensions;
 
 namespace Repository.Repositories.System;
 
 public class UserRepository : GenericRepository<User, string>, IUserRepository
 {
     private readonly StringBuilder _sqlBuilder;
+    private readonly string _tableName;
+    private readonly string _userRoleTable;
+    private readonly string _roleTalbe;
 
-    public UserRepository(AppSettings appSettings) : base(appSettings)
+    public UserRepository(IDbConnectionFactory factory) : base(factory)
     {
         _sqlBuilder = new StringBuilder();
+        _tableName = StringHelper.GetTableName<User>();
+        _userRoleTable = StringHelper.GetTableName<UserRole>();
+        _roleTalbe = StringHelper.GetTableName<Role>();
     }
 
-    public async Task<List<string>> GetRolesAsync(long userId)
+    public async Task<List<string>> GetRolesAsync(string userId)
     {
-        var query = new Query($"{nameof(User)}s as u")
-            .Join($"{nameof(UserRoles)} as ur", $"u.{nameof(User.Id)}", $"ur.{nameof(UserRoles.UserId)}")
-            .Join($"{nameof(Role)}s as r", $"ur.{nameof(UserRoles.RoleId)}", $"r.{nameof(Role.Id)}")
+        var query = new Query($"{_tableName} as u")
+            .Join($"{_userRoleTable} as ur", $"u.{nameof(User.Id)}", $"ur.{nameof(UserRole.UserId)}")
+            .Join($"{_roleTalbe} as r", $"ur.{nameof(UserRole.RoleId)}", $"r.{nameof(Role.Id)}")
             .Where($"u.{nameof(User.Id)}", userId)
             .Where($"u.{nameof(User.IsDeleted)}", false)
             .Where($"u.{nameof(User.IsActive)}", true)
@@ -31,12 +39,13 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryAsync<string>(compiledQuery.Sql, compiledQuery.NamedBindings);
         return result.ToList();
     }
     
-    public async Task<UserDto?> GetDetailAsync(long userId)
+    public async Task<UserDto?> GetDetailAsync(string userId)
     {
         // Get user details
         var userQuery = new Query($"{nameof(User)}s")
@@ -46,15 +55,16 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
 
         var userSql = _compiler.Compile(userQuery);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var user = await connection.QueryFirstOrDefaultAsync<User>(userSql.Sql, userSql.NamedBindings);
         
         if (user == null) return null;
 
         // Get user roles
-        var roleQuery = new Query($"{nameof(UserRoles)} as ur")
-            .Join($"{nameof(Role)}s as r", $"ur.{nameof(UserRoles.RoleId)}", $"r.{nameof(Role.Id)}")
-            .Where($"ur.{nameof(UserRoles.UserId)}", user.Id)
+        var roleQuery = new Query($"{_userRoleTable} as ur")
+            .Join($"{_roleTalbe} as r", $"ur.{nameof(UserRole.RoleId)}", $"r.{nameof(Role.Id)}")
+            .Where($"ur.{nameof(UserRole.UserId)}", user.Id)
             .Where($"r.{nameof(Role.IsDeleted)}", false)
             .Select($"r.{nameof(Role.Name)}", $"r.{nameof(Role.Id)}");
 
@@ -89,7 +99,8 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
             $"{nameof(User.IsDeleted)} = 0 AND {nameof(User.IsActive)} = 1 AND {nameof(User.Username)} LIKE @prefix AND LEN({nameof(User.Username)}) = @expectedLength",
             $"{nameof(User.Username)} DESC");
 
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var result = await connection.QueryFirstOrDefaultAsync<User>(sql, new 
         { 
             prefix = prefix + "%", 
@@ -135,9 +146,9 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         {
             _sqlBuilder.Append($@"
                 SELECT DISTINCT u.{nameof(User.Id)}, u.{nameof(User.Username)}, u.{nameof(User.Email)}, u.{nameof(User.FullName)}, u.{nameof(User.Phone)}, u.{nameof(User.Avatar)}, u.{nameof(User.IsActive)}, u.{nameof(User.IsLocked)}
-                FROM {nameof(User)}s u
-                INNER JOIN {nameof(UserRoles)} ur ON u.{nameof(User.Id)} = ur.{nameof(UserRoles.UserId)}
-                INNER JOIN {nameof(Role)}s r ON ur.{nameof(UserRoles.RoleId)} = r.{nameof(Role.Id)}
+                FROM {_tableName}s u
+                INNER JOIN {_userRoleTable} ur ON u.{nameof(User.Id)} = ur.{nameof(UserRole.UserId)}
+                INNER JOIN {_roleTalbe} r ON ur.{nameof(UserRole.RoleId)} = r.{nameof(Role.Id)}
                 WHERE ").Append(whereClause).Append($" AND r.{nameof(Role.IsDeleted)} = 0 AND r.{nameof(Role.Id)} IN @roleIds");
             
             var roleIdsList = request.Roles.Split(',').Select(long.Parse).ToList();
@@ -150,7 +161,8 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
 
         var baseQuery = _sqlBuilder.ToString();
 
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         
         // Get total count
         var countQuery = BuildCountQuery(_sqlBuilder, !string.IsNullOrWhiteSpace(request.Roles) 
@@ -168,10 +180,10 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         if (userIds.Any())
         {
             var roleQuery = $@"
-                SELECT ur.{nameof(UserRoles.UserId)}, r.{nameof(Role.Name)} as Role
-                FROM {nameof(UserRoles)} ur
-                INNER JOIN {nameof(Role)}s r ON ur.{nameof(UserRoles.RoleId)} = r.{nameof(Role.Id)}
-                WHERE ur.{nameof(UserRoles.UserId)} IN @userIds AND r.{nameof(Role.IsDeleted)} = 0";
+                SELECT ur.{nameof(UserRole.UserId)}, r.{nameof(Role.Name)} as Role
+                FROM {nameof(UserRole)} ur
+                INNER JOIN {nameof(Role)}s r ON ur.{nameof(UserRole.RoleId)} = r.{nameof(Role.Id)}
+                WHERE ur.{nameof(UserRole.UserId)} IN @userIds AND r.{nameof(Role.IsDeleted)} = 0";
 
             var userRoles = await connection.QueryAsync<(long UserId, string Role)>(roleQuery, new { userIds });
             var userRolesMap = userRoles.GroupBy(ur => ur.UserId).ToDictionary(g => g.Key, g => g.Select(ur => ur.Role).ToList());
@@ -203,7 +215,8 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         // Get total count
         var countQuery = BuildCountQuery(_sqlBuilder, $"{nameof(User)}s", whereClause);
         
-        using var connection = Connection;
+        using var connection = _connection;
+        connection.Open();
         var totalCount = await connection.QuerySingleAsync<int>(countQuery, parameters);
 
         // Get paginated results
@@ -222,5 +235,32 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         }).ToList();
 
         return (result, totalCount);
+    }
+
+    // Helper methods for building queries
+    private string BuildSelectQuery(StringBuilder sqlBuilder, string tableName, string whereClause, string orderBy)
+    {
+        sqlBuilder.Clear();
+        sqlBuilder.Append($"SELECT * FROM {tableName}");
+        if (!string.IsNullOrEmpty(whereClause))
+            sqlBuilder.Append($" WHERE {whereClause}");
+        if (!string.IsNullOrEmpty(orderBy))
+            sqlBuilder.Append($" ORDER BY {orderBy}");
+        return sqlBuilder.ToString();
+    }
+
+    private string BuildCountQuery(StringBuilder sqlBuilder, string tableName, string whereClause)
+    {
+        sqlBuilder.Clear();
+        sqlBuilder.Append($"SELECT COUNT(*) FROM {tableName}");
+        if (!string.IsNullOrEmpty(whereClause))
+            sqlBuilder.Append($" WHERE {whereClause}");
+        return sqlBuilder.ToString();
+    }
+
+    private string BuildPaginationQuery(StringBuilder sqlBuilder, string baseQuery, int page, int pageSize)
+    {
+        var offset = (page - 1) * pageSize;
+        return $"{baseQuery} OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
     }
 }
