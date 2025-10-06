@@ -1,14 +1,23 @@
 ﻿using Common.Extensions;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using LinqToDB;
+using LinqToDB.Data;
+using LinqToDB.Data;
+using LinqToDB.Linq;
+using LinqToDB.Mapping;
 using Mapster;
 using Model.Entities.System;
 using Repository.Interfaces.Base;
 using SqlKata;
 using SqlKata.Compilers;
 using System.Data;
+using System.Data.Common;
 using System.Linq.Expressions;
-using System.Reflection;
+using System.Text;
+using Z.Dapper.Plus;
+using static LinqToDB.Reflection.Methods.LinqToDB.Insert;
+using static LinqToDB.SqlQuery.SqlPredicate;
 
 namespace Repository.Repositories.Base;
 
@@ -37,9 +46,11 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
         using var connection = _connection;
         connection.Open();
         string tableName = StringHelper.GetTableName<TEntity>();
-        var query = new Query(tableName).Where(predicate);
-        var compiledQuery = _compiler.Compile(query);
-        var entity = await connection.QueryFirstOrDefaultAsync<TEntity>(compiledQuery.Sql, compiledQuery.NamedBindings);
+        var visitor = new SqlExpressionVisitor();
+        var whereSql = visitor.Translate(predicate);
+        var sql = $"SELECT * FROM {tableName} WHERE {whereSql}";
+
+        var entity = await connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);   
         return entity.Adapt<TDto>();
     }
 
@@ -55,10 +66,8 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
     {
         using var connection = _connection;
         connection.Open();
-        string tableName = StringHelper.GetTableName<TEntity>();
-        var query = new Query(tableName).Where(predicate);
-        var compiledQuery = _compiler.Compile(query);
-        var entities = await connection.QueryAsync<TEntity>(compiledQuery.Sql, compiledQuery.NamedBindings);
+        var sql = ToSqlWhere(predicate);
+        var entities = await connection.QueryAsync<TEntity>(sql);
         return entities.Adapt<IEnumerable<TDto>>();
     }
 
@@ -164,5 +173,58 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
             transaction.Rollback();
             throw;
         }
+    }
+
+    public static string ToSqlWhere<T>(Expression<Func<T, bool>> predicate)
+    where T : class
+    {
+        using var db = new DataConnection("SqlServer"); // hoặc "SQLite", "PostgreSQL"...
+        var query = db.GetTable<T>().Where(predicate);
+        var sql = query.ToString();
+        return sql;
+    }
+
+    private class SqlExpressionVisitor : ExpressionVisitor
+    {
+        private StringBuilder _sb = new();
+
+        public string Translate(Expression exp)
+        {
+            Visit(exp);
+            return _sb.ToString();
+        }
+
+        protected override Expression VisitBinary(BinaryExpression node)
+        {
+            _sb.Append("(");
+            Visit(node.Left);
+            _sb.Append($" {GetSqlOperator(node.NodeType)} ");
+            Visit(node.Right);
+            _sb.Append(")");
+            return node;
+        }
+
+        protected override Expression VisitMember(MemberExpression node)
+        {
+            _sb.Append(node.Member.Name);
+            return node;
+        }
+
+        protected override Expression VisitConstant(ConstantExpression node)
+        {
+            _sb.Append($"'{node.Value}'");
+            return node;
+        }
+
+        private static string GetSqlOperator(ExpressionType type) => type switch
+        {
+            ExpressionType.Equal => "=",
+            ExpressionType.NotEqual => "<>",
+            ExpressionType.GreaterThan => ">",
+            ExpressionType.GreaterThanOrEqual => ">=",
+            ExpressionType.LessThan => "<",
+            ExpressionType.LessThanOrEqual => "<=",
+            _ => throw new NotSupportedException($"Unsupported op: {type}")
+        };
     }
 }

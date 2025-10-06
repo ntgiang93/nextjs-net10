@@ -8,8 +8,11 @@
 
   <ItemGroup>
     <Compile Remove="Helpers\**" />
+    <Compile Remove="Infrastructure\**" />
     <EmbeddedResource Remove="Helpers\**" />
+    <EmbeddedResource Remove="Infrastructure\**" />
     <None Remove="Helpers\**" />
+    <None Remove="Infrastructure\**" />
   </ItemGroup>
 
   <ItemGroup>
@@ -24,15 +27,12 @@
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="SqlKata" Version="4.0.1" />
     <PackageReference Include="Ulid" Version="1.4.1" />
+    <PackageReference Include="Z.Dapper.Plus" Version="8.0.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj" />
     <ProjectReference Include="..\Model\Model.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Infrastructure\" />
   </ItemGroup>
 
 </Project>

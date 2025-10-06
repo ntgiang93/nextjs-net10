@@ -5,7 +5,7 @@ using Repository.Interfaces.Base;
 
 namespace Repository.Interfaces.System
 {
-    public interface IUserProfileRepository : IGenericRepository<UserProfile, int>
+    public interface IUserProfileRepository : IGenericRepository<UserProfile, long>
     {
 
     }

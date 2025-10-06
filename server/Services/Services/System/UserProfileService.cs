@@ -8,7 +8,7 @@ using Service.Services.Base;
 
 namespace Service.Services.System;
 
-public class UserProfileService : GenericService<UserProfile, int>, IUserProfileService
+public class UserProfileService : GenericService<UserProfile, long>, IUserProfileService
 {
     private readonly IUserProfileRepository _userProfileRepository;
 
@@ -19,7 +19,7 @@ public class UserProfileService : GenericService<UserProfile, int>, IUserProfile
         _userProfileRepository = userProfileRepository;
     }
 
-    public async Task<UserProfileDto?> GetUserProfileAsync(long userId)
+    public async Task<UserProfileDto?> GetUserProfileAsync(string userId)
     {
         var user = await GetSingleAsync<UserProfileDto>(up => up.UserId == userId);
         return user;

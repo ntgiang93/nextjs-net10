@@ -1,5 +1,5 @@
 using Microsoft.Data.SqlClient;
-using Model.Models;
+using Microsoft.Extensions.Configuration;
 using Repository.Interfaces.Base;
 using System.Data;
 
@@ -9,9 +9,11 @@ public class DbConnectionFactory : IDbConnectionFactory
 {
     private readonly string _mainConnectionString;
 
-    public DbConnectionFactory(AppSettings appSettings)
+    public DbConnectionFactory(IConfiguration configuration)
     {
-        _mainConnectionString = appSettings.ConnectionStrings.MainDb;
+        _mainConnectionString = configuration.GetConnectionString("MainDb")
+            ?? configuration["ConnectionStrings:MainDb"]
+            ?? throw new InvalidOperationException("Connection string 'MainDb' is not configured.");
     }
 
     public IDbConnection CreateConnection()

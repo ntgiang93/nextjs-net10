@@ -6,9 +6,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Model.Entities.System;
 
 [Table("UserProfiles")]
-public class UserProfile : BaseEntity<int>
+public class UserProfile : BaseEntity<long>
 {
-    [Required] public long UserId { get; set; }
+    [Required] public string UserId { get; set; } = string.Empty;
 
     [StringLength(500)] public string? Address { get; set; }
 

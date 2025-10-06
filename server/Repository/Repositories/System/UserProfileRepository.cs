@@ -7,7 +7,7 @@ using SqlKata;
 
 namespace Repository.Repositories.System
 {
-    public class UserProfileRepository : GenericRepository<UserProfile, int>, IUserProfileRepository
+    public class UserProfileRepository : GenericRepository<UserProfile, long>, IUserProfileRepository
     {
         public UserProfileRepository(IDbConnectionFactory factory) : base(factory)
         {

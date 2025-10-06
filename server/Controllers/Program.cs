@@ -1,22 +1,18 @@
 ﻿using Api.Filters;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
+using Common.Security;
+using Common.Security.Policies;
+using Controllers.DependencyInjection;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using Common.Security;
-using Common.Security.Policies;
 using Model.Models;
 using Repository.Interfaces.Base;
-using Repository.Interfaces.System;
 using Repository.Repositories.Base;
-using Service.Interfaces.Base;
-using Service.Services.Base;
-using Service.Services;
 using Serilog;
 using System.Text;
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
-using Controllers.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +72,7 @@ builder.Services.AddAuthorization();
 // Add permission policy service
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
+builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 builder.Services.AddSingleton<CacheManager>();
 
 // Add controllers with filters

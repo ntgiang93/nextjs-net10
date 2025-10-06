@@ -18,7 +18,7 @@ public class UserProfileDto
 public class SaveUserProfileDto
 {
     public int Id { get; set; }
-    [Required] public long UserId { get; set; }
+    [Required] public string UserId { get; set; }
 
     public string? Address { get; set; }
 
