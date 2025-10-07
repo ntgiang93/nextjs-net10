@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model.Entities.System;
 
-[Table("RolePermission")]
+[Table("RolePermissions")]
 public class RolePermission
 {
     [Required] public string Role { get; set; }

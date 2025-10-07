@@ -37,7 +37,7 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
                 AND u.{nameof(User.IsDeleted)} = 0 
                 AND u.{nameof(User.IsActive)} = 1");
 
-        using var connection = _connection;
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<RoleMembersDto>(_sqlBuilder.ToString(), new { roleId });
         return result.ToList();
     }
@@ -53,7 +53,7 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
 
         var compiledQuery = _compiler.Compile(query);
 
-        using var connection = _connection;
+        var connection = _dbFactory.Connection;
         var permissions = await connection.QueryAsync<string>(compiledQuery.Sql, compiledQuery.NamedBindings);
         return permissions.ToList();
     }
@@ -66,7 +66,7 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
 
         var compiledQuery = _compiler.Compile(query);
 
-        using var connection = _connection;
+        var connection = _dbFactory.Connection;
         var permissions = await connection.QueryAsync<RolePermission>(compiledQuery.Sql, compiledQuery.NamedBindings);
         return permissions.ToList();
     }

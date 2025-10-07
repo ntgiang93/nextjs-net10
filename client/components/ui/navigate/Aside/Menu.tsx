@@ -41,16 +41,17 @@ export const Menu = (props: ISidebarMenuProps) => {
       const getClassNames = (isActive: boolean, hasChildren: boolean) => {
         return {
           item: clsx(
-            'px-2.5 py-1.5 my-1 text-nowrap rounded-md',
-            !isActive && 'hover:bg-default hover:bg-opacity-30',
+            'px-2.5 py-1.5 my-1 text-nowrap rounded-md group',
+            !isActive && 'has-[:hover]:bg-default/30',
             isActive && 'bg-primary',
           ),
           title: clsx(
             'transition-opacity duration-300 text-sm',
+            !isActive && 'group-hover:cursor-pointer',
             isActive ? 'text-white' : '',
-            isCompact ? 'opacity-0' : 'opacity-1',
+            isCompact ? 'opacity-0' : 'opacity-100',
           ),
-          startContent: clsx('py-1', isActive ? 'text-white' : ''),
+          startContent: clsx('py-1 group-hover:cursor-pointer', isActive ? 'text-white' : ''),
           content: clsx(
             `${hasChildren && !isCompact ? '' : 'hidden'}`,
             hasChildren && 'ms-2 ps-2 py-1 border-l border-default',
@@ -79,10 +80,10 @@ export const Menu = (props: ISidebarMenuProps) => {
                 className={classNames.item}
                 classNames={{
                   content: classNames.content,
-                  trigger: 'group py-0',
+                  trigger: 'py-0',
                   title: classNames.title,
                   startContent: classNames.startContent,
-                  indicator: 'text-secondary',
+                  indicator: 'text-secondary group-hover:cursor-pointer',
                 }}
                 startContent={
                   parentKey && !item.icon ? (

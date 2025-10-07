@@ -25,8 +25,7 @@ public class UserSessionRepository : GenericRepository<UserToken, long>, IUserSe
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryFirstOrDefaultAsync<UserToken>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result;
@@ -42,8 +41,7 @@ public class UserSessionRepository : GenericRepository<UserToken, long>, IUserSe
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<UserToken>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
@@ -110,8 +108,7 @@ public class UserSessionRepository : GenericRepository<UserToken, long>, IUserSe
                 AND {nameof(UserToken.IsDeleted)} = 0 
                 AND {nameof(UserToken.Expires)} > @now");
 
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var count = await connection.QuerySingleAsync<int>(_sqlBuilder.ToString(), 
             new { userId, now = DateTime.UtcNow });
         

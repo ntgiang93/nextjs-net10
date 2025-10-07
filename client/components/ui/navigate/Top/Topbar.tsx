@@ -17,7 +17,7 @@ import {
 } from '@heroui/react';
 import { motion } from 'framer-motion';
 import { ArrowLeft03Icon, ArrowRight03Icon, Search01Icon } from 'hugeicons-react';
-//import { DarkModeButton } from '../../button/DarkmodeButton';
+import { ThemeSwitch } from '../../button/theme-switch';
 import LanguageSwitcher from '../../select-box/LanguageSwitcher';
 
 interface ITopbarProps {
@@ -103,7 +103,7 @@ export const Topbar = (props: ITopbarProps) => {
             </Button>
           </div>
         )}
-        {/* <DarkModeButton /> */}
+        <ThemeSwitch />
         <LanguageSwitcher />
         <NotificationCenter />
         <Dropdown placement="bottom-end">

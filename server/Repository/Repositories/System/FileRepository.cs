@@ -27,8 +27,7 @@ public class FileRepository : GenericRepository<FileStorage, int>, IFileReposito
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<FileStorage>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();

@@ -27,8 +27,7 @@ public class SysCategoryRepository : GenericRepository<SysCategory, int>, ISysCa
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<SysCategory>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
@@ -44,8 +43,7 @@ public class SysCategoryRepository : GenericRepository<SysCategory, int>, ISysCa
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<SysCategory>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();

@@ -40,9 +40,10 @@ export function Providers({ children, themeProps }: ProvidersProps) {
   return (
     <QueryClientProvider client={queryClient}>
       <HeroUIProvider navigate={router.push} labelPlacement="outside">
-        <NextThemesProvider {...themeProps}>       <I18nProvider locale="vi">{children}</I18nProvider></NextThemesProvider>
+        <NextThemesProvider {...themeProps}>       
+          <I18nProvider locale="vi">{children}</I18nProvider>
+        </NextThemesProvider>
         <ToastProvider placement={'top-right'} toastProps={{ timeout: 3000 }} />
-
       </HeroUIProvider>
     </QueryClientProvider>
 

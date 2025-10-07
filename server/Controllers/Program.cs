@@ -72,7 +72,7 @@ builder.Services.AddAuthorization();
 // Add permission policy service
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
-builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
+builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
 builder.Services.AddSingleton<CacheManager>();
 
 // Add controllers with filters

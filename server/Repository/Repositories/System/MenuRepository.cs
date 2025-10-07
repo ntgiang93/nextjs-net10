@@ -4,7 +4,6 @@ using SqlKata;
 using Model.Constants;
 using Model.DTOs.System.Menu;
 using Model.Entities.System;
-using Model.Models;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
 using Repository.Interfaces.Base;
@@ -26,14 +25,13 @@ public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
 
     public async Task<List<MenuDto>> GetMenuTreeAsync()
     {
-        var query = new Query(nameof(Menu))
+        var query = new Query(_tableName)
             .Where(nameof(Menu.IsDeleted), false)
             .Where(nameof(Menu.IsActive), true)
             .OrderBy(nameof(Menu.ParentId), nameof(Menu.DisplayOrder));
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var allMenus = await connection.QueryAsync<MenuDto>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return BuildMenuTree(allMenus.ToList());
@@ -53,8 +51,7 @@ public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
 
         parameters.Add("viewPermission", nameof(EPermission.View));
 
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var allMenus = await connection.QueryAsync<MenuDto>(_sqlBuilder.ToString(), parameters);
         
         return BuildMenuTree(allMenus.ToList());

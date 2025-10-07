@@ -3,122 +3,95 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using LinqToDB;
 using LinqToDB.Data;
-using LinqToDB.Data;
-using LinqToDB.Linq;
-using LinqToDB.Mapping;
 using Mapster;
 using Model.Entities.System;
 using Repository.Interfaces.Base;
-using SqlKata;
 using SqlKata.Compilers;
 using System.Data;
-using System.Data.Common;
 using System.Linq.Expressions;
-using System.Text;
-using Z.Dapper.Plus;
-using static LinqToDB.Reflection.Methods.LinqToDB.Insert;
-using static LinqToDB.SqlQuery.SqlPredicate;
 
 namespace Repository.Repositories.Base;
 
 public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey>
     where TEntity : BaseEntity<TKey>
 {
-    protected readonly IDbConnection _connection;
+    protected readonly IDbConnectionFactory _dbFactory;
     protected readonly Compiler _compiler;
+    private readonly ExpressionToSqlConverter _converter;
 
-    public GenericRepository(IDbConnectionFactory connection)
+    public GenericRepository(IDbConnectionFactory dbFactory)
     {
-        _connection = connection.CreateConnection();
+        _dbFactory = dbFactory;
         _compiler = new SqlServerCompiler();
+        _converter = new ExpressionToSqlConverter();
     }
     
     public virtual async Task<TDto> GetByIdAsync<TDto>(TKey id)
     {
-        using var connection = _connection;
-        connection.Open();
-        var entity = await connection.GetAsync<TEntity>(id);
+        var entity = await _dbFactory.Connection.GetAsync<TEntity>(id);
         return entity.Adapt<TDto>();
     }
 
     public virtual async Task<TDto> GetSingleAsync<TDto>(Expression<Func<TEntity, bool>> predicate)
     {
-        using var connection = _connection;
-        connection.Open();
-        string tableName = StringHelper.GetTableName<TEntity>();
-        var visitor = new SqlExpressionVisitor();
-        var whereSql = visitor.Translate(predicate);
-        var sql = $"SELECT * FROM {tableName} WHERE {whereSql}";
-
-        var entity = await connection.QueryFirstOrDefaultAsync<TEntity>(sql, parameters);   
+        var sqlResult = _converter.Convert(predicate);
+        var sql = $"SELECT * FROM {StringHelper.GetTableName<TEntity>()} WHERE {sqlResult.WhereClause}";
+        var entity = await _dbFactory.Connection.QueryFirstOrDefaultAsync<TEntity>(sql, sqlResult.Parameters);
         return entity.Adapt<TDto>();
     }
 
     public virtual async Task<IEnumerable<TDto>> GetAllAsync<TDto>()
     {
-        using var connection = _connection;
-        connection.Open();
-        var entities = await connection.GetAllAsync<TEntity>();
+        var entities = await _dbFactory.Connection.GetAllAsync<TEntity>();
         return entities.Adapt<IEnumerable<TDto>>();
     }
 
     public virtual async Task<IEnumerable<TDto>> FindAsync<TDto>(Expression<Func<TEntity, bool>> predicate)
     {
-        using var connection = _connection;
-        connection.Open();
-        var sql = ToSqlWhere(predicate);
-        var entities = await connection.QueryAsync<TEntity>(sql);
+        var sqlResult = _converter.Convert(predicate);
+        var sql = $"SELECT * FROM {StringHelper.GetTableName<TEntity>()} WHERE {sqlResult.WhereClause}";
+        var entities = await _dbFactory.Connection.QueryAsync<TEntity>(sql, sqlResult.Parameters);
         return entities.Adapt<IEnumerable<TDto>>();
     }
 
     public virtual async Task<TKey> InsertAsync(TEntity entity)
     {
-        using var connection = _connection;
-        connection.Open();
         entity.CreatedAt = DateTime.UtcNow;
         entity.IsDeleted = false;        
         if (typeof(TKey) == typeof(string))
         {
             entity.Id = (TKey)(object)Ulid.NewUlid().ToString();
-            await connection.InsertAsync(entity);
+            await _dbFactory.Connection.InsertAsync(entity);
             return entity.Id;
         }
         else
         {
-            var id = await connection.InsertAsync(entity);
+            var id = await _dbFactory.Connection.InsertAsync(entity);
             return (TKey)Convert.ChangeType(id, typeof(TKey));
         }
     }
 
     public virtual async Task<bool> UpdateAsync(TEntity entity)
     {
-        using var connection = _connection;
-        connection.Open();
         entity.UpdatedAt = DateTime.UtcNow;
-        var result = await connection.UpdateAsync(entity);
+        var result = await _dbFactory.Connection.UpdateAsync(entity);
         return result;
     }
 
     public virtual async Task<bool> DeleteAsync(TEntity entity)
     {
-        using var connection = _connection;
-        connection.Open();
-        var result = await connection.DeleteAsync<TEntity>(entity);
+        var result = await _dbFactory.Connection.DeleteAsync<TEntity>(entity);
         return result;
     }
 
     public async Task<IEnumerable<T>> ExecuteSPAsync<T>(string storedProcedure, DynamicParameters? parameters = null)
     {
-        using var connection = _connection;
-        connection.Open(); 
-        return await connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        return await _dbFactory.Connection.QueryAsync<T>(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
     }
 
     public async Task<T?> ExecuteSPSingleAsync<T>(string storedProcedure, DynamicParameters? parameters = null)
     {
-        using var connection = _connection;
-        connection.Open();
-        return await connection.QueryFirstOrDefaultAsync<T>(storedProcedure, parameters,
+        return await _dbFactory.Connection.QueryFirstOrDefaultAsync<T>(storedProcedure, parameters,
             commandType: CommandType.StoredProcedure);
     }
 
@@ -128,9 +101,7 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
         int pageIndex = 1,
         int pageSize = 10)
     {
-        using var connection = _connection;
-        connection.Open();
-        var result = await connection.QueryMultipleAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
+        var result = await _dbFactory.Connection.QueryMultipleAsync(storedProcedure, parameters, commandType: CommandType.StoredProcedure);
         var items = await result.ReadAsync<T>();
         var totalCount = await result.ReadSingleAsync<int>();
 
@@ -140,13 +111,11 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
     // Transaction support methods
     protected async Task<T> ExecuteInTransactionAsync<T>(Func<IDbConnection, IDbTransaction, Task<T>> operation)
     {
-        using var connection = _connection;
-        connection.Open();
-        using var transaction = connection.BeginTransaction();
-        
+        using var transaction = _dbFactory.Connection.BeginTransaction();
+
         try
         {
-            var result = await operation(connection, transaction);
+            var result = await operation(_dbFactory.Connection, transaction);
             transaction.Commit();
             return result;
         }
@@ -159,13 +128,11 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
 
     protected async Task ExecuteInTransactionAsync(Func<IDbConnection, IDbTransaction, Task> operation)
     {
-        using var connection = _connection;
-        connection.Open();
-        using var transaction = connection.BeginTransaction();
+        using var transaction = _dbFactory.Connection.BeginTransaction();
         
         try
         {
-            await operation(connection, transaction);
+            await operation(_dbFactory.Connection, transaction);
             transaction.Commit();
         }
         catch
@@ -173,58 +140,5 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
             transaction.Rollback();
             throw;
         }
-    }
-
-    public static string ToSqlWhere<T>(Expression<Func<T, bool>> predicate)
-    where T : class
-    {
-        using var db = new DataConnection("SqlServer"); // hoặc "SQLite", "PostgreSQL"...
-        var query = db.GetTable<T>().Where(predicate);
-        var sql = query.ToString();
-        return sql;
-    }
-
-    private class SqlExpressionVisitor : ExpressionVisitor
-    {
-        private StringBuilder _sb = new();
-
-        public string Translate(Expression exp)
-        {
-            Visit(exp);
-            return _sb.ToString();
-        }
-
-        protected override Expression VisitBinary(BinaryExpression node)
-        {
-            _sb.Append("(");
-            Visit(node.Left);
-            _sb.Append($" {GetSqlOperator(node.NodeType)} ");
-            Visit(node.Right);
-            _sb.Append(")");
-            return node;
-        }
-
-        protected override Expression VisitMember(MemberExpression node)
-        {
-            _sb.Append(node.Member.Name);
-            return node;
-        }
-
-        protected override Expression VisitConstant(ConstantExpression node)
-        {
-            _sb.Append($"'{node.Value}'");
-            return node;
-        }
-
-        private static string GetSqlOperator(ExpressionType type) => type switch
-        {
-            ExpressionType.Equal => "=",
-            ExpressionType.NotEqual => "<>",
-            ExpressionType.GreaterThan => ">",
-            ExpressionType.GreaterThanOrEqual => ">=",
-            ExpressionType.LessThan => "<",
-            ExpressionType.LessThanOrEqual => "<=",
-            _ => throw new NotSupportedException($"Unsupported op: {type}")
-        };
     }
 }

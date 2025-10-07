@@ -1,5 +1,5 @@
-import Image from "next/image";
 import clsx from "clsx";
+import Image from "next/image";
 import Link from "next/link";
 
 interface ISidebarProps {
@@ -19,7 +19,7 @@ export const Brand = (props: ISidebarProps) => {
                 width={24}
             />
             <p className={clsx('font-bold text-xl text-inherit text-nowrap transition-opacity duration-300',
-                `${isCompact ? 'opacity-0' : 'opacity-1'}`)}
+                `${isCompact ? 'opacity-0' : 'opacity-100'}`)}
             >{brandName}</p>
         </Link>
     );

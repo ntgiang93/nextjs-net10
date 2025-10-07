@@ -1,15 +1,14 @@
 'use client';
 import { Sidebar } from '@/components/ui//navigate/Aside/Sidebar';
-import { Brand } from '@/components/ui//navigate/Brand';
 import { Topbar } from '@/components/ui/navigate/Top/Topbar';
-import { Button, Drawer, DrawerBody, DrawerContent, DrawerFooter, DrawerHeader, useDisclosure } from '@heroui/react';
+import { useNavivationStore } from '@/store/navigation-store';
+import { Drawer, DrawerBody, DrawerContent, useDisclosure } from '@heroui/react';
 import clsx from 'clsx';
 import { usePathname } from 'next/navigation';
 import { ReactNode, useEffect, useState } from 'react';
-import { useAuth } from './AuthProvider';
 import AdminLayoutSkeleton from '../skeleton/LayoutSkeleton';
-import { useNavivationStore } from '@/store/navigation-store';
 import PageContentSkeleton from '../skeleton/PageContentSkeleton';
+import { useAuth } from './AuthProvider';
 
 export const AdminLayout = ({ children }: { children: ReactNode }) => {
   const [isCompact, setIsCompact] = useState(false);
@@ -48,7 +47,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         isOpen={isOpen}
         size={'sm'}
         onClose={onClose}
-        className={'md:hidden'}
+        className={'md:hidden w-fit'}
         placement={'left'}
         backdrop={'blur'}
         radius={'sm'}
@@ -56,20 +55,9 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         <DrawerContent>
           {(onClose) => (
             <>
-              <DrawerHeader className="flex flex-col gap-1 h-16">
-                <Brand isCompact={isCompact} brandName={'Next Admin'} />
-              </DrawerHeader>
               <DrawerBody>
                 <Sidebar isCompact={isCompact && !showSidebar} />
               </DrawerBody>
-              <DrawerFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
-                  Close
-                </Button>
-                <Button color="primary" onPress={onClose}>
-                  Action
-                </Button>
-              </DrawerFooter>
             </>
           )}
         </DrawerContent>

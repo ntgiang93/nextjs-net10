@@ -27,8 +27,7 @@ namespace Repository.Repositories.Organization
 
             var compiledQuery = _compiler.Compile(query);
             
-            using var connection = _connection;
-            connection.Open();
+            var connection = _dbFactory.Connection;
             var result = await connection.QueryAsync<DepartmentType>(compiledQuery.Sql, compiledQuery.NamedBindings);
             
             return result.ToList();
@@ -42,8 +41,7 @@ namespace Repository.Repositories.Organization
 
             var compiledQuery = _compiler.Compile(query);
             
-            using var connection = _connection;
-            connection.Open();
+            var connection = _dbFactory.Connection;
             var result = await connection.QueryFirstOrDefaultAsync<DepartmentType>(compiledQuery.Sql, compiledQuery.NamedBindings);
             
             return result;

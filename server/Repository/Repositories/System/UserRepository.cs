@@ -39,8 +39,7 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        using var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<string>(compiledQuery.Sql, compiledQuery.NamedBindings);
         return result.ToList();
     }
@@ -54,9 +53,7 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
             .Where(nameof(User.IsActive), true);
 
         var userSql = _compiler.Compile(userQuery);
-        
-        using var connection = _connection;
-        connection.Open();
+        using var connection = _dbFactory.Connection;
         var user = await connection.QueryFirstOrDefaultAsync<User>(userSql.Sql, userSql.NamedBindings);
         
         if (user == null) return null;
@@ -98,9 +95,7 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         var sql = BuildSelectQuery(_sqlBuilder, $"{nameof(User)}s", 
             $"{nameof(User.IsDeleted)} = 0 AND {nameof(User.IsActive)} = 1 AND {nameof(User.Username)} LIKE @prefix AND LEN({nameof(User.Username)}) = @expectedLength",
             $"{nameof(User.Username)} DESC");
-
-        using var connection = _connection;
-        connection.Open();
+        using var connection = _dbFactory.Connection;
         var result = await connection.QueryFirstOrDefaultAsync<User>(sql, new 
         { 
             prefix = prefix + "%", 
@@ -160,10 +155,7 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         }
 
         var baseQuery = _sqlBuilder.ToString();
-
-        using var connection = _connection;
-        connection.Open();
-        
+        using var connection = _dbFactory.Connection;
         // Get total count
         var countQuery = BuildCountQuery(_sqlBuilder, !string.IsNullOrWhiteSpace(request.Roles) 
             ? $"({baseQuery.Replace($"SELECT DISTINCT u.{nameof(User.Id)}, u.{nameof(User.Username)}, u.{nameof(User.Email)}, u.{nameof(User.FullName)}, u.{nameof(User.Phone)}, u.{nameof(User.Avatar)}, u.{nameof(User.IsActive)}, u.{nameof(User.IsLocked)}", $"SELECT DISTINCT u.{nameof(User.Id)}")})" 
@@ -214,9 +206,7 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
 
         // Get total count
         var countQuery = BuildCountQuery(_sqlBuilder, $"{nameof(User)}s", whereClause);
-        
-        using var connection = _connection;
-        connection.Open();
+        using var connection = _dbFactory.Connection;
         var totalCount = await connection.QuerySingleAsync<int>(countQuery, parameters);
 
         // Get paginated results

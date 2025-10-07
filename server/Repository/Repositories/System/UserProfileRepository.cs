@@ -22,8 +22,7 @@ namespace Repository.Repositories.System
 
             var compiledQuery = _compiler.Compile(query);
             
-            using var connection = _connection;
-            connection.Open();
+            var connection = _dbFactory.Connection;
             var result = await connection.QueryFirstOrDefaultAsync<UserProfile>(compiledQuery.Sql, compiledQuery.NamedBindings);
             
             return result;

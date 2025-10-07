@@ -214,7 +214,7 @@ const config = {
               foreground: '#000',
               DEFAULT: '#ff4040',
             },
-            background: '#ffffff',
+            background: '#18181b',
             foreground: '#ffffff',
             content1: {
               DEFAULT: '#18181b',

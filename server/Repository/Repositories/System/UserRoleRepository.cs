@@ -24,9 +24,8 @@ public class UserRoleRepository : GenericRepository<User, string>, IUserRoleRepo
             .Where(nameof(UserRole.UserId), userId);
 
         var compiledQuery = _compiler.Compile(query);
-        
-        using var connection = _connection;
-        connection.Open();
+        using var connection = _dbFactory.Connection;
+
         var result = await connection.QueryAsync<UserRole>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
@@ -38,9 +37,7 @@ public class UserRoleRepository : GenericRepository<User, string>, IUserRoleRepo
             .Where(nameof(UserRole.RoleId), roleId);
 
         var compiledQuery = _compiler.Compile(query);
-        
-        using var connection = _connection;
-        connection.Open();
+        using var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<UserRole>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();

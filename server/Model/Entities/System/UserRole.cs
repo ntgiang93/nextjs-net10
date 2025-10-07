@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model.Entities.System;
 
-[Table("UserRole")]
+[Table("UserRoles")]
 public class UserRole
 {
     [Required] public string UserId { get; set; }

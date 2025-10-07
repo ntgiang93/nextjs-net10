@@ -39,8 +39,7 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
             WHERE d.{nameof(Department.IsActive)} = 1 AND d.{nameof(Department.IsDeleted)} = 0
             ORDER BY d.{nameof(Department.Id)} DESC");
 
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var allDepartments = await connection.QueryAsync<TableDepartmentDto>(_sqlBuilder.ToString());
         
         return BuildDepartmentTree(allDepartments.ToList());
@@ -80,8 +79,7 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<Department>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
@@ -97,8 +95,7 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<Department>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();

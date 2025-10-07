@@ -2,7 +2,7 @@ using System.Data;
 
 namespace Repository.Interfaces.Base;
 
-public interface IDbConnectionFactory
+public interface IDbConnectionFactory: IDisposable
 {
-    IDbConnection CreateConnection();
+    IDbConnection Connection { get; }
 }

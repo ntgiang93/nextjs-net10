@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Model.Entities.System;
 
-[Table("UserRole", Schema = "System")]
+[Table("UserTokens")]
 public class UserToken : BaseEntity<long>
 {
     [Required] public string UserId { get; set; }

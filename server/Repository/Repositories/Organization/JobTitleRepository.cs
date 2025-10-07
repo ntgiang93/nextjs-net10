@@ -27,8 +27,7 @@ public class JobTitleRepository : GenericRepository<JobTitle, int>, IJobTitleRep
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<JobTitle>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
@@ -44,8 +43,7 @@ public class JobTitleRepository : GenericRepository<JobTitle, int>, IJobTitleRep
 
         var compiledQuery = _compiler.Compile(query);
         
-        using var connection = _connection;
-        connection.Open();
+        var connection = _dbFactory.Connection;
         var result = await connection.QueryAsync<JobTitle>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
