@@ -11,6 +11,7 @@ using Model.Entities.System;
 using Repository.Interfaces.System;
 using Service.Interfaces.System;
 using Service.Services.Base;
+using Model.DTOs.System.Module;
 
 namespace Service.Services.System;
 
@@ -47,14 +48,11 @@ public class MenuService : GenericService<Menu, int>, IMenuService
         {
             if (user.Roles.Any(r => r == DefaultRoles.SuperAdmin))
                 return await _menuRepository.GetMenuTreeAsync();
-            var permissions = new List<string>();
+            var permissions = new List<ModulePermissionDto>();
             foreach (var role in user.Roles)
             {
-                var rolePermissions = await _permissionService.GetRolePermissionStringAsync(role);
-                var viewPermission = rolePermissions
-                    .Where(p => p.EndsWith($"{EPermission.View}"))
-                    .ToList();
-                permissions.AddRange(viewPermission);
+                var rolePermissions = await _permissionService.GetRolePermissionAsync(role);
+                permissions.AddRange(rolePermissions);
             }
 
             permissions = permissions.Distinct().ToList();

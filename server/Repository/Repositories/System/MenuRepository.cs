@@ -8,6 +8,7 @@ using Repository.Interfaces.System;
 using Repository.Repositories.Base;
 using Repository.Interfaces.Base;
 using Common.Extensions;
+using Model.DTOs.System.Module;
 
 namespace Repository.Repositories.System;
 
@@ -37,22 +38,21 @@ public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
         return BuildMenuTree(allMenus.ToList());
     }
 
-    public async Task<List<MenuDto>> GetMenusByPermissionsAsync(List<string> permissions)
+    public async Task<List<MenuDto>> GetMenusByPermissionsAsync(List<ModulePermissionDto> permissions)
     {
         var parameters = new DynamicParameters();
         parameters.Add("permissions", permissions);
-
-        _sqlBuilder.Clear();
-        _sqlBuilder.Append($@"
-            SELECT * FROM {_tableName} 
-            WHERE {nameof(Menu.IsDeleted)} = 0 AND {nameof(Menu.IsActive)} = 1 
-            AND ({nameof(Menu.Sysmodule)} IS NULL OR CONCAT({nameof(Menu.Sysmodule)}, '.', @viewPermission) IN @permissions)
-            ORDER BY {nameof(Menu.ParentId)}, {nameof(Menu.DisplayOrder)}");
-
-        parameters.Add("viewPermission", nameof(EPermission.View));
+        var activeModules = permissions.Select(p => p.Module).Distinct();
+        var query = new Query(_tableName)
+                    .Where(nameof(Menu.IsDeleted), false)
+                    .Where(nameof(Menu.IsActive), true)
+                    .Where(q => q.WhereNull(nameof(Menu.Sysmodule))
+                                 .OrWhereIn(nameof(Menu.Sysmodule), activeModules))
+                    .OrderBy(nameof(Menu.ParentId), nameof(Menu.DisplayOrder));
+        var compiledQuery = _compiler.Compile(query);
 
         var connection = _dbFactory.Connection;
-        var allMenus = await connection.QueryAsync<MenuDto>(_sqlBuilder.ToString(), parameters);
+        var allMenus = await connection.QueryAsync<MenuDto>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return BuildMenuTree(allMenus.ToList());
     }

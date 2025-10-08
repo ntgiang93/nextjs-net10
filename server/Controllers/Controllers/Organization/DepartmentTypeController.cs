@@ -51,7 +51,7 @@ public class DepartmentTypeController : ControllerBase
 
     // POST methods
     [HttpPost]
-    [Policy(ESysModule.Menu, EPermission.Creation)]
+    [Policy(ESysModule.Menu, EPermission.Create)]
     public async Task<IActionResult> CreateMenu([FromBody] CreateDepartmentTypeDto dto)
     {
         var newDepartmentType = await _departmentTypeService.CreateAsync(dto.Adapt<DepartmentType>());
@@ -64,7 +64,7 @@ public class DepartmentTypeController : ControllerBase
 
     // PUT methods
     [HttpPut]
-    [Policy(ESysModule.Menu, EPermission.Edition)]
+    [Policy(ESysModule.Menu, EPermission.Edit)]
     public async Task<IActionResult> UpdateMenu([FromBody] UpdateDepartmentTypeDto dto)
     {
         var success = await _departmentTypeService.UpdateAsync(dto.Adapt<DepartmentType>());
@@ -76,7 +76,7 @@ public class DepartmentTypeController : ControllerBase
 
     // DELETE methods
     [HttpDelete("{id}")]
-    [Policy(ESysModule.Menu, EPermission.Deletion)]
+    [Policy(ESysModule.Menu, EPermission.Delete)]
     public async Task<IActionResult> DeleteMenu(int id)
     {
         var success = await _departmentTypeService.SoftDeleteAsync(id);

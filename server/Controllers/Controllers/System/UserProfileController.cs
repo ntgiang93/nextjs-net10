@@ -54,7 +54,7 @@ public class UserProfileController : ControllerBase
 
     // PUT methods
     [HttpPost]
-    [Policy(ESysModule.Users, EPermission.Creation)]
+    [Policy(ESysModule.Users, EPermission.Create)]
     public async Task<IActionResult> CreateUserProfile([FromBody] SaveUserProfileDto createProfileDto)
     {
         var currentUser = UserContext.Current;
@@ -72,7 +72,7 @@ public class UserProfileController : ControllerBase
 
     // PUT methods
     [HttpPut]
-    [Policy(ESysModule.Users, EPermission.Edition)]
+    [Policy(ESysModule.Users, EPermission.Edit)]
     public async Task<IActionResult> UpdateUserProfile([FromBody] SaveUserProfileDto updateProfileDto)
     {
         var currentUser = UserContext.Current;

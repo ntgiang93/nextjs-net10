@@ -8,6 +8,7 @@ using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.System.Auth;
 using Model.DTOs.System.File;
+using Model.DTOs.System.Module;
 using Model.DTOs.System.User;
 using Model.Entities.System;
 using Model.Models;
@@ -44,7 +45,7 @@ public class UserService : GenericService<User, string>, IUserService
     public async Task<PaginatedResultDto<UserTableDto>> GetPaginationAsync(UserTableRequestDto request)
     {
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetPaginationAsync", request);
-        return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
+        return await CacheManager.GetOrCreateAsync<PaginatedResultDto<UserTableDto>>(cacheKey, async () =>
         {
             var result = await _userRepository.GetPaginatedUsersAsync(request);
             return new PaginatedResultDto<UserTableDto>
@@ -73,7 +74,7 @@ public class UserService : GenericService<User, string>, IUserService
     public async Task<PaginatedResultDto<UserSelectDto>> GetPagination2SelectAsync(PaginationRequest request)
     {
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetPagination2SelectAsync", request);
-        return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
+        return await CacheManager.GetOrCreateAsync<PaginatedResultDto<UserSelectDto>>(cacheKey, async () =>
         {
             var result = await _userRepository.GetPaginatedUser2SelectAsync(request);
             return new PaginatedResultDto<UserSelectDto>
@@ -243,7 +244,7 @@ public class UserService : GenericService<User, string>, IUserService
         return await _userRepository.GetRolesAsync(userId);
     }
 
-    public async Task<IEnumerable<string>> GetUserPermissionsAsync(string userId)
+    public async Task<List<ModulePermissionDto>> GetUserPermissionsAsync(string userId)
     {
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetUserPermissionsAsync", userId);
         return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
@@ -251,13 +252,13 @@ public class UserService : GenericService<User, string>, IUserService
             // Get all roles for the user
             var userRoles = await GetUserRoleAsync(userId);
             if (userRoles == null || !userRoles.Any())
-                return Enumerable.Empty<string>();
+                return new List<ModulePermissionDto>();
 
             // Get permissions for each role and combine them
-            var allPermissions = new HashSet<string>();
+            var allPermissions = new HashSet<ModulePermissionDto>();
             foreach (var role in userRoles)
             {
-                var rolePermissions = await _permissionService.GetRolePermissionStringAsync(role);
+                var rolePermissions = await _permissionService.GetRolePermissionAsync(role);
                 if (rolePermissions != null)
                 {
                     foreach (var permission in rolePermissions)
@@ -267,16 +268,16 @@ public class UserService : GenericService<User, string>, IUserService
                 }
             }
 
-            return allPermissions;
+            return allPermissions.ToList();
         });
     }
 
-    public async Task<IEnumerable<string>> GetCurrentUserPermissionsAsync()
+    public async Task<List<ModulePermissionDto>> GetCurrentUserPermissionsAsync()
     {
         // Get the current user ID from the context
         var currentUser = UserContext.Current;
         if (currentUser == null || string.IsNullOrEmpty(currentUser.UserId))
-            return Enumerable.Empty<string>();
+            return new List<ModulePermissionDto>();
 
         // Get permissions for the current user
         return await GetUserPermissionsAsync(currentUser.UserId);

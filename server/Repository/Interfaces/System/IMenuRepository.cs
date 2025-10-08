@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Model.DTOs.System.Menu;
+using Model.DTOs.System.Module;
 using Model.Entities.System;
 using Repository.Interfaces.Base;
 
@@ -17,6 +18,6 @@ namespace Repository.Interfaces.System
         /// <summary>
         /// Gets menus based on user permissions
         /// </summary>
-        Task<List<MenuDto>> GetMenusByPermissionsAsync(List<string> permissions);
+        Task<List<MenuDto>> GetMenusByPermissionsAsync(List<ModulePermissionDto> permissions);
     }
 }

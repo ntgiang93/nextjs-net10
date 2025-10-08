@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Model.Constants;
+using Model.DTOs.System.Module;
 
 namespace Common.Security.Policies
 {
@@ -16,7 +18,12 @@ namespace Common.Security.Policies
             if (policy == null)
             {
                 var builder = new AuthorizationPolicyBuilder();
-                builder.AddRequirements(new PermissionRequirement(policyName));
+                var permission  = policyName.Split('.');
+                builder.AddRequirements(new PermissionRequirement(new ModulePermissionDto
+                {
+                    Module = permission[0],
+                    Permission = (EPermission)int.Parse(permission[1] ?? "0")
+                }));
                 policy = builder.Build();
             }
             return policy;

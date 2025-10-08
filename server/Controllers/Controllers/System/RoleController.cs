@@ -8,6 +8,7 @@ using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Service.Interfaces;
 using Service.Interfaces.Base;
+using Model.DTOs.System.Module;
 
 namespace NextDotNet.Api.Controllers.System;
 
@@ -60,11 +61,11 @@ public class RoleController : ControllerBase
     public async Task<IActionResult> GetRolePermissions(int roleId)
     {
         var permissions = await _roleService.GetRolePermissionAsync(roleId);
-        return Ok(ApiResponse<List<RolePermission>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<List<ModulePermissionDto>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpPost]
-    [Policy(ESysModule.Roles, EPermission.Creation)]
+    [Policy(ESysModule.Roles, EPermission.Create)]
     public async Task<IActionResult> CreateRole([FromBody] RoleDto roleDto)
     {
         var createdRole = await _roleService.CreateRoleAsync(roleDto);
@@ -97,7 +98,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpPut]
-    [Policy(ESysModule.Roles, EPermission.Edition)]
+    [Policy(ESysModule.Roles, EPermission.Edit)]
     public async Task<IActionResult> UpdateRole([FromBody] RoleDto roleDto)
     {
         var success = await _roleService.UpdateRoleAsync(roleDto);
@@ -108,7 +109,7 @@ public class RoleController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Policy(ESysModule.Roles, EPermission.Deletion)]
+    [Policy(ESysModule.Roles, EPermission.Delete)]
     public async Task<IActionResult> DeleteRole(int id)
     {
         var success = await _roleService.DeleteRoleAsync(id);
@@ -118,7 +119,7 @@ public class RoleController : ControllerBase
         return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
     }
     [HttpDelete("{id}/remove-member/{userId}")]
-    [Policy(ESysModule.Roles, EPermission.Deletion)]
+    [Policy(ESysModule.Roles, EPermission.Delete)]
     public async Task<IActionResult> DeleteRole(int id, string userId)
     {
         var success = await _roleService.RemoveRoleMember(id, userId);

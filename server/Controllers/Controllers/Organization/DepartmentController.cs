@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Common.Security.Policies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Common.Security.Policies;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
@@ -55,7 +53,7 @@ public class DepartmentController : ControllerBase
 
     // POST methods
     [HttpPost]
-    [Policy(ESysModule.Department, EPermission.Creation)]
+    [Policy(ESysModule.Department, EPermission.Create)]
     public async Task<IActionResult> CreateDepartment([FromBody] CreateDepartmentDto createDepartmentDto)
     {
         var department = await _departmentService.CreateDepartmentAsync(createDepartmentDto);
@@ -67,7 +65,7 @@ public class DepartmentController : ControllerBase
 
     // PUT methods
     [HttpPut]
-    [Policy(ESysModule.Department, EPermission.Edition)]
+    [Policy(ESysModule.Department, EPermission.Edit)]
     public async Task<IActionResult> UpdateDepartment([FromBody] UpdateDepartmentDto updateDepartmentDto)
     {
         var success = await _departmentService.UpdateDepartmentAsync(updateDepartmentDto);
@@ -79,7 +77,7 @@ public class DepartmentController : ControllerBase
 
     // DELETE methods
     [HttpDelete("{id}")]
-    [Policy(ESysModule.Department, EPermission.Deletion)]
+    [Policy(ESysModule.Department, EPermission.Delete)]
     public async Task<IActionResult> DeleteDepartment(int id)
     {
         var success = await _departmentService.SoftDeleteAsync(id);

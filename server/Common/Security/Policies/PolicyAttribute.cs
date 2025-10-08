@@ -9,7 +9,6 @@ public class PolicyAttribute : AuthorizeAttribute
     public PolicyAttribute(ESysModule module, EPermission permission)
     {
         var moduleName = module.ToString();
-        var permissionName = permission.ToString();
-        Policy = $"{moduleName}.{permissionName}";
+        Policy = $"{moduleName}.{permission}";
     }
 }

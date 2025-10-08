@@ -68,7 +68,7 @@ public class UserDepartmentController : ControllerBase
 
     // POST methods
     [HttpPost]
-    [Policy(ESysModule.Department, EPermission.Creation)]
+    [Policy(ESysModule.Department, EPermission.Create)]
     public async Task<IActionResult> AssignUserToDepartment([FromBody] UserDepartment userDepartment)
     {
         var id = await _userDepartmentService.CreateUserDepartmentAsync(userDepartment);
@@ -80,7 +80,7 @@ public class UserDepartmentController : ControllerBase
 
     // PUT methods
     [HttpPut]
-    [Policy(ESysModule.Department, EPermission.Edition)]
+    [Policy(ESysModule.Department, EPermission.Edit)]
     public async Task<IActionResult> UpdateUserDepartment([FromBody] UserDepartment userDepartment)
     {
         var result = await _userDepartmentService.UpdateUserDepartmentAsync(userDepartment);
@@ -92,7 +92,7 @@ public class UserDepartmentController : ControllerBase
 
     // DELETE methods
     [HttpDelete("{id}")]
-    [Policy(ESysModule.Department, EPermission.Deletion)]
+    [Policy(ESysModule.Department, EPermission.Delete)]
     public async Task<IActionResult> RemoveUserFromDepartment(int id)
     {
         var success = await _userDepartmentService.SoftDeleteAsync(id);

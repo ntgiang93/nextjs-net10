@@ -14,6 +14,7 @@ using Model.Entities.System;
 using Model.Models;
 using Service.Interfaces;
 using Service.Interfaces.Base;
+using Model.DTOs.System.Module;
 
 namespace NextDotNet.Api.Controllers;
 
@@ -68,14 +69,14 @@ public class UserController : ControllerBase
         if (permissions == null) 
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.UserNotFound), HttpStatusCode.NotFound));
 
-        return Ok(ApiResponse<IEnumerable<string>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<List<ModulePermissionDto>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
     }
     
     [HttpGet("current/permissions")]
     public async Task<IActionResult> GetCurrentUserPermissions()
     {
         var permissions = await _userService.GetCurrentUserPermissionsAsync();
-        return Ok(ApiResponse<IEnumerable<string>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<List<ModulePermissionDto>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpGet("verify-email")]
@@ -91,7 +92,7 @@ public class UserController : ControllerBase
 
     // POST methods
     [HttpPost]
-    [Policy(ESysModule.Users, EPermission.Creation)]
+    [Policy(ESysModule.Users, EPermission.Create)]
     public async Task<IActionResult> Create([FromBody] CreateUserDto createUserDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -102,7 +103,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("{userId}/assign-roles")]
-    [Policy(ESysModule.Users, EPermission.Edition)]
+    [Policy(ESysModule.Users, EPermission.Edit)]
     public async Task<IActionResult> AssignRoles(string userId, [FromBody] List<UserRole> userRoles)
     {
         var success = await _userService.AssignRolesAsync(userId, userRoles);
@@ -114,7 +115,7 @@ public class UserController : ControllerBase
 
     // PUT methods
     [HttpPut]
-    [Policy(ESysModule.Users, EPermission.Edition)]
+    [Policy(ESysModule.Users, EPermission.Edit)]
     public async Task<IActionResult> Update([FromBody] UpdateUserDto updateUserDto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -127,7 +128,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("change-active-status")]
-    [Policy(ESysModule.Users, EPermission.Edition)]
+    [Policy(ESysModule.Users, EPermission.Edit)]
     public async Task<IActionResult> ChangeActiveStatus([FromBody] string id)
     {
         var currentUser = UserContext.Current;
@@ -137,7 +138,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("change-email")]
-    [Policy(ESysModule.Users, EPermission.Edition)]
+    [Policy(ESysModule.Users, EPermission.Edit)]
     public async Task<IActionResult> ChangeEmail([FromBody] ChangeEmailDto dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);

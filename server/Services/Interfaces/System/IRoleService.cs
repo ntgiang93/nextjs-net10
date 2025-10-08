@@ -1,4 +1,5 @@
 using Model.DTOs.System;
+using Model.DTOs.System.Module;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Service.Interfaces.Base;
@@ -40,7 +41,7 @@ public interface IRoleService : IGenericService<Role, int>
     /// </summary>
     /// <param name="roleId">ID of the role</param>
     /// <returns>List of role permissions</returns>
-    Task<List<RolePermission>> GetRolePermissionAsync(int roleId);
+    Task<List<ModulePermissionDto>> GetRolePermissionAsync(int roleId);
 
     /// <summary>
     ///     Retrieves the permissions associated with a specific role as strings.

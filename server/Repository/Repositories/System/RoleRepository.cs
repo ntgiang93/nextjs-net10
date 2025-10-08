@@ -1,6 +1,7 @@
 using Common.Extensions;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using Model.DTOs.System.Module;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.Base;
@@ -14,10 +15,13 @@ namespace Repository.Repositories;
 public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
 {
     private readonly StringBuilder _sqlBuilder;
+    private readonly string _rolePermissitonTable;
 
     public RoleRepository(IDbConnectionFactory factory) : base(factory)
     {
         _sqlBuilder = new StringBuilder();
+        _rolePermissitonTable = StringHelper.GetTableName<RolePermission>();
+
     }
 
     public async Task<List<RoleMembersDto>> GetRoleMembersAsync(int roleId)
@@ -44,9 +48,8 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
 
     public async Task<List<string>> GetRolePermissionString(string role)
     {
-        string rolePermissionTable = StringHelper.GetTableName<RolePermission>();
-        var query = new Query(rolePermissionTable)
-        .SelectRaw($"CONCAT({nameof(RolePermission.Role)}, '.', {nameof(RolePermission.Permission)}) as Permission");
+        var query = new Query(_rolePermissitonTable)
+        .SelectRaw($"CONCAT({nameof(RolePermission.SysModule)}, '.', {nameof(RolePermission.Permission)}) as Permission");
 
         if (!string.IsNullOrEmpty(role))
             query = query.Where(nameof(RolePermission.Role), "like", $"%{role}%");
@@ -58,17 +61,21 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
         return permissions.ToList();
     }
 
-    public async Task<List<RolePermission>> GetRolePermission(string role)
+    public async Task<List<ModulePermissionDto>> GetRolePermission(string role)
     {
-        var query = new Query(nameof(RolePermission));
+        var query = new Query(_rolePermissitonTable);
         if (!string.IsNullOrEmpty(role))
-            query = query.Where(nameof(RolePermission.Role), "like", $"%{role}%");
+            query = query.Where(nameof(RolePermission.Role), role);
 
         var compiledQuery = _compiler.Compile(query);
 
         var connection = _dbFactory.Connection;
         var permissions = await connection.QueryAsync<RolePermission>(compiledQuery.Sql, compiledQuery.NamedBindings);
-        return permissions.ToList();
+        return permissions.Select(x => new ModulePermissionDto
+        {
+            Module = x.SysModule,
+            Permission = x.Permission
+        }).ToList();
     }
 
     public async Task<bool> AddRolePermissionAsync(IEnumerable<RolePermission> rolePermissions)
@@ -83,15 +90,28 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
         });
     }
 
-    public async Task<bool> DeleteRolePermissionAsync(IEnumerable<RolePermission> rolePermissions)
+    public async Task<bool> DeleteRolePermissionAsync(string role)
     {
-        return await ExecuteInTransactionAsync(async (connection, transaction) =>
+        string rolePermissionTable = StringHelper.GetTableName<RolePermission>();
+        var deleteQuery = new Query(rolePermissionTable)
+            .Where(nameof(RolePermission.Role), role)
+            .AsDelete();
+
+        var compiled = _compiler.Compile(deleteQuery);
+
+        var connection = _dbFactory.Connection;
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+        try
         {
-            foreach (var rolePermission in rolePermissions)
-            {
-                await connection.DeleteAsync(rolePermission, transaction);
-            }
-            return true;
-        });
+            var rows = await connection.ExecuteAsync(compiled.Sql, compiled.NamedBindings, transaction);
+            transaction.Commit();
+            return rows > 0;
+        }
+        catch
+        {
+            transaction.Rollback();
+            throw;
+        }
     }
 }

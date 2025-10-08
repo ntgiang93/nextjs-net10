@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Caching.Memory;
 using Model.Constants;
+using Model.DTOs.System.Module;
 
 namespace Common.Security.Policies;
 
@@ -27,7 +28,7 @@ public class PermissionHandler : AuthorizationHandler<PermissionRequirement>
             foreach (var item in roles)
             {
                 var cacheKey = $"{Permission.PermissionCacheKeyPrefix}{item}";
-                if (_cache.TryGetValue(cacheKey, out IEnumerable<string> permissions))
+                if (_cache.TryGetValue(cacheKey, out List<ModulePermissionDto> permissions))
                     if (permissions != null && permissions.Contains(requirement.Permission))
                     {
                         context.Succeed(requirement);

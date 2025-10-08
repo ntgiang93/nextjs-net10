@@ -2,6 +2,6 @@ namespace Model.Models;
 
 public class SelectOption<TKey>
 {
-    public TKey Value { get; set; }
-    public string Label { get; set; }
+    public required TKey Value { get; set; }
+    public required string Label { get; set; }
 }

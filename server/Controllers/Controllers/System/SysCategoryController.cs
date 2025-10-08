@@ -39,7 +39,7 @@ public class SysCategoryController : ControllerBase
     public async Task<IActionResult> GetAllPermission()
     {
         var permisons = Permission.Get2SelectOptions();
-        return Ok(ApiResponse<IEnumerable<SelectOption<string>>>.Succeed(permisons, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<IEnumerable<SelectOption<EPermission>>>.Succeed(permisons, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpGet]
@@ -61,7 +61,7 @@ public class SysCategoryController : ControllerBase
     }
 
     [HttpPost]
-    [Policy(ESysModule.SysCategories, EPermission.Creation)]
+    [Policy(ESysModule.SysCategories, EPermission.Create)]
     public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto categoryDto)
     {
         var id = await _categoryService.CreateCategoryAsync(categoryDto);
@@ -72,7 +72,7 @@ public class SysCategoryController : ControllerBase
     }
 
     [HttpPut]
-    [Policy(ESysModule.SysCategories, EPermission.Edition)]
+    [Policy(ESysModule.SysCategories, EPermission.Edit)]
     public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryDto categoryDto)
     {
         var success = await _categoryService.UpdateCategoryAsync(categoryDto);
@@ -83,7 +83,7 @@ public class SysCategoryController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    [Policy(ESysModule.SysCategories, EPermission.Deletion)]
+    [Policy(ESysModule.SysCategories, EPermission.Delete)]
     public async Task<IActionResult> DeleteCategory(int id)
     {
         var success = await _categoryService.DeleteCategoryAsync(id);

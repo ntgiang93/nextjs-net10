@@ -13,6 +13,7 @@ using Repository.Interfaces.System;
 using Service.Interfaces;
 using Service.Interfaces.System;
 using Service.Services.Base;
+using Model.DTOs.System.Module;
 
 namespace Service.Services;
 
@@ -91,7 +92,7 @@ public class RoleService : GenericService<Role, int>, IRoleService
         return await _roleRepository.GetRolePermissionString(role.Code);
     }
 
-    public async Task<List<RolePermission>> GetRolePermissionAsync(int roleId)
+    public async Task<List<ModulePermissionDto>> GetRolePermissionAsync(int roleId)
     {
         var role = await GetByIdAsync<Role>(roleId);
         if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
@@ -106,8 +107,7 @@ public class RoleService : GenericService<Role, int>, IRoleService
             throw new BusinessException(SysMsg.Get(EMessage.CannotModifyProtectedRole), "CANNOT_MODIFY_PROTECTED_ROLE");
 
         // Clear existing permissions
-        var existingPermissions = await _roleRepository.GetRolePermission(role.Code);
-        if (existingPermissions.Any()) await _roleRepository.DeleteRolePermissionAsync(existingPermissions);
+        await _roleRepository.DeleteRolePermissionAsync(role.Code);
 
         var result = await _roleRepository.AddRolePermissionAsync(permissions);
         if (result) _permissionService.InvalidateRolePermissionCache(role.Code);

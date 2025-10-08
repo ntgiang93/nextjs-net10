@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Model.DTOs.Base;
 using Model.DTOs.System.Auth;
+using Model.DTOs.System.Module;
 using Model.DTOs.System.User;
 using Model.Entities.System;
 using Model.Models;
@@ -17,7 +18,7 @@ public interface IUserService : IGenericService<User, string>
     /// </summary>
     /// <param name="userId">ID of the user</param>
     /// <returns>Collection of permission strings assigned to the user</returns>
-    Task<IEnumerable<string>> GetUserPermissionsAsync(string userId);
+    Task<List<ModulePermissionDto>> GetUserPermissionsAsync(string userId);
 
     /// <summary>
     /// Gets detailed information of a user by their ID
@@ -28,7 +29,7 @@ public interface IUserService : IGenericService<User, string>
     ///     Gets permissions of the currently authenticated user
     /// </summary>
     /// <returns>Collection of permission strings for the current user</returns>
-    Task<IEnumerable<string>> GetCurrentUserPermissionsAsync();
+    Task<List<ModulePermissionDto>> GetCurrentUserPermissionsAsync();
 
     /// <summary>
     ///     Gets all roles assigned to a specific user

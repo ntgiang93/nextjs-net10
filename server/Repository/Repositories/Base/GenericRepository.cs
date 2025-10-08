@@ -1,8 +1,6 @@
 ﻿using Common.Extensions;
 using Dapper;
 using Dapper.Contrib.Extensions;
-using LinqToDB;
-using LinqToDB.Data;
 using Mapster;
 using Model.Entities.System;
 using Repository.Interfaces.Base;

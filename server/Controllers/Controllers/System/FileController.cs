@@ -78,7 +78,7 @@ public class FileController : ControllerBase
 
     // DELETE methods
     [HttpDelete("{id}")]
-    [Policy(ESysModule.Files, EPermission.Deletion)]
+    [Policy(ESysModule.Files, EPermission.Delete)]
     public async Task<IActionResult> DeleteFile(int id)
     {
         var result = await _fileService.DeleteFileAsync(id);
