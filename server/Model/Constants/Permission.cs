@@ -14,6 +14,7 @@ public enum EPermission
     Export = 1 << 5 // 100000  = 32
 }
 
+
 public static class Permission
 {
     public static readonly string PermissionCacheKeyPrefix = "RolePermission_";

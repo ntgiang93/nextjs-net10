@@ -65,8 +65,25 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
         var compiledQuery = _compiler.Compile(query);
 
         var connection = _dbFactory.Connection;
-        var permissions = await connection.QueryAsync<RolePermission>(compiledQuery.Sql, compiledQuery.NamedBindings);
-        return permissions.ToList();
+        var rows = await connection.QueryAsync<RolePermission>(compiledQuery.Sql, compiledQuery.NamedBindings);
+        var list = new List<RolePermission>();
+        foreach (var rp in rows)
+        {
+            var permissions = Enum.GetValues(typeof(EPermission))
+               .Cast<EPermission>()
+               .Where(p => p != EPermission.None && (rp.Permission).HasFlag(p))
+               .ToList();
+            foreach (var p in permissions)
+            {
+                list.Add(new RolePermission
+                {
+                    SysModule = rp.SysModule,
+                    Permission = p,
+                    Role = rp.Role,
+                });
+            }
+        }
+        return list;
     }
 
     public async Task<bool> AddRolePermissionAsync(IEnumerable<RolePermission> rolePermissions)

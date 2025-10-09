@@ -77,13 +77,6 @@ public class RoleService : GenericService<Role, int>, IRoleService
         return await SoftDeleteAsync(id);
     }
 
-    public async Task<List<string>> GetRolePermissionStringAsync(int roleId)
-    {
-        var role = await GetByIdAsync<Role>(roleId);
-        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
-        return await _roleRepository.GetRolePermissionString(role.Code);
-    }
-
     public async Task<List<RolePermission>> GetRolePermissionAsync(int roleId)
     {
         var role = await GetByIdAsync<Role>(roleId);
