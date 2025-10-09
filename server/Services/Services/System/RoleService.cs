@@ -3,7 +3,6 @@ using Common.Security;
 using Mapster;
 using Model.Constants;
 using Model.DTOs.System;
-using Model.DTOs.System.Module;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.System;
@@ -85,7 +84,7 @@ public class RoleService : GenericService<Role, int>, IRoleService
         return await _roleRepository.GetRolePermissionString(role.Code);
     }
 
-    public async Task<List<ModulePermissionDto>> GetRolePermissionAsync(int roleId)
+    public async Task<List<RolePermission>> GetRolePermissionAsync(int roleId)
     {
         var role = await GetByIdAsync<Role>(roleId);
         if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");

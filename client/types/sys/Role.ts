@@ -25,7 +25,7 @@ export type RoleMembersDto = {
 export type RolePermissionDto = {
   role: string;
   sysModule: string;
-  permission: string;
+  permission: number;
 };
 
 export type UserRoleDto = {

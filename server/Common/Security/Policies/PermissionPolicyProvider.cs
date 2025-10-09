@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Options;
 using Model.Constants;
 using Model.DTOs.System.Module;
+using Model.Entities.System;
 
 namespace Common.Security.Policies
 {
@@ -19,10 +20,11 @@ namespace Common.Security.Policies
             {
                 var builder = new AuthorizationPolicyBuilder();
                 var permission  = policyName.Split('.');
-                builder.AddRequirements(new PermissionRequirement(new ModulePermissionDto
+                builder.AddRequirements(new PermissionRequirement(new RolePermission
                 {
-                    Module = permission[0],
-                    Permission = (EPermission)int.Parse(permission[1] ?? "0")
+                    SysModule = permission[0],
+                    Permission = (EPermission)int.Parse(permission[1] ?? "0"),
+                    Role = permission.Length > 2 ? permission[2] : null
                 }));
                 policy = builder.Build();
             }

@@ -41,7 +41,7 @@ public interface IRoleService : IGenericService<Role, int>
     /// </summary>
     /// <param name="roleId">ID of the role</param>
     /// <returns>List of role permissions</returns>
-    Task<List<ModulePermissionDto>> GetRolePermissionAsync(int roleId);
+    Task<List<RolePermission>> GetRolePermissionAsync(int roleId);
 
     /// <summary>
     ///     Retrieves the permissions associated with a specific role as strings.

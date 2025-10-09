@@ -48,7 +48,7 @@ public class MenuService : GenericService<Menu, int>, IMenuService
         {
             if (user.Roles.Any(r => r == DefaultRoles.SuperAdmin))
                 return await _menuRepository.GetMenuTreeAsync();
-            var permissions = new List<ModulePermissionDto>();
+            var permissions = new List<RolePermission>();
             foreach (var role in user.Roles)
             {
                 var rolePermissions = await _permissionService.GetRolePermissionAsync(role);

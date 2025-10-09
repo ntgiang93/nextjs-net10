@@ -18,7 +18,7 @@ public interface IUserService : IGenericService<User, string>
     /// </summary>
     /// <param name="userId">ID of the user</param>
     /// <returns>Collection of permission strings assigned to the user</returns>
-    Task<List<ModulePermissionDto>> GetUserPermissionsAsync(string userId);
+    Task<List<RolePermission>> GetUserPermissionsAsync(string userId);
 
     /// <summary>
     /// Gets detailed information of a user by their ID
@@ -29,7 +29,7 @@ public interface IUserService : IGenericService<User, string>
     ///     Gets permissions of the currently authenticated user
     /// </summary>
     /// <returns>Collection of permission strings for the current user</returns>
-    Task<List<ModulePermissionDto>> GetCurrentUserPermissionsAsync();
+    Task<List<RolePermission>> GetCurrentUserPermissionsAsync();
 
     /// <summary>
     ///     Gets all roles assigned to a specific user

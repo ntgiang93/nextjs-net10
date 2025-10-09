@@ -31,7 +31,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
       queries: {
         refetchOnWindowFocus: false, // Prevents automatic refetching when user switches back to the browser tab
         retry: 0, // Disables automatic retry attempts on failed queries to avoid unnecessary network requests
-        staleTime: 3000, // Sets data as fresh for 3 seconds (3000ms), preventing immediate refetches
+        staleTime: 1000, // Sets data as fresh for 1 second (1000ms), preventing immediate refetches
         initialDataUpdatedAt: dayjs().add(-5, 'second').valueOf(), // Marks initial data as 5 seconds old to ensure fresh data fetching on mount
       },
     },

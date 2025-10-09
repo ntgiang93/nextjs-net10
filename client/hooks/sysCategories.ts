@@ -1,11 +1,10 @@
 'use client';
 
 import { ApiResponse } from '@/types/base/ApiResponse';
-import { defaultMenuItem, MenuItem, SaveMenuDto } from '@/types/sys/Menu';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiService } from '../services/api';
-import { useMutation } from '@tanstack/react-query';
 import { SelectOption } from '@/types/base/SelectOption';
+import { defaultMenuItem, MenuItem, SaveMenuDto } from '@/types/sys/Menu';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiService } from '../services/api';
 
 const endpoint = 'categories';
 
@@ -34,15 +33,15 @@ export const useGetSysModule = () => {
 
 export const useGetPermission = () => {
   const queryClient = useQueryClient();
-  const cachedData = queryClient.getQueryData<SelectOption<string>[]>([
+  const cachedData = queryClient.getQueryData<SelectOption<number>[]>([
     'getPermission',
   ]);
 
-  return useQuery<SelectOption<string>[], Error>({
+  return useQuery<SelectOption<number>[], Error>({
     queryKey: ['getPermission'],
     queryFn: async () => {
       const response = await apiService.get<
-          ApiResponse<SelectOption<string>[]>
+          ApiResponse<SelectOption<number>[]>
       >(`${endpoint}/system-permissions`);
       if (response.success && response.data) {
         return response.data;

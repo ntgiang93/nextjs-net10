@@ -1,6 +1,7 @@
 using Common.Extensions;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using Model.Constants;
 using Model.DTOs.System.Module;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
@@ -55,7 +56,7 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
         return permissions.ToList();
     }
 
-    public async Task<List<ModulePermissionDto>> GetRolePermission(string role)
+    public async Task<List<RolePermission>> GetRolePermission(string role)
     {
         var query = new Query(_rolePermissitonTable);
         if (!string.IsNullOrEmpty(role))
@@ -65,18 +66,24 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
 
         var connection = _dbFactory.Connection;
         var permissions = await connection.QueryAsync<RolePermission>(compiledQuery.Sql, compiledQuery.NamedBindings);
-        return permissions.Select(x => new ModulePermissionDto
-        {
-            Module = x.SysModule,
-            Permission = x.Permission
-        }).ToList();
+        return permissions.ToList();
     }
 
     public async Task<bool> AddRolePermissionAsync(IEnumerable<RolePermission> rolePermissions)
     {
+        var aggregated = rolePermissions
+        .GroupBy(x => new { x.Role, x.SysModule })
+        .Select(g => new RolePermission
+        {
+            Role = g.Key.Role,
+            SysModule = g.Key.SysModule,
+            Permission = g.Select(x => x.Permission)
+                          .Aggregate(EPermission.None, (acc, cur) => acc | cur)
+        })
+        .ToList();
         return await ExecuteInTransactionAsync(async (connection, transaction) =>
         {
-            foreach (var rolePermission in rolePermissions)
+            foreach (var rolePermission in aggregated)
             {
                 await connection.InsertAsync(rolePermission, transaction);
             }
@@ -94,7 +101,6 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
         var compiled = _compiler.Compile(deleteQuery);
 
         var connection = _dbFactory.Connection;
-        connection.Open();
         using var transaction = connection.BeginTransaction();
         try
         {

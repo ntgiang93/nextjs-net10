@@ -36,11 +36,11 @@ public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
         return BuildMenuTree(allMenus.ToList());
     }
 
-    public async Task<List<MenuDto>> GetMenusByPermissionsAsync(List<ModulePermissionDto> permissions)
+    public async Task<List<MenuDto>> GetMenusByPermissionsAsync(List<RolePermission> permissions)
     {
         var parameters = new DynamicParameters();
         parameters.Add("permissions", permissions);
-        var activeModules = permissions.Select(p => p.Module).Distinct();
+        var activeModules = permissions.Select(p => p.SysModule).Distinct();
         var query = new Query(_tableName)
                     .Where(nameof(Menu.IsDeleted), false)
                     .Where(nameof(Menu.IsActive), true)

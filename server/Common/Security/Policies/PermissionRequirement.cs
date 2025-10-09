@@ -6,7 +6,7 @@ namespace Common.Security.Policies
 {
     public class PermissionRequirement : IAuthorizationRequirement
     {
-        public ModulePermissionDto Permission { get; }
-        public PermissionRequirement(ModulePermissionDto permission) => Permission = permission;
+        public RolePermission Permission { get; }
+        public PermissionRequirement(RolePermission permission) => Permission = permission;
     }
 }

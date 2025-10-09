@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Memory;
 using Model.DTOs.System.Module;
+using Model.Entities.System;
 using Repository.Interfaces.System;
 using Service.Interfaces.System;
 
@@ -22,12 +23,12 @@ namespace Service.Services.System
             _memoryCache = memoryCache;
         }
 
-        public async Task<List<ModulePermissionDto>> GetRolePermissionAsync(string role)
+        public async Task<List<RolePermission>> GetRolePermissionAsync(string role)
         {
             string cacheKey = $"{CACHE_KEY_PREFIX}{role}";
             
             // Try to get from cache first
-            if (_memoryCache.TryGetValue(cacheKey, out List<ModulePermissionDto>? permissions) && permissions != null)
+            if (_memoryCache.TryGetValue(cacheKey, out List<RolePermission>? permissions) && permissions != null)
             {
                 return permissions;
             }

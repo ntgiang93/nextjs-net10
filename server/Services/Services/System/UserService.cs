@@ -244,7 +244,7 @@ public class UserService : GenericService<User, string>, IUserService
         return await _userRepository.GetRolesAsync(userId);
     }
 
-    public async Task<List<ModulePermissionDto>> GetUserPermissionsAsync(string userId)
+    public async Task<List<RolePermission>> GetUserPermissionsAsync(string userId)
     {
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetUserPermissionsAsync", userId);
         return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
@@ -252,10 +252,10 @@ public class UserService : GenericService<User, string>, IUserService
             // Get all roles for the user
             var userRoles = await GetUserRoleAsync(userId);
             if (userRoles == null || !userRoles.Any())
-                return new List<ModulePermissionDto>();
+                return new List<RolePermission>();
 
             // Get permissions for each role and combine them
-            var allPermissions = new HashSet<ModulePermissionDto>();
+            var allPermissions = new HashSet<RolePermission>();
             foreach (var role in userRoles)
             {
                 var rolePermissions = await _permissionService.GetRolePermissionAsync(role);
@@ -272,12 +272,12 @@ public class UserService : GenericService<User, string>, IUserService
         });
     }
 
-    public async Task<List<ModulePermissionDto>> GetCurrentUserPermissionsAsync()
+    public async Task<List<RolePermission>> GetCurrentUserPermissionsAsync()
     {
         // Get the current user ID from the context
         var currentUser = UserContext.Current;
         if (currentUser == null || string.IsNullOrEmpty(currentUser.UserId))
-            return new List<ModulePermissionDto>();
+            return new List<RolePermission>();
 
         // Get permissions for the current user
         return await GetUserPermissionsAsync(currentUser.UserId);

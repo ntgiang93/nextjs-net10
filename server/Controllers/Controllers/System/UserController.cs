@@ -69,14 +69,14 @@ public class UserController : ControllerBase
         if (permissions == null) 
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.UserNotFound), HttpStatusCode.NotFound));
 
-        return Ok(ApiResponse<List<ModulePermissionDto>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<List<RolePermission>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
     }
     
     [HttpGet("current/permissions")]
     public async Task<IActionResult> GetCurrentUserPermissions()
     {
         var permissions = await _userService.GetCurrentUserPermissionsAsync();
-        return Ok(ApiResponse<List<ModulePermissionDto>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<List<RolePermission>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpGet("verify-email")]

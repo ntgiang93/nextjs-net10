@@ -18,6 +18,6 @@ namespace Repository.Interfaces.System
         /// <summary>
         /// Gets menus based on user permissions
         /// </summary>
-        Task<List<MenuDto>> GetMenusByPermissionsAsync(List<ModulePermissionDto> permissions);
+        Task<List<MenuDto>> GetMenusByPermissionsAsync(List<RolePermission> permissions);
     }
 }

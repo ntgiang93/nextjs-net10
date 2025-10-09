@@ -30,7 +30,7 @@ public class RoleController : ControllerBase
     [Policy(ESysModule.Roles, EPermission.View)]
     public async Task<IActionResult> GetAllRoles()
     {
-        var roles = await _roleService.GetAllAsync<RoleViewDto>();
+        var roles = await _roleService.FindAsync<RoleViewDto>(r => r.IsDeleted == false);
         return Ok(ApiResponse<IEnumerable<RoleViewDto>>.Succeed(roles, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
@@ -61,7 +61,7 @@ public class RoleController : ControllerBase
     public async Task<IActionResult> GetRolePermissions(int roleId)
     {
         var permissions = await _roleService.GetRolePermissionAsync(roleId);
-        return Ok(ApiResponse<List<ModulePermissionDto>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<List<RolePermission>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpPost]

@@ -1,16 +1,18 @@
-import { RoleHook } from '@/hooks/role';
-import { Button, Checkbox, Tooltip } from '@heroui/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { SysCategoryHook } from '@/hooks/sysCategories';
-import { ColumnDef } from '@tanstack/react-table';
 import DataTable from '@/components/ui/data-table/Datatable';
 import { SearchInput } from '@/components/ui/input/SearchInput';
-import { FloppyDiskIcon } from 'hugeicons-react';
+import { RoleHook } from '@/hooks/role';
+import { SysCategoryHook } from '@/hooks/sysCategories';
 import { RoleDto, RolePermissionDto } from '@/types/sys/Role';
+import { Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip } from '@heroui/react';
+import { ColumnDef } from '@tanstack/react-table';
+import { FloppyDiskIcon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 interface IRoleUserProps {
   role: RoleDto;
+  isOpen: boolean;
+  onOpenChange: () => void;
 }
 
 interface PermissionTable {
@@ -18,9 +20,9 @@ interface PermissionTable {
   moduleName: string;
 }
 
-export default function RolePermisson(props: IRoleUserProps) {
+export default function RolePermissonModal(props: IRoleUserProps) {
   const msg = useTranslations('msg');
-  const { role } = props;
+  const { role, isOpen, onOpenChange } = props;
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [tableData, setTableData] = useState<PermissionTable[]>([]);
   const [form, setForm] = useState<RolePermissionDto[]>([]);
@@ -30,14 +32,14 @@ export default function RolePermisson(props: IRoleUserProps) {
   const { data: permissons, isLoading: loadingPermssion } = SysCategoryHook.useGetPermission();
 
   const checkedPermisson = useCallback(
-    (sysmodule: string, permission: string) => {
+    (sysmodule: string, permission: number) => {
       return form.some((rp) => rp.sysModule === sysmodule && rp.permission == permission);
     },
     [form],
   );
 
   const handleCheckedChange = useCallback(
-    (sysmodule: string, permission: string, checked: boolean) => {
+    (sysmodule: string, permission: number, checked: boolean) => {
       if (!role) return;
       if (!checked) {
         const newForm = form.filter((rp) => rp.sysModule !== sysmodule || rp.permission !== permission);
@@ -69,8 +71,8 @@ export default function RolePermisson(props: IRoleUserProps) {
     ];
     permissons.forEach((p) => {
       const permissonsCol: ColumnDef<PermissionTable> = {
-        id: p.value,
-        accessorKey: p.value,
+        id: p.value.toString(),
+        accessorKey: p.label,
         header: () => p.label,
         footer: (props) => props.column.id,
         size: 100,
@@ -108,26 +110,48 @@ export default function RolePermisson(props: IRoleUserProps) {
   }, [rolePermissions]);
 
   return (
-    <div className={'h-full'}>
-      <DataTable
-        removeWrapper={true}
-        columns={columns}
-        data={tableData}
-        isLoading={loadingModule || loadingPermssion}
-        fetch={refetch}
-        leftContent={
-          <>
-            <SearchInput className="w-64" value={searchTerm} onValueChange={(value) => setSearchTerm(value)} />
-          </>
-        }
-        rightContent={
-          <Tooltip content={msg('save')} showArrow={true} radius={'sm'}>
-            <Button isIconOnly isLoading={isPending} variant="shadow" color={'primary'} size="sm" onPress={onSubmit}>
-              <FloppyDiskIcon size={16} />
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      scrollBehavior="inside"
+      size='3xl'
+    >
+      <ModalContent>
+        <>
+          <ModalHeader className="flex flex-col gap-1">
+            <p>{role.name}</p>
+          </ModalHeader>
+          <ModalBody>
+            <DataTable
+                    removeWrapper={true}
+                    columns={columns}
+                    data={tableData}
+                    isLoading={loadingModule || loadingPermssion}
+                    fetch={refetch}
+                    leftContent={
+                      <>
+                        <SearchInput className="w-64" value={searchTerm} onValueChange={(value) => setSearchTerm(value)} />
+                      </>
+                    }
+                    rightContent={
+                      <Tooltip content={msg('save')} showArrow={true} radius={'sm'}>
+                        <Button isIconOnly isLoading={isPending} variant="shadow" color={'primary'} size="sm" onPress={onSubmit}>
+                          <FloppyDiskIcon size={16} />
+                        </Button>
+                      </Tooltip>
+                    }
+                  />
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" variant="light" onPress={onOpenChange}>
+              {msg('close')}
             </Button>
-          </Tooltip>
-        }
-      />
-    </div>
+            <Button onPress={onSubmit} color="primary" form="roleForm" isLoading={isPending}>
+              {msg('save')}
+            </Button>
+          </ModalFooter>
+        </>
+      </ModalContent>
+    </Modal>
   );
 }
