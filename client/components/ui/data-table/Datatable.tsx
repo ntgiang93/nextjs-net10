@@ -144,6 +144,7 @@ const DataTable = (props: DataTableProps) => {
     const cardHeight = cardRef.current.clientHeight;
     // Calculate the remaining space for the table
     const newTableHeight = cardHeight - 152;
+    console.log('tableHeight', newTableHeight, cardHeight);
     setTableHeight(Math.max(newTableHeight, 400));
   }, []);
 
@@ -200,7 +201,7 @@ const DataTable = (props: DataTableProps) => {
                 <Settings04Icon size={20} />
               </ExtButton>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Dynamic Actions" items={table.getAllLeafColumns()} selectionMode="multiple">
+            <DropdownMenu aria-label="Dynamic Actions" selectionMode="multiple">
               <DropdownItem key={1}>Resize column</DropdownItem>
               <DropdownItem key={2}>Move column</DropdownItem>
             </DropdownMenu>

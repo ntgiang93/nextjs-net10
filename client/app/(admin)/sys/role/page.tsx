@@ -1,16 +1,14 @@
 'use client';
-import RolePermisson from '@/app/(admin)/sys/role/components/RolePermisson';
 import { ConfirmModal } from '@/components/ui//overlay/ConfirmModal';
 import { ExtButton } from '@/components/ui/button/ExtButton';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
 import { RoleHook } from '@/hooks/role';
-import { defaultRoleDto, RoleDto } from '@/types/sys/Role';
-import { Card, CardBody, CardHeader, Tab, Tabs, useDisclosure } from '@heroui/react';
+import { RoleDto } from '@/types/sys/Role';
+import { useDisclosure } from '@heroui/react';
 import { Add01Icon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 import RoleDetailModal from './components/RoleDetailModal';
-import RoleUser from './components/RoleUser';
 import TableRole from './components/TableRole';
 
 export default function Roles() {
@@ -19,7 +17,6 @@ export default function Roles() {
   const { data: roles, refetch, isLoading } = RoleHook.useGetAll();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedRole, setSelectedRole] = useState<RoleDto | undefined>(undefined);
-  const [selected, setSelected] = useState('user');
   const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
   const { mutateAsync: del, isSuccess: delSuccess } = RoleHook.useDelete(selectedRole?.id || '0');
 
@@ -41,8 +38,6 @@ export default function Roles() {
           </>
         }
       ></PageHeader>
-      <div className={'h-full grid grid-cols-5 gap-4'}>
-        <div className="col-span-2">
           <TableRole
             setSelectedRole={(role) => setSelectedRole(role)}
             roles={roles}
@@ -51,35 +46,6 @@ export default function Roles() {
             onOpenDel={onOpenDel}
             onOpenEditModal={onOpen}
           />
-        </div>
-
-        <Card className="col-span-3 flex w-full flex-col">
-          <CardHeader>
-            <h4 className="text-lg font-semibold">{`${msg('details')} ${selectedRole?.name || ''}`}</h4>
-          </CardHeader>
-          <CardBody>
-            {!selectedRole && <div className="text-center">{t('selectRoleRequired')}</div>}
-            {selectedRole && (
-              <Tabs aria-label="Options" selectedKey={selected} onSelectionChange={(key) => setSelected(String(key))}>
-                <Tab key="user" title={t('roleMembers')} className={'h-full'}>
-                  <RoleUser role={selectedRole || { ...defaultRoleDto }} />
-                </Tab>
-                <Tab key="permisson" title={t('permissions')} className={'h-full'}>
-                  <RolePermisson
-                    role={
-                      selectedRole || {
-                        id: '0',
-                        name: '',
-                        description: '',
-                      }
-                    }
-                  />
-                </Tab>
-              </Tabs>
-            )}
-          </CardBody>
-        </Card>
-      </div>
       <RoleDetailModal
         id={selectedRole?.id || '0'}
         isOpen={isOpen}
@@ -89,11 +55,11 @@ export default function Roles() {
       />
       <ConfirmModal
         isOpen={IsOpenDel}
-        title="Delete Menu"
-        message="Do you want to delete this role.This action cannot be undone."
+        title={msg('delete')}
         confirmColor="danger"
         onOpenChange={OnOpenDelChange}
         onConfirm={() => del()}
+        objectName={[selectedRole?.name || ""]}
       />
     </div>
   );

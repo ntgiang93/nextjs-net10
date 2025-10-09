@@ -1,5 +1,4 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 using Model.Entities.System;
 using Repository.Interfaces.System;
 using Service.Interfaces.System;
@@ -40,5 +39,15 @@ public class UserRoleService : IUserRoleService
     public async Task<List<UserRole>> GetAllByUserAsync(string userId)
     {
         return await _userRoleRepository.GetAllByUserAsync(userId);
+    }
+
+    public async Task<UserRole> GetSingleAsync(int roleId, string userId)
+    {
+        return await _userRoleRepository.GetSingleAsync(roleId, userId);
+    }
+
+    public async Task<bool> DeleteAsync(int roleId, string userId)
+    {
+        return await _userRoleRepository.DeleteAsync(roleId, userId);
     }
 }

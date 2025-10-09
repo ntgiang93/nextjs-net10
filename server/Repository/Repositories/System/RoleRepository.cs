@@ -28,21 +28,15 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
     {
         string userRoleTable = StringHelper.GetTableName<UserRole>();
         string userTable = StringHelper.GetTableName<User>();
-        _sqlBuilder.Clear();
-        _sqlBuilder.Append($@"
-            SELECT 
-                u.{nameof(User.Id)},
-                u.{nameof(User.Username)} as UserName,
-                u.{nameof(User.FullName)},
-                u.{nameof(User.Avatar)}
-            FROM {userRoleTable} ur
-            INNER JOIN {userTable}s u ON ur.{nameof(UserRole.UserId)} = u.{nameof(User.Id)}
-            WHERE ur.{nameof(UserRole.RoleId)} = @roleId 
-                AND u.{nameof(User.IsDeleted)} = 0 
-                AND u.{nameof(User.IsActive)} = 1");
-
+        var query = new Query(userRoleTable)
+            .SelectRaw($"{userTable}.{nameof(User.Id)}, {userTable}.{nameof(User.Username)}, {userTable}.{nameof(User.FullName)}, {userTable}.{nameof(User.Avatar)}")
+            .Join(userTable, $"{userRoleTable}.{nameof(UserRole.UserId)}", $"{userTable}.{nameof(User.Id)}")
+            .Where($"{userRoleTable}.{nameof(UserRole.RoleId)}", roleId)
+            .Where($"{userTable}.{nameof(User.IsDeleted)}", 0)
+            .Where($"{userTable}.{nameof(User.IsActive)}", 1);
+        var compiledQuery = _compiler.Compile(query);
         var connection = _dbFactory.Connection;
-        var result = await connection.QueryAsync<RoleMembersDto>(_sqlBuilder.ToString(), new { roleId });
+        var result = await connection.QueryAsync<RoleMembersDto>(compiledQuery.Sql, compiledQuery.NamedBindings);
         return result.ToList();
     }
 

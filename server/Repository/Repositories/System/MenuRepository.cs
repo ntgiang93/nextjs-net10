@@ -14,12 +14,10 @@ namespace Repository.Repositories.System;
 
 public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
 {
-    private readonly StringBuilder _sqlBuilder;
     private readonly string _tableName;
 
     public MenuRepository(IDbConnectionFactory factory) : base(factory)
     {
-        _sqlBuilder = new StringBuilder();
         _tableName = StringHelper.GetTableName<Menu>();
 
     }

@@ -11,4 +11,6 @@ public interface IUserRoleService
     Task<bool> AddUserRoleAsync(IEnumerable<UserRole> userRoles);
     Task<bool> DeleteUserRoleAsync(IEnumerable<UserRole> userRoles);
     Task<bool> UpdateUserRoleAsync(IEnumerable<UserRole> userRoles, string userId);
+    Task<UserRole> GetSingleAsync(int roleId, string userId);
+    Task<bool> DeleteAsync(int roleId, string userId);
 }

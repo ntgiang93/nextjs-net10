@@ -1,3 +1,4 @@
+using Common.Extensions;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Model.Entities.System;
@@ -12,15 +13,17 @@ namespace Repository.Repositories.System;
 public class UserRoleRepository : GenericRepository<User, string>, IUserRoleRepository
 {
     private readonly StringBuilder _sqlBuilder;
+    private readonly string _tableName; 
 
     public UserRoleRepository(IDbConnectionFactory factory) : base(factory)
     {
         _sqlBuilder = new StringBuilder();
+        _tableName = StringHelper.GetTableName<UserRole>();
     }
 
     public async Task<List<UserRole>> GetAllByUserAsync(string userId)
     {
-        var query = new Query(nameof(UserRole))
+        var query = new Query(_tableName)
             .Where(nameof(UserRole.UserId), userId);
 
         var compiledQuery = _compiler.Compile(query);
@@ -33,7 +36,7 @@ public class UserRoleRepository : GenericRepository<User, string>, IUserRoleRepo
 
     public async Task<List<UserRole>> GetAllByRoleAsync(int roleId)
     {
-        var query = new Query(nameof(UserRole))
+        var query = new Query(_tableName)
             .Where(nameof(UserRole.RoleId), roleId);
 
         var compiledQuery = _compiler.Compile(query);
@@ -102,5 +105,31 @@ public class UserRoleRepository : GenericRepository<User, string>, IUserRoleRepo
             await connection.ExecuteAsync(_sqlBuilder.ToString(), new { RoleId = roleId }, transaction);
             return true;
         });
+    }
+
+    public async Task<UserRole> GetSingleAsync(int roleId, string userId)
+    {
+        var query = new Query(_tableName)
+            .Where(nameof(UserRole.RoleId), roleId)
+            .Where(nameof(UserRole.UserId), userId);
+
+        var compiledQuery = _compiler.Compile(query);
+        using var connection = _dbFactory.Connection;
+        var result = await connection.QueryFirstOrDefaultAsync<UserRole>(compiledQuery.Sql, compiledQuery.NamedBindings);
+
+        return result;
+    }
+
+    public async Task<bool> DeleteAsync(int roleId, string userId)
+    {
+        var query = new Query(_tableName)
+            .Where(nameof(UserRole.RoleId), roleId)
+            .Where(nameof(UserRole.UserId), userId);
+
+        var compiledQuery = _compiler.Compile(query);
+        using var connection = _dbFactory.Connection;
+        var result = await connection.QueryFirstOrDefaultAsync<UserRole>(compiledQuery.Sql, compiledQuery.NamedBindings);
+        if (result is null) return true;
+        return await connection.DeleteAsync(result);
     }
 }

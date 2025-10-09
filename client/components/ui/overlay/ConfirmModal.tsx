@@ -1,5 +1,5 @@
 import { Button, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
-import { Alert02Icon } from 'hugeicons-react';
+import { Alert02Icon, AlertCircleIcon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 
 interface ConfirmModalProps {
@@ -12,7 +12,7 @@ interface ConfirmModalProps {
   cancelText?: string;
   confirmColor?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
   size?: 'sm' | 'md' | 'lg' | 'xl';
-  objectName?: string;
+  objectName?: string[];
 }
 
 export function ConfirmModal({
@@ -23,13 +23,13 @@ export function ConfirmModal({
   message,
   confirmText,
   cancelText,
+  objectName,
   confirmColor = 'primary',
-  size = 'sm',
-  objectName = 'item',
+  size = 'md',
 }: ConfirmModalProps) {
   const msg = useTranslations('msg');
   return (
-    <Modal isOpen={isOpen} size={size} onOpenChange={onOpenChange}>
+    <Modal isOpen={isOpen} size={size} onOpenChange={onOpenChange} scrollBehavior='inside'>
       <ModalContent>
         {(onClose) => (
           <>
@@ -39,7 +39,13 @@ export function ConfirmModal({
             </ModalHeader>
             <ModalBody>
               <p>{message ?? msg('deleteWarning')}</p>
-              <p className="font-semibold text-lg text-center">{objectName}</p>
+              {Array.isArray(objectName) && (
+                <ul className="list-disc">
+                  {objectName.map((name) => (
+                    <li key={name} className="font-semibold flex gap-2"><AlertCircleIcon /> {name}</li>
+                  ))}
+                </ul>
+              )}
             </ModalBody>
             <ModalFooter>
               <Button color="default" variant="light" onPress={onClose}>

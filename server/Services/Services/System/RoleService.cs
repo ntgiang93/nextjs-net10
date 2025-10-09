@@ -1,19 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Mapster;
 using Common.Exceptions;
 using Common.Security;
+using Mapster;
 using Model.Constants;
 using Model.DTOs.System;
+using Model.DTOs.System.Module;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.System;
 using Service.Interfaces;
 using Service.Interfaces.System;
 using Service.Services.Base;
-using Model.DTOs.System.Module;
 
 namespace Service.Services;
 
@@ -68,12 +64,9 @@ public class RoleService : GenericService<Role, int>, IRoleService
         return await UpdateAsync(role);
     }
 
-    /// <summary>
-    ///     Gets a role by name
-    /// </summary>
     public async Task<Role> GetRoleByCodeAsync(string code)
     {
-        return await _roleRepository.GetSingleAsync<Role>(r => r.Code.ToLower() == code.ToLower());
+        return await _roleRepository.GetSingleAsync<Role>(r => r.Code == code);
     }
 
     public async Task<bool> DeleteRoleAsync(int id)
@@ -145,21 +138,14 @@ public class RoleService : GenericService<Role, int>, IRoleService
     
     public async Task<bool> RemoveRoleMember(int roleId, string userId)
     {
-        var role = await GetByIdAsync<Role>(roleId);
+        var role = await  GetByIdAsync<Role>(roleId);
         if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
         var user = UserContext.Current;
         if (!user.Roles.Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
             throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
 
-        var result =  await _userRoleService.DeleteUserRoleAsync(new List<UserRole>()
-        {
-            new UserRole
-            {
-                UserId = userId,
-                RoleId = roleId
-            }
-        });
-        CacheManager.RemoveCacheByPrefix(_cachePrefix);
+        var result =  await _userRoleService.DeleteAsync(roleId, userId);
+        if(result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return result;
     }
 }

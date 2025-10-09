@@ -32,7 +32,7 @@ export default function TableRole(props: ITableRoleProps) {
         accessorKey: 'code',
         header: () => t('roleCode'),
         footer: (props) => props.column.id,
-        minSize: 200,
+        minSize: 150,
         meta: {
           pinned: 'left',
         },
@@ -41,6 +41,13 @@ export default function TableRole(props: ITableRoleProps) {
         id: 'name',
         accessorKey: 'name',
         header: () => t('roleName'),
+        footer: (props) => props.column.id,
+        minSize: 150,
+      },
+      {
+        id: 'description',
+        accessorKey: 'description',
+        header: () => msg('description'),
         footer: (props) => props.column.id,
         minSize: 150,
       },

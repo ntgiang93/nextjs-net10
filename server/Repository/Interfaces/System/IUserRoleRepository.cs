@@ -24,4 +24,7 @@ public interface IUserRoleRepository : IGenericRepository<User, string>
     ///     Deletes multiple UserRole
     /// </summary>
     Task<bool> DeleteUserRoleAsync(IEnumerable<UserRole> userRoles);
+
+    Task<UserRole> GetSingleAsync(int roleId, string userId);
+    Task<bool> DeleteAsync(int roleId, string userId);
 }

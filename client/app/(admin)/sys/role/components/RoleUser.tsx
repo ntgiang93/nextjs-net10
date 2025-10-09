@@ -110,8 +110,8 @@ export default function RoleUser(props: IRoleUserProps) {
       const filterdData = members.filter(
         (item) =>
           item.fullName?.toLowerCase().includes(lowerSearchTerm) ||
-          item.userName.toLowerCase().includes(lowerSearchTerm) ||
-          item.email.toLowerCase().includes(lowerSearchTerm),
+          item.userName?.toLowerCase().includes(lowerSearchTerm) ||
+          item.email?.toLowerCase().includes(lowerSearchTerm),
       );
       setTableData([...filterdData]);
     }

@@ -26,15 +26,16 @@
     "loading": "Loading...",
     "details": "Details",
     "deleteWarning": "Are you sure you want to delete selected item?",
+    "canNotUndo": "This action can not be undone.",
     "fileRequired": "File is empty or not selected",
-    "module": "Module"
+    "module": "Module",
+    "description": "Description"
   },
   "role": {
     "title": "Role management",
     "role": "Role",
     "roleCode": "Role code",
     "roleName": "Role name",
-    "description": "Description",
     "selectRoleRequired": "Please select a role to view details.",
     "assignMembers": "Assign members",
     "roleMembers": "Role members",

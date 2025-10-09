@@ -72,10 +72,9 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
     public virtual async Task<bool> SoftDeleteAsync(TKey id)
     {
         // We need to get the entity by ID first to verify it exists
-        var existingEntity =
-            await _repository.GetSingleAsync<TEntity>(e => e.Id != null && e.Id.Equals(id) && !e.IsDeleted);
+        var existingEntity = await _repository.GetByIdAsync<TEntity>(id);
 
-        if (existingEntity != null)
+        if (existingEntity != null && !existingEntity.IsDeleted)
         {
             existingEntity.IsDeleted = true;
             existingEntity.UpdatedBy = UserContext.Current?.Username ?? "System";
