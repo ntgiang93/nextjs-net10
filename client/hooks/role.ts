@@ -22,7 +22,7 @@ export const useGetAll = () => {
   });
 };
 
-export const useGet = (id: string) => {
+export const useGet = (id: number) => {
   return useQuery<RoleDto, Error>({
     queryKey: [endpoint, 'get', id],
     queryFn: async () => {
@@ -33,11 +33,11 @@ export const useGet = (id: string) => {
       return { ...defaultRoleDto };
     },
     placeholderData: { ...defaultRoleDto },
-    enabled: id != undefined && id !== '0' && id !== '',
+    enabled: id > 0,
   });
 };
 
-export const useGetMember = (roleId: string) => {
+export const useGetMember = (roleId: number) => {
   return useQuery<RoleMembersDto[], Error>({
     queryKey: [endpoint, 'useGetMember', roleId],
     queryFn: async () => {
@@ -48,11 +48,11 @@ export const useGetMember = (roleId: string) => {
       return [];
     },
     initialData: [],
-    enabled: roleId !== '0' && roleId !== '',
+    enabled: roleId > 0,
   });
 };
 
-export const useGetPermission = (roleId: string) => {
+export const useGetPermission = (roleId: number) => {
   return useQuery<RolePermissionDto[], Error>({
     queryKey: [endpoint, 'useGetPermission', roleId],
     queryFn: async () => {
@@ -63,14 +63,14 @@ export const useGetPermission = (roleId: string) => {
       return [];
     },
     initialData: [],
-    enabled: roleId !== '0' && roleId !== '',
+    enabled: roleId > 0,
   });
 };
 
 export const useSave = () => {
   return useMutation({
     mutationFn: async (role: RoleDto) => {
-      if (role.id === '0' || role.id === '') {
+      if (role.id > 0) {
         return await apiService.post<ApiResponse<RoleDto>>(`${endpoint}`, role);
       } else {
         return await apiService.put<ApiResponse<any>>(`${endpoint}`, role);
@@ -79,7 +79,7 @@ export const useSave = () => {
   });
 };
 
-export const useAssignPermission = (roleId: string) => {
+export const useAssignPermission = (roleId: number) => {
   return useMutation({
     mutationFn: async (permission: RolePermissionDto[]) => {
       return await apiService.post<ApiResponse<any>>(`${endpoint}/${roleId}/permissions`, permission);
@@ -87,7 +87,7 @@ export const useAssignPermission = (roleId: string) => {
   });
 };
 
-export const useAssignMember = (roleId: string) => {
+export const useAssignMember = (roleId: number) => {
   return useMutation({
     mutationFn: async (userRole: UserRoleDto[]) => {
       return await apiService.post<ApiResponse<any>>(`${endpoint}/${roleId}/assign-members`, userRole);
@@ -95,7 +95,7 @@ export const useAssignMember = (roleId: string) => {
   });
 };
 
-export const useDelete = (id: string) => {
+export const useDelete = (id: number) => {
   return useMutation({
     mutationFn: async () => {
       await apiService.delete<ApiResponse<MenuItem>>(`${endpoint}/${id}`);
@@ -103,7 +103,7 @@ export const useDelete = (id: string) => {
   });
 };
 
-export const useRemoveMember = (roleId: string, userId: string) => {
+export const useRemoveMember = (roleId: number, userId: string) => {
   return useMutation({
     mutationFn: async () => {
       await apiService.delete<ApiResponse<MenuItem>>(`${endpoint}/${roleId}/remove-member/${userId}`);

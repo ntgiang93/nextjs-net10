@@ -9,7 +9,7 @@ namespace Model.Entities.System;
 [Table("RolePermissions")]
 public class RolePermission
 {
-    [Required] public required string Role { get; set; }
+    [Required] public int RoleId { get; set; }
 
     [Required] public required string SysModule { get; set; }
 

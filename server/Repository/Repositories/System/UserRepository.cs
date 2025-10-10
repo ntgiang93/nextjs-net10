@@ -8,25 +8,24 @@ using Repository.Interfaces.System;
 using Repository.Repositories.Base;
 using Repository.Interfaces.Base;
 using Common.Extensions;
+using Model.DTOs.System;
 
 namespace Repository.Repositories.System;
 
 public class UserRepository : GenericRepository<User, string>, IUserRepository
 {
-    private readonly StringBuilder _sqlBuilder;
     private readonly string _tableName;
     private readonly string _userRoleTable;
     private readonly string _roleTalbe;
 
     public UserRepository(IDbConnectionFactory factory) : base(factory)
     {
-        _sqlBuilder = new StringBuilder();
         _tableName = StringHelper.GetTableName<User>();
         _userRoleTable = StringHelper.GetTableName<UserRole>();
         _roleTalbe = StringHelper.GetTableName<Role>();
     }
 
-    public async Task<List<string>> GetRolesAsync(string userId)
+    public async Task<List<RoleClaimDto>> GetRolesAsync(string userId)
     {
         var query = new Query($"{_tableName} as u")
             .Join($"{_userRoleTable} as ur", $"u.{nameof(User.Id)}", $"ur.{nameof(UserRole.UserId)}")
@@ -35,12 +34,12 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
             .Where($"u.{nameof(User.IsDeleted)}", false)
             .Where($"u.{nameof(User.IsActive)}", true)
             .Where($"r.{nameof(Role.IsDeleted)}", false)
-            .Select($"r.{nameof(Role.Code)}");
+            .Select([$"r.{nameof(Role.Code)}", $"r.{nameof(Role.Id)}"]);
 
         var compiledQuery = _compiler.Compile(query);
         
         using var connection = _dbFactory.Connection;
-        var result = await connection.QueryAsync<string>(compiledQuery.Sql, compiledQuery.NamedBindings);
+        var result = await connection.QueryAsync<RoleClaimDto>(compiledQuery.Sql, compiledQuery.NamedBindings);
         return result.ToList();
     }
     
@@ -92,128 +91,164 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
     {
         if (string.IsNullOrEmpty(prefix)) return null;
         
-        var sql = BuildSelectQuery(_sqlBuilder, $"{nameof(User)}s", 
-            $"{nameof(User.IsDeleted)} = 0 AND {nameof(User.IsActive)} = 1 AND {nameof(User.Username)} LIKE @prefix AND LEN({nameof(User.Username)}) = @expectedLength",
-            $"{nameof(User.Username)} DESC");
+        var query = new Query($"{_tableName}s")
+            .Where(nameof(User.IsDeleted), false)
+            .Where(nameof(User.IsActive), true)
+            .WhereRaw($"{nameof(User.Username)} LIKE ?", prefix + "%")
+            .WhereRaw($"LEN({nameof(User.Username)}) = ?", prefix.Length + 3)
+            .OrderByDesc(nameof(User.Username))
+            .Limit(1);
+
+        var compiledQuery = _compiler.Compile(query);
+        
         using var connection = _dbFactory.Connection;
-        var result = await connection.QueryFirstOrDefaultAsync<User>(sql, new 
-        { 
-            prefix = prefix + "%", 
-            expectedLength = prefix.Length + 3 
-        });
+        var result = await connection.QueryFirstOrDefaultAsync<User>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result;
     }
 
     public async Task<(List<UserTableDto> Items, int TotalCount)> GetPaginatedUsersAsync(UserTableRequestDto request)
     {
-        var parameters = new DynamicParameters();
-        var whereConditions = new List<string> { $"u.{nameof(User.IsDeleted)} = 0" };
+        Query query;
+        
+        // Check if role filtering is needed to determine query structure
+        if (!string.IsNullOrWhiteSpace(request.Roles))
+        {
+            var roleIdsList = request.Roles.Split(',').Select(long.Parse).ToList();
+            
+            // Query with role filtering and aggregation
+            query = new Query($"{_tableName}s as u")
+                .Join($"{_userRoleTable} as ur", $"u.{nameof(User.Id)}", $"ur.{nameof(UserRole.UserId)}")
+                .Join($"{_roleTalbe} as r", $"ur.{nameof(UserRole.RoleId)}", $"r.{nameof(Role.Id)}")
+                .Where($"u.{nameof(User.IsDeleted)}", false)
+                .Where($"r.{nameof(Role.IsDeleted)}", false)
+                .WhereIn($"r.{nameof(Role.Id)}", roleIdsList);
+        }
+        else
+        {
+            // Query without role filtering but with left join for role aggregation
+            query = new Query($"{_tableName}s as u")
+                .LeftJoin($"{_userRoleTable} as ur", $"u.{nameof(User.Id)}", $"ur.{nameof(UserRole.UserId)}")
+                .LeftJoin($"{_roleTalbe} as r", j => j
+                    .On($"ur.{nameof(UserRole.RoleId)}", $"r.{nameof(Role.Id)}")
+                    .Where($"r.{nameof(Role.IsDeleted)}", false))
+                .Where($"u.{nameof(User.IsDeleted)}", false);
+        }
 
         // Apply search filter
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
-            whereConditions.Add($"(LOWER(u.{nameof(User.Username)}) LIKE @searchTerm OR LOWER(u.{nameof(User.Email)}) LIKE @searchTerm OR LOWER(u.{nameof(User.FullName)}) LIKE @searchTerm)");
-            parameters.Add("searchTerm", $"%{request.SearchTerm.ToLower()}%");
+            query.Where(q => q
+                .WhereRaw($"LOWER(u.{nameof(User.Username)}) LIKE ?", $"%{request.SearchTerm.ToLower()}%")
+                .OrWhereRaw($"LOWER(u.{nameof(User.Email)}) LIKE ?", $"%{request.SearchTerm.ToLower()}%")
+                .OrWhereRaw($"LOWER(u.{nameof(User.FullName)}) LIKE ?", $"%{request.SearchTerm.ToLower()}%"));
         }
 
         // Filter by active status
         if (request.IsActive.HasValue)
         {
-            whereConditions.Add($"u.{nameof(User.IsActive)} = @isActive");
-            parameters.Add("isActive", request.IsActive.Value);
+            query.Where($"u.{nameof(User.IsActive)}", request.IsActive.Value);
         }
 
         // Filter by locked status
         if (request.isLocked.HasValue)
         {
             if (request.isLocked.Value)
-                whereConditions.Add($"u.{nameof(User.LockExprires)} IS NOT NULL");
+                query.WhereNotNull($"u.{nameof(User.LockExprires)}");
             else
-                whereConditions.Add($"u.{nameof(User.LockExprires)} IS NULL");
+                query.WhereNull($"u.{nameof(User.LockExprires)}");
         }
 
-        var whereClause = string.Join(" AND ", whereConditions);
+        // Select with string aggregation for roles
+        query.Select([
+            $"u.{nameof(User.Id)}",
+            $"u.{nameof(User.Username)}",
+            $"u.{nameof(User.Email)}",
+            $"u.{nameof(User.FullName)}",
+            $"u.{nameof(User.Phone)}",
+            $"u.{nameof(User.Avatar)}",
+            $"u.{nameof(User.IsActive)}",
+            $"u.{nameof(User.IsLocked)}"
+        ])
+        .SelectRaw($"STRING_AGG(r.{nameof(Role.Name)}, ',') as Roles")
+        .GroupBy([
+            $"u.{nameof(User.Id)}",
+            $"u.{nameof(User.Username)}",
+            $"u.{nameof(User.Email)}",
+            $"u.{nameof(User.FullName)}",
+            $"u.{nameof(User.Phone)}",
+            $"u.{nameof(User.Avatar)}",
+            $"u.{nameof(User.IsActive)}",
+            $"u.{nameof(User.IsLocked)}"
+        ]);
 
-        // Build base query with role filtering if needed
-        _sqlBuilder.Clear();
-        if (!string.IsNullOrWhiteSpace(request.Roles))
-        {
-            _sqlBuilder.Append($@"
-                SELECT DISTINCT u.{nameof(User.Id)}, u.{nameof(User.Username)}, u.{nameof(User.Email)}, u.{nameof(User.FullName)}, u.{nameof(User.Phone)}, u.{nameof(User.Avatar)}, u.{nameof(User.IsActive)}, u.{nameof(User.IsLocked)}
-                FROM {_tableName}s u
-                INNER JOIN {_userRoleTable} ur ON u.{nameof(User.Id)} = ur.{nameof(UserRole.UserId)}
-                INNER JOIN {_roleTalbe} r ON ur.{nameof(UserRole.RoleId)} = r.{nameof(Role.Id)}
-                WHERE ").Append(whereClause).Append($" AND r.{nameof(Role.IsDeleted)} = 0 AND r.{nameof(Role.Id)} IN @roleIds");
-            
-            var roleIdsList = request.Roles.Split(',').Select(long.Parse).ToList();
-            parameters.Add("roleIds", roleIdsList);
-        }
-        else
-        {
-            _sqlBuilder.Append($"SELECT u.{nameof(User.Id)}, u.{nameof(User.Username)}, u.{nameof(User.Email)}, u.{nameof(User.FullName)}, u.{nameof(User.Phone)}, u.{nameof(User.Avatar)}, u.{nameof(User.IsActive)}, u.{nameof(User.IsLocked)} FROM {nameof(User)}s u WHERE ").Append(whereClause);
-        }
+        // Apply pagination and ordering
+        query.OrderBy($"u.{nameof(User.Username)}")
+             .Offset((request.Page - 1) * request.PageSize)
+             .Limit(request.PageSize);
 
-        var baseQuery = _sqlBuilder.ToString();
+        var compiledQuery = _compiler.Compile(query);
+        
         using var connection = _dbFactory.Connection;
-        // Get total count
-        var countQuery = BuildCountQuery(_sqlBuilder, !string.IsNullOrWhiteSpace(request.Roles) 
-            ? $"({baseQuery.Replace($"SELECT DISTINCT u.{nameof(User.Id)}, u.{nameof(User.Username)}, u.{nameof(User.Email)}, u.{nameof(User.FullName)}, u.{nameof(User.Phone)}, u.{nameof(User.Avatar)}, u.{nameof(User.IsActive)}, u.{nameof(User.IsLocked)}", $"SELECT DISTINCT u.{nameof(User.Id)}")})" 
-            : $"{nameof(User)}s u", whereClause);
-            
-        var totalCount = await connection.QuerySingleAsync<int>(countQuery, parameters);
+        var users = await connection.QueryAsync<UserTableDtoWithRolesString>(compiledQuery.Sql, compiledQuery.NamedBindings);
 
-        // Get paginated results
-        var paginatedQuery = BuildPaginationQuery(_sqlBuilder, baseQuery + $" ORDER BY u.{nameof(User.Username)}", request.Page, request.PageSize);
-        var users = await connection.QueryAsync<UserTableDto>(paginatedQuery, parameters);
-
-        // Get roles for users
-        var userIds = users.Select(u => long.Parse(u.Id)).ToList();
-        if (userIds.Any())
+        // Convert to final result format
+        var result = users.Select(u => new UserTableDto
         {
-            var roleQuery = $@"
-                SELECT ur.{nameof(UserRole.UserId)}, r.{nameof(Role.Name)} as Role
-                FROM {nameof(UserRole)} ur
-                INNER JOIN {nameof(Role)}s r ON ur.{nameof(UserRole.RoleId)} = r.{nameof(Role.Id)}
-                WHERE ur.{nameof(UserRole.UserId)} IN @userIds AND r.{nameof(Role.IsDeleted)} = 0";
+            Id = u.Id,
+            Username = u.Username,
+            Email = u.Email,
+            FullName = u.FullName,
+            Phone = u.Phone,
+            Avatar = u.Avatar,
+            IsActive = u.IsActive,
+            isLocked = u.isLocked,
+            Roles = string.IsNullOrEmpty(u.Roles) 
+                ? new List<string>() 
+                : u.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+        }).ToList();
 
-            var userRoles = await connection.QueryAsync<(long UserId, string Role)>(roleQuery, new { userIds });
-            var userRolesMap = userRoles.GroupBy(ur => ur.UserId).ToDictionary(g => g.Key, g => g.Select(ur => ur.Role).ToList());
-
-            // Assign roles to users
-            foreach (var user in users)
-            {
-                user.Roles = userRolesMap.TryGetValue(long.Parse(user.Id), out var roles) ? roles : new List<string>();
-            }
-        }
-
-        return (users.ToList(), totalCount);
+        return (result, 0); // Return 0 for total count as requested
     }
-    
+
     public async Task<(List<UserSelectDto> Items, int TotalCount)> GetPaginatedUser2SelectAsync(PaginationRequest request)
     {
-        var parameters = new DynamicParameters();
-        var whereConditions = new List<string> { $"{nameof(User.IsDeleted)} = 0", $"{nameof(User.IsActive)} = 1" };
+        // Base query for active, non-deleted users
+        var query = new Query($"{_tableName}")
+            .Where(nameof(User.IsDeleted), false)
+            .Where(nameof(User.IsActive), true);
 
         // Apply search filter
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
-            whereConditions.Add($"(LOWER({nameof(User.Username)}) LIKE @searchTerm OR LOWER({nameof(User.Email)}) LIKE @searchTerm OR LOWER({nameof(User.FullName)}) LIKE @searchTerm)");
-            parameters.Add("searchTerm", $"%{request.SearchTerm.ToLower()}%");
+            query.Where(q => q
+                .WhereLike($"{nameof(User.Username)}", $"%{request.SearchTerm}%")
+                .OrWhereLike($"{nameof(User.Email)}", $"%{request.SearchTerm}%")
+                .OrWhereLike($"{nameof(User.FullName)}", $"%{request.SearchTerm}%"));
         }
 
-        var whereClause = string.Join(" AND ", whereConditions);
-
-        // Get total count
-        var countQuery = BuildCountQuery(_sqlBuilder, $"{nameof(User)}s", whereClause);
         using var connection = _dbFactory.Connection;
-        var totalCount = await connection.QuerySingleAsync<int>(countQuery, parameters);
+        
+        // Get total count
+        var countQuery = query.Clone().AsCount();
+        var countCompiled = _compiler.Compile(countQuery);
+        var totalCount = await connection.QuerySingleAsync<int>(countCompiled.Sql, countCompiled.NamedBindings);
 
         // Get paginated results
-        var selectQuery = BuildSelectQuery(_sqlBuilder, $"{nameof(User)}s", whereClause, nameof(User.Username));
-        var paginatedQuery = BuildPaginationQuery(_sqlBuilder, selectQuery, request.Page, request.PageSize);
-        
-        var users = await connection.QueryAsync<User>(paginatedQuery, parameters);
+        var selectQuery = query.Clone()
+            .Select([
+                nameof(User.Id),
+                nameof(User.Username),
+                nameof(User.Email),
+                nameof(User.FullName),
+                nameof(User.Avatar)
+            ])
+            .OrderBy(nameof(User.Username))
+            .Offset((request.Page - 1) * request.PageSize)
+            .Limit(request.PageSize);
+
+        var selectCompiled = _compiler.Compile(selectQuery);
+        var users = await connection.QueryAsync<User>(selectCompiled.Sql, selectCompiled.NamedBindings);
 
         var result = users.Select(user => new UserSelectDto
         {
@@ -227,30 +262,17 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         return (result, totalCount);
     }
 
-    // Helper methods for building queries
-    private string BuildSelectQuery(StringBuilder sqlBuilder, string tableName, string whereClause, string orderBy)
+    // Helper DTO for string aggregation result
+    private class UserTableDtoWithRolesString
     {
-        sqlBuilder.Clear();
-        sqlBuilder.Append($"SELECT * FROM {tableName}");
-        if (!string.IsNullOrEmpty(whereClause))
-            sqlBuilder.Append($" WHERE {whereClause}");
-        if (!string.IsNullOrEmpty(orderBy))
-            sqlBuilder.Append($" ORDER BY {orderBy}");
-        return sqlBuilder.ToString();
-    }
-
-    private string BuildCountQuery(StringBuilder sqlBuilder, string tableName, string whereClause)
-    {
-        sqlBuilder.Clear();
-        sqlBuilder.Append($"SELECT COUNT(*) FROM {tableName}");
-        if (!string.IsNullOrEmpty(whereClause))
-            sqlBuilder.Append($" WHERE {whereClause}");
-        return sqlBuilder.ToString();
-    }
-
-    private string BuildPaginationQuery(StringBuilder sqlBuilder, string baseQuery, int page, int pageSize)
-    {
-        var offset = (page - 1) * pageSize;
-        return $"{baseQuery} OFFSET {offset} ROWS FETCH NEXT {pageSize} ROWS ONLY";
+        public string Id { get; set; }
+        public string Username { get; set; }
+        public string Avatar { get; set; }
+        public string Email { get; set; }
+        public string Phone { get; set; }
+        public string FullName { get; set; }
+        public bool IsActive { get; set; }
+        public bool isLocked { get; set; }
+        public string Roles { get; set; } // Comma-separated role names
     }
 }

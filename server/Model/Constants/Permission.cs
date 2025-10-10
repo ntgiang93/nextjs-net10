@@ -11,7 +11,7 @@ public enum EPermission
     Edit = 1 << 2, // 000100  = 4
     Delete = 1 << 3, // 001000  = 8
     Approve = 1 << 4,// 010000  = 16
-    Export = 1 << 5 // 100000  = 32
+    All = View | Create | Edit | Delete | Approve
 }
 
 
@@ -26,7 +26,7 @@ public static class Permission
         { EPermission.Edit, "Edit" },
         { EPermission.Delete, "Delete" },
         { EPermission.Approve, "Approve" },
-        { EPermission.Export, "Export" },
+        { EPermission.All, "All" },
     };
     
     public static List<SelectOption<EPermission>> Get2SelectOptions()

@@ -7,6 +7,7 @@ public class CurrentUser
     public string Email { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public List<string> Roles { get; set; } = new();
-    public string? Language { get; set; } = "en-US";
+    public List<int> Roles { get; set; }
+    public string RoleCodes { get; set; }
+    public string? Language { get; set; } = "vi-VN";
 }

@@ -20,6 +20,7 @@ public class JwtUserInfoMiddleware
         // Extract and process JWT token if the user is authenticated
         if (context.User.Identity?.IsAuthenticated == true)
         {
+            var roles = GetClaimValues(context.User, ClaimTypes.Role);
             var currentUser = new CurrentUser
             {
                 UserId = GetClaimValue<string>(context.User, ClaimTypes.NameIdentifier),
@@ -28,7 +29,8 @@ public class JwtUserInfoMiddleware
                 FirstName = GetClaimValue<string>(context.User, "FirstName"),
                 LastName = GetClaimValue<string>(context.User, "LastName"),
                 Language = GetClaimValue<string>(context.User, "Language"),
-                Roles = GetClaimValues(context.User, ClaimTypes.Role)
+                Roles = roles.Select(role => int.TryParse(role, out int roleId) ? roleId : 0).ToList(),
+                RoleCodes = GetClaimValue<string>(context.User, "RoleCode") ?? string.Empty
             };
 
             // Store the current user in the UserContext

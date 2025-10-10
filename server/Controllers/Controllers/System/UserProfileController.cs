@@ -33,8 +33,7 @@ public class UserProfileController : ControllerBase
     public async Task<IActionResult> GetUserProfile(string userId)
     {
         var currentUser = UserContext.Current;
-        if (!currentUser.Roles.Contains(DefaultRoles.SuperAdmin) &&
-            !currentUser.Roles.Contains(DefaultRoles.Admin) &&
+        if (!currentUser.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) &&
             currentUser.UserId != userId)
             return Forbid();
 
@@ -58,8 +57,8 @@ public class UserProfileController : ControllerBase
     public async Task<IActionResult> CreateUserProfile([FromBody] SaveUserProfileDto createProfileDto)
     {
         var currentUser = UserContext.Current;
-        if (!currentUser.Roles.Contains(DefaultRoles.SuperAdmin) &&
-            !currentUser.Roles.Contains(DefaultRoles.Admin) &&
+        if (!currentUser.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) &&
+            !currentUser.RoleCodes.Split(';').Contains(DefaultRoles.Admin) &&
             currentUser.UserId != createProfileDto.UserId)
             return Forbid();
         var newProfile = createProfileDto.Adapt<UserProfile>();
@@ -76,8 +75,8 @@ public class UserProfileController : ControllerBase
     public async Task<IActionResult> UpdateUserProfile([FromBody] SaveUserProfileDto updateProfileDto)
     {
         var currentUser = UserContext.Current;
-        if (!currentUser.Roles.Contains(DefaultRoles.SuperAdmin) &&
-            !currentUser.Roles.Contains(DefaultRoles.Admin) &&
+        if (!currentUser.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) &&
+            !currentUser.RoleCodes.Split(';').Contains(DefaultRoles.Admin) &&
             currentUser.UserId != updateProfileDto.UserId)
             return Forbid();
         var profile = updateProfileDto.Adapt<UserProfile>();

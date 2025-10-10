@@ -37,11 +37,26 @@ public interface IRoleService : IGenericService<Role, int>
     Task<Role> GetRoleByCodeAsync(string code);
 
     /// <summary>
-    ///     Retrieves the permissions associated with a specific role.
+    ///     Retrieves the permissions associated with a specific role. Return role permissions without exploding from bitmask
+    ///     <para>
+    ///     Retrieves permissions for the specified role exactly as stored:
+    ///     one entry per module where <see cref="RolePermission.Permission"/> is a combined EPermission bitmask (no flag expansion).
+    ///     </para>
     /// </summary>
     /// <param name="roleId">ID of the role</param>
-    /// <returns>List of role permissions</returns>
+    /// <returns>List of role permissions with combined bitmask per module</returns>
     Task<List<RolePermission>> GetRolePermissionAsync(int roleId);
+
+    /// <summary>
+    ///     Retrieves the permissions associated with a specific role.
+    ///     <para>
+    ///     Retrieves permissions for the specified role with the permission bitmask expanded into discrete flags:
+    ///     returns one entry per module per atomic <see cref="EPermission"/> value (no combined flags).
+    ///     </para>
+    /// </summary>
+    /// <param name="roleId">ID of the role</param>
+    /// <returns>List of role permissions exploded into individual EPermission flags</returns>
+    Task<List<RolePermission>> GetRolePermissionExplodedAsync(int roleId);
 
     /// <summary>
     ///     Assigns a list of permissions to a specified role.
@@ -73,4 +88,5 @@ public interface IRoleService : IGenericService<Role, int>
     /// <param name="userId">ID of the user to remove from the role</param>
     /// <returns>True if removal was successful, false otherwise</returns>
     Task<bool> RemoveRoleMember(int roleId, string userId);
+
 }

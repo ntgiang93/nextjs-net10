@@ -1,13 +1,14 @@
 import { UserClaim } from '@/types/base/UserClaim';
+import { RolePermissionDto } from '@/types/sys/Role';
 import { create } from 'zustand';
 
 interface AuthState {
   token: string | undefined;
   user: UserClaim | undefined;
-  permissions: string[];
+  permissions: RolePermissionDto[];
   setToken: (token: string | undefined) => void;
   setUser: (user: UserClaim | undefined) => void;
-  setPermissions: (permissions: string[]) => void;
+  setPermissions: (permissions: RolePermissionDto[]) => void;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({

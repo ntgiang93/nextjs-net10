@@ -10,20 +10,26 @@ import { useEffect, useMemo, useState } from 'react';
 interface IUserSelectTable {
   selectedUserIds: string[];
   onSeledtedChange: (usersIds: string[]) => void;
+  loadingInitialData?: boolean;
 }
 
 export default function UserSelectTable(props: IUserSelectTable) {
-  const { selectedUserIds, onSeledtedChange } = props;
+  const { selectedUserIds, onSeledtedChange, loadingInitialData } = props;
   const [filter, setFilter] = useState<PaginationFilter>({
     ...defaultPaginationFilter,
   });
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [selectedItems, setSelectedItems] = useState<string[]>([...selectedUserIds]);
   const { data, refetch, isFetching } = UserHook.useGetPaginationToSelect(filter);
 
-  useEffect(() => {
-    onSeledtedChange(selectedItems);
+  // useEffect(() => {
+  //   onSeledtedChange(selectedItems);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [selectedItems]);
+
+    useEffect(() => {
+     onSeledtedChange(selectedUserIds);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItems]);
+  }, [selectedUserIds]);
 
   const columns = useMemo<ColumnDef<UserSelectDto>[]>(
     () => [
@@ -84,7 +90,7 @@ export default function UserSelectTable(props: IUserSelectTable) {
           },
         }}
         selection={{
-          selectedKeys: selectedUserIds,
+          selectedKeys: selectedItems,
           onChangeSelection(value) {
             setSelectedItems(value);
           },

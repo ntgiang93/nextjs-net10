@@ -79,9 +79,30 @@ public class RoleService : GenericService<Role, int>, IRoleService
 
     public async Task<List<RolePermission>> GetRolePermissionAsync(int roleId)
     {
-        var role = await GetByIdAsync<Role>(roleId);
-        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
-        return await _roleRepository.GetRolePermission(role.Code);
+        return await _roleRepository.GetRolePermission(roleId);
+    }
+
+    public async Task<List<RolePermission>> GetRolePermissionExplodedAsync(int roleId)
+    {
+        var rows = await _roleRepository.GetRolePermission(roleId);
+        var list = new List<RolePermission>();
+        foreach (var rp in rows)
+        {
+            var permissions = Enum.GetValues(typeof(EPermission))
+               .Cast<EPermission>()
+               .Where(p => p != EPermission.None && (rp.Permission).HasFlag(p))
+               .ToList();
+            foreach (var p in permissions)
+            {
+                list.Add(new RolePermission
+                {
+                    SysModule = rp.SysModule,
+                    Permission = p,
+                    RoleId = rp.RoleId,
+                });
+            }
+        }
+        return list;
     }
 
     public async Task<bool> AssignPermissionsToRoleAsync(int roleId, List<RolePermission> permissions)
@@ -92,10 +113,10 @@ public class RoleService : GenericService<Role, int>, IRoleService
             throw new BusinessException(SysMsg.Get(EMessage.CannotModifyProtectedRole), "CANNOT_MODIFY_PROTECTED_ROLE");
 
         // Clear existing permissions
-        await _roleRepository.DeleteRolePermissionAsync(role.Code);
+        await _roleRepository.DeleteRolePermissionAsync(roleId);
 
         var result = await _roleRepository.AddRolePermissionAsync(permissions);
-        if (result) _permissionService.InvalidateRolePermissionCache(role.Code);
+        if (result) _permissionService.InvalidateRolePermissionCache(roleId);
         return result;
     }
 
@@ -104,7 +125,7 @@ public class RoleService : GenericService<Role, int>, IRoleService
         var role = await GetByIdAsync<Role>(roleId);
         if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
         var user = UserContext.Current;
-        if (!user.Roles.Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
+        if (!user.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
             throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
 
         // Clear existing permissions
@@ -130,10 +151,9 @@ public class RoleService : GenericService<Role, int>, IRoleService
     
     public async Task<bool> RemoveRoleMember(int roleId, string userId)
     {
-        var role = await  GetByIdAsync<Role>(roleId);
-        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
         var user = UserContext.Current;
-        if (!user.Roles.Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
+        var userRoles = user.RoleCodes.Split(';', StringSplitOptions.RemoveEmptyEntries);
+        if (!userRoles.Contains(DefaultRoles.SuperAdmin))
             throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
 
         var result =  await _userRoleService.DeleteAsync(roleId, userId);

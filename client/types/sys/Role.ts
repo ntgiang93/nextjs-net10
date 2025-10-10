@@ -1,5 +1,7 @@
+import { EPermission } from "../base/Permission";
+
 export type RoleDto = {
-  id: string;
+  id: number;
   code: string;
   name: string;
   description?: string;
@@ -7,7 +9,7 @@ export type RoleDto = {
 };
 
 export const defaultRoleDto: RoleDto = {
-  id: '0',
+  id: 0,
   code: '',
   name: '',
   description: '',
@@ -23,12 +25,12 @@ export type RoleMembersDto = {
 };
 
 export type RolePermissionDto = {
-  role: string;
+  roleId: number;
   sysModule: string;
-  permission: number;
+  permission: EPermission;
 };
 
 export type UserRoleDto = {
   userId: string;
-  roleId: string;
+  roleId: number;
 };

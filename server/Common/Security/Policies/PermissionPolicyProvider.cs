@@ -24,7 +24,7 @@ namespace Common.Security.Policies
                 {
                     SysModule = permission[0],
                     Permission = (EPermission)int.Parse(permission[1] ?? "0"),
-                    Role = permission.Length > 2 ? permission[2] : null
+                    RoleId = 0
                 }));
                 policy = builder.Build();
             }

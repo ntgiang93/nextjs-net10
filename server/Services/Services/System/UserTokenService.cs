@@ -2,6 +2,7 @@ using Microsoft.IdentityModel.Tokens;
 using Model.Constants;
 using Model.Entities.System;
 using Model.Models;
+using Newtonsoft.Json;
 using Repository.Interfaces.Base;
 using Service.Interfaces;
 using Service.Services.Base;
@@ -38,9 +39,10 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
             new(ClaimTypes.Email, user.Email),
             new("FullName", user.FullName),
             new("Language", DetectLanguage(user)),
-            new(ClaimTypes.NameIdentifier, user.Id.ToString())
+            new(ClaimTypes.NameIdentifier, user.Id),
+            new("RoleCode", string.Join(";", roles.Select(r => r.Code)))
         };
-        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
+        claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role.Id.ToString())));
         var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_appSettings.Jwt.SingingKey));
         var token = new JwtSecurityToken(
             _appSettings.Jwt.Issuer,
@@ -108,7 +110,7 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
     {
         if (string.IsNullOrEmpty(user.Language))
         {
-            var currentCulture = CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+            var currentCulture = "vi-VN";
             return currentCulture;
         }
 

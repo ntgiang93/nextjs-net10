@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory;
 using Common.Exceptions;
 using Common.Security;
+using Microsoft.Extensions.Caching.Memory;
 using Model.Constants;
 using Model.DTOs.System.Auth;
 using Model.Entities.System;
@@ -13,6 +8,7 @@ using Model.Models;
 using Service.DTOs.System.Auth;
 using Service.Interfaces;
 using Service.Interfaces.Base;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Service.Services;
 

@@ -42,11 +42,12 @@ public class MenuService : GenericService<Menu, int>, IMenuService
     public async Task<List<MenuDto>> GetUserMenusAsync()
     {
         var user = UserContext.Current;
+        var userRoleCodes = user.RoleCodes.Split(';', StringSplitOptions.RemoveEmptyEntries);
         if (!user.Roles.Any()) return new List<MenuDto>();
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetUserMenus", user.UserId);
         return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
         {
-            if (user.Roles.Any(r => r == DefaultRoles.SuperAdmin))
+            if (userRoleCodes.Any(r => r == DefaultRoles.SuperAdmin))
                 return await _menuRepository.GetMenuTreeAsync();
             var permissions = new List<RolePermission>();
             foreach (var role in user.Roles)

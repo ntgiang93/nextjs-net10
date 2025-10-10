@@ -1,11 +1,8 @@
-using System.Collections.Generic;
-using System.Net;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Common.Exceptions;
 using Common.Security;
 using Common.Security.Policies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.System.Auth;
@@ -14,7 +11,7 @@ using Model.Entities.System;
 using Model.Models;
 using Service.Interfaces;
 using Service.Interfaces.Base;
-using Model.DTOs.System.Module;
+using System.Net;
 
 namespace NextDotNet.Api.Controllers;
 
@@ -25,12 +22,10 @@ public class UserController : ControllerBase
 {
     private readonly ISysMessageService _sysMsg;
     private readonly IUserService _userService;
-    private AppSettings _appSettings;
-    public UserController(IUserService userService, ISysMessageService sysMsg, AppSettings appSettings)
+    public UserController(IUserService userService, ISysMessageService sysMsg)
     {
         _userService = userService;
         _sysMsg = sysMsg;
-        _appSettings = appSettings;
     }
 
     // GET methods
@@ -120,7 +115,8 @@ public class UserController : ControllerBase
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
         var currentUser = UserContext.Current;
-        if (!currentUser.Roles.Contains(DefaultRoles.SuperAdmin) && !currentUser.Roles.Contains(DefaultRoles.Admin) &&
+        var userRoles = currentUser.RoleCodes.Split(';');
+        if (!userRoles.Contains(DefaultRoles.SuperAdmin) && !userRoles.Contains(DefaultRoles.Admin) &&
             !currentUser.UserId.Equals(updateUserDto.Id)) return Forbid(_sysMsg.Get(EMessage.Error403Msg));
         var result = await _userService.UpdateUserAsync(updateUserDto);
         if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
@@ -152,7 +148,8 @@ public class UserController : ControllerBase
     public async Task<IActionResult> UpdateAvatar(string id, IFormFile file)
     {
         var currentUser = UserContext.Current;
-        if (!currentUser.Roles.Contains(DefaultRoles.SuperAdmin) && !currentUser.Roles.Contains(DefaultRoles.Admin) &&
+        var userRoles = currentUser.RoleCodes.Split(';');
+        if (!userRoles.Contains(DefaultRoles.SuperAdmin) && !userRoles.Contains(DefaultRoles.Admin) &&
             !currentUser.UserId.Equals(id)) return Forbid(_sysMsg.Get(EMessage.Error403Msg));
         var result = await _userService.UpdateAvatarAsync(file, id);
         if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));

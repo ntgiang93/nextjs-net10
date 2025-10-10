@@ -1,14 +1,13 @@
 ﻿using Common.Exceptions;
 using Common.Extensions;
 using Common.Security;
-using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Model.Constants;
 using Model.DTOs.Base;
+using Model.DTOs.System;
 using Model.DTOs.System.Auth;
 using Model.DTOs.System.File;
-using Model.DTOs.System.Module;
 using Model.DTOs.System.User;
 using Model.Entities.System;
 using Model.Models;
@@ -239,7 +238,7 @@ public class UserService : GenericService<User, string>, IUserService
         return true;
     }
 
-    public async Task<IEnumerable<string>> GetUserRoleAsync(string userId)
+    public async Task<IEnumerable<RoleClaimDto>> GetUserRoleAsync(string userId)
     {
         return await _userRepository.GetRolesAsync(userId);
     }
@@ -258,7 +257,7 @@ public class UserService : GenericService<User, string>, IUserService
             var allPermissions = new HashSet<RolePermission>();
             foreach (var role in userRoles)
             {
-                var rolePermissions = await _permissionService.GetRolePermissionAsync(role);
+                var rolePermissions = await _permissionService.GetRolePermissionAsync(role.Id);
                 if (rolePermissions != null)
                 {
                     foreach (var permission in rolePermissions)

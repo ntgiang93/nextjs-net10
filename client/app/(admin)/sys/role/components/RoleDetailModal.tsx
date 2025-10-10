@@ -5,7 +5,7 @@ import { Button, Form, Input, Modal, ModalBody, ModalContent, ModalFooter, Modal
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 interface UserCreateModalProps {
-  id: string;
+  id: number;
   isOpen: boolean;
   onOpenChange: () => void;
   onRefresh: () => void;
@@ -54,7 +54,7 @@ export default function RoleDetailModal(props: UserCreateModalProps) {
       <ModalContent>
         <>
           <ModalHeader className="flex flex-col gap-1">
-            {role?.id && role.id !== '0' ? t('editRole') : t('addRole')}
+            {role?.id && role.id > 0 ? t('editRole') : t('addRole')}
           </ModalHeader>
           <ModalBody>
             {isFetching && <FormSkeleton row={4} />}

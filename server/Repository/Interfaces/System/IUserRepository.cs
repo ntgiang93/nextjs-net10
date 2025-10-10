@@ -1,3 +1,4 @@
+using Model.DTOs.System;
 using Model.DTOs.System.User;
 using Model.Entities.System;
 using Model.Models;
@@ -12,7 +13,7 @@ public interface IUserRepository : IGenericRepository<User, string>
     /// </summary>
     /// <param name="userId">The ID of the user whose roles are being retrieved</param>
     /// <returns>A list of role names assigned to the user</returns>
-    Task<List<string>> GetRolesAsync(string userId);
+    Task<List<RoleClaimDto>> GetRolesAsync(string userId);
 
     /// <summary>
     ///     Retrieves detailed information for a specific user by their ID

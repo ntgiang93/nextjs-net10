@@ -144,8 +144,7 @@ const DataTable = (props: DataTableProps) => {
     const cardHeight = cardRef.current.clientHeight;
     // Calculate the remaining space for the table
     const newTableHeight = cardHeight - 152;
-    console.log('tableHeight', newTableHeight, cardHeight);
-    setTableHeight(Math.max(newTableHeight, 400));
+    setTableHeight(Math.max(newTableHeight, 350));
   }, []);
 
   const table = useReactTable({

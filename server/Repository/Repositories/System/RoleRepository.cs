@@ -2,13 +2,13 @@ using Common.Extensions;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Model.Constants;
-using Model.DTOs.System.Module;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.Base;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
 using SqlKata;
+using System.Data;
 using System.Text;
 
 namespace Repository.Repositories;
@@ -41,58 +41,25 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
         return result.ToList();
     }
 
-    public async Task<List<string>> GetRolePermissionString(string role)
-    {
-        var query = new Query(_rolePermissitonTable)
-        .SelectRaw($"CONCAT({nameof(RolePermission.SysModule)}, '.', {nameof(RolePermission.Permission)}) as Permission");
-
-        if (!string.IsNullOrEmpty(role))
-            query = query.Where(nameof(RolePermission.Role), "like", $"%{role}%");
-
-        var compiledQuery = _compiler.Compile(query);
-
-        var connection = _dbFactory.Connection;
-        var permissions = await connection.QueryAsync<string>(compiledQuery.Sql, compiledQuery.NamedBindings);
-        return permissions.ToList();
-    }
-
-    public async Task<List<RolePermission>> GetRolePermission(string role)
+    public async Task<List<RolePermission>> GetRolePermission(int roleId)
     {
         var query = new Query(_rolePermissitonTable);
-        if (!string.IsNullOrEmpty(role))
-            query = query.Where(nameof(RolePermission.Role), role);
+        query = query.Where(nameof(RolePermission.RoleId), roleId);
 
         var compiledQuery = _compiler.Compile(query);
 
         var connection = _dbFactory.Connection;
         var rows = await connection.QueryAsync<RolePermission>(compiledQuery.Sql, compiledQuery.NamedBindings);
-        var list = new List<RolePermission>();
-        foreach (var rp in rows)
-        {
-            var permissions = Enum.GetValues(typeof(EPermission))
-               .Cast<EPermission>()
-               .Where(p => p != EPermission.None && (rp.Permission).HasFlag(p))
-               .ToList();
-            foreach (var p in permissions)
-            {
-                list.Add(new RolePermission
-                {
-                    SysModule = rp.SysModule,
-                    Permission = p,
-                    Role = rp.Role,
-                });
-            }
-        }
-        return list;
+        return rows.ToList();
     }
 
     public async Task<bool> AddRolePermissionAsync(IEnumerable<RolePermission> rolePermissions)
     {
         var aggregated = rolePermissions
-        .GroupBy(x => new { x.Role, x.SysModule })
+        .GroupBy(x => new { x.RoleId, x.SysModule })
         .Select(g => new RolePermission
         {
-            Role = g.Key.Role,
+            RoleId = g.Key.RoleId,
             SysModule = g.Key.SysModule,
             Permission = g.Select(x => x.Permission)
                           .Aggregate(EPermission.None, (acc, cur) => acc | cur)
@@ -108,11 +75,11 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
         });
     }
 
-    public async Task<bool> DeleteRolePermissionAsync(string role)
+    public async Task<bool> DeleteRolePermissionAsync(int roleId)
     {
         string rolePermissionTable = StringHelper.GetTableName<RolePermission>();
         var deleteQuery = new Query(rolePermissionTable)
-            .Where(nameof(RolePermission.Role), role)
+            .Where(nameof(RolePermission.RoleId), roleId)
             .AsDelete();
 
         var compiled = _compiler.Compile(deleteQuery);

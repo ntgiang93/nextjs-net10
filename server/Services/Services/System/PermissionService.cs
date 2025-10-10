@@ -23,9 +23,9 @@ namespace Service.Services.System
             _memoryCache = memoryCache;
         }
 
-        public async Task<List<RolePermission>> GetRolePermissionAsync(string role)
+        public async Task<List<RolePermission>> GetRolePermissionAsync(int roleId)
         {
-            string cacheKey = $"{CACHE_KEY_PREFIX}{role}";
+            string cacheKey = $"{CACHE_KEY_PREFIX}{roleId}";
             
             // Try to get from cache first
             if (_memoryCache.TryGetValue(cacheKey, out List<RolePermission>? permissions) && permissions != null)
@@ -33,7 +33,7 @@ namespace Service.Services.System
                 return permissions;
             }
 
-            permissions = await _roleRepository.GetRolePermission(role);
+            permissions = await _roleRepository.GetRolePermission(roleId);
             var cacheOptions = new MemoryCacheEntryOptions()
                 .SetPriority(CacheItemPriority.NeverRemove);
 
@@ -42,9 +42,9 @@ namespace Service.Services.System
             return permissions;
         }
 
-        public void InvalidateRolePermissionCache(string role)
+        public void InvalidateRolePermissionCache(int roleId)
         {
-            string cacheKey = $"{CACHE_KEY_PREFIX}{role}";
+            string cacheKey = $"{CACHE_KEY_PREFIX}{roleId}";
             _memoryCache.Remove(cacheKey);
         }
     }

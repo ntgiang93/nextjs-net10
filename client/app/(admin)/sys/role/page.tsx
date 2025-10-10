@@ -8,9 +8,10 @@ import { RoleHook } from '@/hooks/role';
 import { defaultRoleDto, RoleDto } from '@/types/sys/Role';
 import { Button, Tooltip, useDisclosure } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Add01Icon, Delete02Icon, Edit01Icon, Shield01Icon, StructureCheckIcon } from 'hugeicons-react';
+import { Add01Icon, Delete02Icon, Edit01Icon, Shield01Icon, StructureCheckIcon, UserGroupIcon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
+import AssignRoleUserModal from './components/AssignRoleUserModal';
 import RoleDetailModal from './components/RoleDetailModal';
 import RolePermissonModal from './components/RolePermissonModal';
 
@@ -22,7 +23,8 @@ export default function Roles() {
   const [selectedRole, setSelectedRole] = useState<RoleDto | undefined>(undefined);
   const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
   const { isOpen: IsOpenPermission, onOpen: onOpenPermission, onOpenChange: OnOpenPermissionChange } = useDisclosure();
-  const { mutateAsync: del, isSuccess: delSuccess } = RoleHook.useDelete(selectedRole?.id || '0');
+  const { isOpen: IsOpenAssign, onOpen: onOpenAssign, onOpenChange: OnOpenAssignChange } = useDisclosure();
+  const { mutateAsync: del, isSuccess: delSuccess } = RoleHook.useDelete(selectedRole?.id || 0);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [tableData, setTableData] = useState<RoleDto[]>(roles || []);
 
@@ -74,6 +76,22 @@ export default function Roles() {
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
+              <Tooltip content={t('roleMembers')}>
+                <Button
+                  isIconOnly
+                  aria-label="expand-button"
+                  color="primary"
+                  variant="light"
+                  radius="full"
+                  size="sm"
+                  onPress={() => {
+                    setSelectedRole(row.original);
+                    onOpenAssign();
+                  }}
+                >
+                  <UserGroupIcon size={16} />
+                </Button>
+              </Tooltip>
               <Tooltip content={t('permissions')}>
                 <Button
                   isIconOnly
@@ -177,7 +195,7 @@ export default function Roles() {
             }
           />
       <RoleDetailModal
-        id={selectedRole?.id || '0'}
+        id={selectedRole?.id || 0}
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         onRefresh={refetch}
@@ -196,6 +214,12 @@ export default function Roles() {
         onConfirm={() => del()}
         objectName={[selectedRole?.name || ""]}
       />
-    </div>
+      <AssignRoleUserModal
+        isOpen={IsOpenAssign}
+        onOpenChange={OnOpenAssignChange}
+        onRefresh={refetch}
+        role={selectedRole || {...defaultRoleDto}}
+      />
+      </div>
   );
 }

@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Model.DTOs.Base;
+using Model.DTOs.System;
 using Model.DTOs.System.Auth;
-using Model.DTOs.System.Module;
 using Model.DTOs.System.User;
 using Model.Entities.System;
 using Model.Models;
@@ -36,7 +34,7 @@ public interface IUserService : IGenericService<User, string>
     /// </summary>
     /// <param name="userId">ID of the user</param>
     /// <returns>Collection of role names assigned to the user</returns>
-    Task<IEnumerable<string>> GetUserRoleAsync(string userId);
+    Task<IEnumerable<RoleClaimDto>> GetUserRoleAsync(string userId);
 
     /// <summary>
     ///     Gets paginated list of users based on filter criteria

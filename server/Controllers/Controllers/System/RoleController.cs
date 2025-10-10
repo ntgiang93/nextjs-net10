@@ -8,7 +8,6 @@ using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Service.Interfaces;
 using Service.Interfaces.Base;
-using Model.DTOs.System.Module;
 
 namespace NextDotNet.Api.Controllers.System;
 
@@ -60,7 +59,7 @@ public class RoleController : ControllerBase
     [Policy(ESysModule.Roles, EPermission.View)]
     public async Task<IActionResult> GetRolePermissions(int roleId)
     {
-        var permissions = await _roleService.GetRolePermissionAsync(roleId);
+        var permissions = await _roleService.GetRolePermissionExplodedAsync(roleId);
         return Ok(ApiResponse<List<RolePermission>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 

@@ -4,28 +4,6 @@ import Cookies from 'js-cookie';
 
 export const SUPER_ADMIN_ROLE = 'SUPER_ADMIN';
 
-export enum EPermission {
-  Development = 'Development',
-  Deletion = 'Deletion',
-  Edition = 'Edition',
-  Approved = 'Approved',
-  Creation = 'Creation',
-  View = 'View',
-}
-
-export enum ESysModule {
-  Users = 'Users',
-  Roles = 'Roles',
-  UserRoles = 'UserRoles',
-  Menu = 'Menu',
-  UserProfile = 'UserProfile',
-  Files = 'Files',
-  SysCategories = 'SysCategories',
-  BusinessCategory = 'BusinessCategory',
-  Department = 'Department',
-  JobTitle = 'JobTitle',
-}
-
 export async function getDeviceId() {
   const fp = await FingerprintJS.load();
   const result = await fp.get();

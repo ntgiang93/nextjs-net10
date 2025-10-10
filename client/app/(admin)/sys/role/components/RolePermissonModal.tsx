@@ -2,10 +2,10 @@ import DataTable from '@/components/ui/data-table/Datatable';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { RoleHook } from '@/hooks/role';
 import { SysCategoryHook } from '@/hooks/sysCategories';
+import { EPermission } from '@/types/base/Permission';
 import { RoleDto, RolePermissionDto } from '@/types/sys/Role';
-import { Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader, Tooltip } from '@heroui/react';
+import { Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { FloppyDiskIcon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -26,27 +26,33 @@ export default function RolePermissonModal(props: IRoleUserProps) {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [tableData, setTableData] = useState<PermissionTable[]>([]);
   const [form, setForm] = useState<RolePermissionDto[]>([]);
-  const { data: rolePermissions, refetch } = RoleHook.useGetPermission(role.id);
+  const { data: rolePermissions, refetch, isLoading } = RoleHook.useGetPermission(role.id);
   const { data: sysmodules, isLoading: loadingModule } = SysCategoryHook.useGetSysModule();
-  const { mutateAsync: save, isPending } = RoleHook.useAssignPermission(role.id);
+  const { mutateAsync: save, isPending, isSuccess } = RoleHook.useAssignPermission(role.id);
   const { data: permissons, isLoading: loadingPermssion } = SysCategoryHook.useGetPermission();
 
   const checkedPermisson = useCallback(
-    (sysmodule: string, permission: number) => {
-      return form.some((rp) => rp.sysModule === sysmodule && rp.permission == permission);
+    (sysmodule: string, permission: EPermission) => {
+      return form.some((rp) => rp.sysModule === sysmodule && (rp.permission & permission) === permission);
     },
     [form],
   );
 
   const handleCheckedChange = useCallback(
-    (sysmodule: string, permission: number, checked: boolean) => {
+    (sysmodule: string, permission: EPermission, checked: boolean) => {
       if (!role) return;
       if (!checked) {
-        const newForm = form.filter((rp) => rp.sysModule !== sysmodule || rp.permission !== permission);
+        const newForm = form.filter((rp) => rp.sysModule !== sysmodule || ( (rp.permission & permission) !== permission));
         setForm([...newForm]);
       } else {
-        const newForm = [...form, { sysModule: sysmodule, permission: permission, role: role.code }];
-        setForm([...newForm]);
+        if(permission === EPermission.All) {
+          const newForm = form.filter((rp) => rp.sysModule !== sysmodule);
+          setForm([...newForm, { sysModule: sysmodule, permission: permission, roleId: role.id }]);
+        }
+        else {
+          const newForm = [...form, { sysModule: sysmodule, permission: permission, roleId: role.id }];
+          setForm([...newForm]);
+        }
       }
     },
     [form, role],
@@ -109,12 +115,19 @@ export default function RolePermissonModal(props: IRoleUserProps) {
     if (rolePermissions) setForm([...rolePermissions]);
   }, [rolePermissions]);
 
+  useEffect(() => {
+    if (isSuccess) {
+      onOpenChange();
+    } 
+  }, [isSuccess])
+  
+
   return (
     <Modal
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       scrollBehavior="inside"
-      size='3xl'
+      size='5xl'
     >
       <ModalContent>
         <>
@@ -126,19 +139,12 @@ export default function RolePermissonModal(props: IRoleUserProps) {
                     removeWrapper={true}
                     columns={columns}
                     data={tableData}
-                    isLoading={loadingModule || loadingPermssion}
+                    isLoading={loadingModule || loadingPermssion || isLoading}
                     fetch={refetch}
                     leftContent={
                       <>
                         <SearchInput className="w-64" value={searchTerm} onValueChange={(value) => setSearchTerm(value)} />
                       </>
-                    }
-                    rightContent={
-                      <Tooltip content={msg('save')} showArrow={true} radius={'sm'}>
-                        <Button isIconOnly isLoading={isPending} variant="shadow" color={'primary'} size="sm" onPress={onSubmit}>
-                          <FloppyDiskIcon size={16} />
-                        </Button>
-                      </Tooltip>
                     }
                   />
           </ModalBody>
