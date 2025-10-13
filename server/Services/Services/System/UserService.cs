@@ -88,30 +88,35 @@ public class UserService : GenericService<User, string>, IUserService
 
     public async Task<string> CreateUserAsync(CreateUserDto model)
     {
-        var name = model.FullName.Split(' ');
-        var prefix = name[^1].ToLower() + model.FullName.Replace(name[^1], "").Trim().GetInitials();
-        var lastUserMatch = await _userRepository.FindLastUserByUsernamePrefixAsync(prefix);
-        string userName;
-        if (lastUserMatch == null)
+        if(!string.IsNullOrWhiteSpace(model.UserName))
         {
-            userName = prefix + "001";
+            await ValidateUniqueUser(model.Email, model.PhoneNumber, model.UserName);
         }
         else
         {
-            var lastUserName = lastUserMatch.Username;
-            var lastUserSuffix = lastUserName.Substring(prefix.Length);
-            var nextSuffix = int.Parse(lastUserSuffix) + 1;
-            userName = $"{prefix}{nextSuffix:D3}";
+            var name = model.FullName.Split(' ');
+            var prefix = name[^1].ToLower() + model.FullName.Replace(name[^1], "").Trim().GetInitials();
+            var lastUserMatch = await _userRepository.FindLastUserByUserNamePrefixAsync(prefix);
+            if (lastUserMatch == null)
+            {
+                model.UserName = prefix + "001";
+            }
+            else
+            {
+                var lastUserName = lastUserMatch.UserName;
+                var lastUserSuffix = lastUserName.Substring(prefix.Length);
+                var nextSuffix = int.Parse(lastUserSuffix) + 1;
+                model.UserName = $"{prefix}{nextSuffix:D3}";
+            }
         }
 
-        await ValidateUniqueUser(model.Email, model.PhoneNumber, null);
         var user = new User
         {
-            Username = userName,
+            UserName = model.UserName,
             FullName = model.FullName,
             Email = model.Email ?? string.Empty,
             Phone = model.PhoneNumber,
-            PasswordHash = PasswordHelper.HashPassword($"!{userName}@2k25")
+            PasswordHash = PasswordHelper.HashPassword($"!{model.UserName}@2k25")
         };
 
         // Add user to database
@@ -225,15 +230,15 @@ public class UserService : GenericService<User, string>, IUserService
         User existingUser;
         if (userId != default)
             existingUser = await _userRepository.GetSingleAsync<User>(u =>
-                u.Id != userId && (u.Email == email || u.Phone == phoneNumber || u.Username == username));
+                u.Id != userId && (u.Email == email || u.Phone == phoneNumber || u.UserName == username));
         else
             existingUser = await _userRepository.GetSingleAsync<User>(u =>
-                u.Email == email || u.Phone == phoneNumber || u.Username == username);
-        if (existingUser != null && existingUser.Username == username)
-            throw new BusinessException(SysMsg.Get(EMessage.UsernameExisted), "USERNAME_EXISTS");
-        if (existingUser != null && existingUser.Email == email)
+                u.Email == email || u.Phone == phoneNumber || u.UserName == username);
+        if (existingUser != null && existingUser.UserName == username)
+            throw new BusinessException(SysMsg.Get(EMessage.UserNameExisted), "USERNAME_EXISTS");
+        if (existingUser != null && existingUser.Email == email && !string.IsNullOrWhiteSpace(existingUser.Email))
             throw new BusinessException(SysMsg.Get(EMessage.EmailExisted), "EMAIL_EXISTS");
-        if (existingUser != null && existingUser.Phone == phoneNumber)
+        if (existingUser != null && existingUser.Phone == phoneNumber && !string.IsNullOrWhiteSpace(existingUser.Phone))
             throw new BusinessException(SysMsg.Get(EMessage.PhoneExisted), "PHONE_EXISTS");
         return true;
     }

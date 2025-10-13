@@ -35,7 +35,7 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Jti, tokenId),
-            new(ClaimTypes.Name, user.Username),
+            new(ClaimTypes.Name, user.UserName),
             new(ClaimTypes.Email, user.Email),
             new("FullName", user.FullName),
             new("Language", DetectLanguage(user)),
@@ -98,7 +98,7 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
                 RefreshToken = refreshToken,
                 Expires = DateTime.UtcNow.AddDays(_appSettings.Jwt.RefreshTokenExpiresIn)
             };
-            var id = await CreateAsync(userToken, user.Username);
+            var id = await CreateAsync(userToken, user.UserName);
             success = id > 0;
         }
 

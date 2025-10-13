@@ -2,7 +2,16 @@ import RoleSelect from '@/components/shared/sys/Select/RoleSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
 import { UserHook } from '@/hooks/user';
 import { defaultCreateUserDto, SaveUserDto } from '@/types/sys/User';
-import { Button, Form, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -22,24 +31,21 @@ export default function UserDetailModal(props: UserCreateModalProps) {
   const { mutateAsync: save, isPending } = UserHook.useSaveUser();
   const { data: user, isFetching } = UserHook.useGet(id);
 
-  const isEdit = useMemo(() => id != undefined && id != '' && id != '0', [id]);
+  const isEdit = useMemo(() => id != undefined && id != '', [id]);
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
+    console.log('Submitting form:', form);
     const response = await save(form);
     if (response && response.success) {
       onOpenChange();
-      setForm({ ...defaultCreateUserDto });
       onRefresh();
     }
   };
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const validateEmail = (value: string) => {
-    if (!value || value.trim() === '') {
-      return 'Email is required';
-    }
-    if (!emailRegex.test(value)) {
+    if (value && value.length > 0 && !emailRegex.test(value)) {
       return 'Invalid email format';
     }
     return null;
@@ -56,7 +62,7 @@ export default function UserDetailModal(props: UserCreateModalProps) {
   };
 
   useEffect(() => {
-    setForm({ ...user, roles: user?.roleIds || [] } as SaveUserDto);
+    if (user) setForm({ ...user });
   }, [user]);
 
   return (
@@ -65,11 +71,16 @@ export default function UserDetailModal(props: UserCreateModalProps) {
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
+      onClose={() => {
+        setForm({ ...defaultCreateUserDto });
+      }}
       scrollBehavior="inside"
     >
       <ModalContent>
         <>
-          <ModalHeader className="flex flex-col gap-1">{isEdit ? t('editUser') : t('addUser')}</ModalHeader>
+          <ModalHeader className="flex flex-col gap-1">
+            {isEdit ? t('editUser') : t('addUser')}
+          </ModalHeader>
           <ModalBody>
             {isFetching && <FormSkeleton row={4} />}
             {!isFetching && (
@@ -89,7 +100,17 @@ export default function UserDetailModal(props: UserCreateModalProps) {
                   variant={'bordered'}
                 />
                 <Input
-                  isRequired
+                  disabled={isEdit}
+                  label={t('username')}
+                  description={t('userNameDesc')}
+                  name="username"
+                  placeholder={t('username')}
+                  value={form.userName}
+                  onValueChange={(value) => setForm({ ...form, userName: value })}
+                  type="text"
+                  variant={'bordered'}
+                />
+                <Input
                   label={t('email')}
                   name="email"
                   placeholder={t('email')}
@@ -105,7 +126,6 @@ export default function UserDetailModal(props: UserCreateModalProps) {
                 <RoleSelect
                   value={form.roles || []}
                   onChange={(values) => {
-                    console.log('Selected roles:', values);
                     setForm({ ...form, roles: [...values] });
                   }}
                   selectionMode="multiple"

@@ -9,14 +9,7 @@ import { LoginDto, TokenDto } from '@/types/sys/Auth';
 import { usePathname, useRouter } from 'next/navigation';
 import { createContext, ReactNode, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { useStore } from 'zustand';
-import {
-  clearSessionFlag,
-  EPermission,
-  ESysModule,
-  getDeviceId,
-  hasActiveSession,
-  markSessionActive,
-} from './AuthHelper';
+import { clearSessionFlag, getDeviceId, hasActiveSession, markSessionActive } from './AuthHelper';
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -24,7 +17,6 @@ interface AuthContextType {
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
   navigate: (url: string) => void;
-  hasPermission: (permission: EPermission, sysModule: string) => boolean;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -34,7 +26,6 @@ const AuthContext = createContext<AuthContextType>({
   logout: async () => {},
   refreshToken: async () => {},
   navigate: () => {},
-  hasPermission: () => false,
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -109,7 +100,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Refresh token function
   const refreshToken = async () => {
     try {
-      const response = await apiService.post<ApiResponse<TokenDto>>(endpoint + 'refresh', undefined, undefined, true);
+      const response = await apiService.post<ApiResponse<TokenDto>>(
+        endpoint + 'refresh',
+        undefined,
+        undefined,
+        true,
+      );
 
       if (response.success && response.data) {
         const accessToken = response.data.accessToken;
@@ -150,10 +146,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    *   // User has edit permission for the users module
    * }
    */
-  const hasPermission = (permission: EPermission, sysModule: string | ESysModule): boolean => {
-    const key = `${sysModule}.${permission}`;
-    return permissions?.includes(key) || false;
-  };
 
   // Kiểm tra session khi component mount
   useLayoutEffect(() => {
@@ -223,7 +215,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         logout,
         refreshToken,
         navigate,
-        hasPermission,
       }}
     >
       {children}

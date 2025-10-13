@@ -9,6 +9,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  Pagination,
   Select,
   SelectItem,
   Table,
@@ -32,7 +33,6 @@ import { ArrowRight01Icon, ReloadIcon, Settings04Icon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExtButton } from '../button/ExtButton';
-import { PaginationInput } from '../input/PaginationInput';
 import Loading from '../overlay/Loading';
 import {
   getfirstColumn,
@@ -57,7 +57,9 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
     removeWrapper,
   } = props;
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>(getRowSelection(selection?.selectedKeys || []));
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>(
+    getRowSelection(selection?.selectedKeys || []),
+  );
   const [tableHeight, setTableHeight] = useState(320);
   const cardRef = useRef<HTMLDivElement>(null);
   const msg = useTranslations('msg');
@@ -197,7 +199,11 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
                 <Settings04Icon size={20} />
               </ExtButton>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Dynamic Actions" items={table.getAllLeafColumns()} selectionMode="multiple">
+            <DropdownMenu
+              aria-label="Dynamic Actions"
+              items={table.getAllLeafColumns()}
+              selectionMode="multiple"
+            >
               <DropdownItem key={1}>Resize column</DropdownItem>
               <DropdownItem key={2}>Move column</DropdownItem>
             </DropdownMenu>
@@ -244,7 +250,9 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
                         width={cell.column.getSize()}
                         className="whitespace-nowrap truncate border-b py-1"
                       >
-                        <div className={`flex items-center justify-${cell.column.columnDef.meta?.align}`}>
+                        <div
+                          className={`flex items-center justify-${cell.column.columnDef.meta?.align}`}
+                        >
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </div>
                       </TableCell>
@@ -282,11 +290,14 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
           >
             {(item) => <SelectItem key={item.key}>{item.label}</SelectItem>}
           </Select>
-
-          <PaginationInput
+          <Pagination
+            classNames={{
+              item: 'hover:cursor-pointer',
+            }}
+            isCompact
             page={pagination.page}
-            totalPage={pagination.totalPages}
-            onPageChange={(value) => pagination.onPageChange(value)}
+            total={pagination.totalPages}
+            onChange={(page) => pagination.onPageChange(page)}
           />
         </div>
       </CardFooter>

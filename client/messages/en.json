@@ -76,6 +76,7 @@
     "confirmPassword": "Confirm Password",
     "oldPassword": "Old Password",
     "passwordMismatch": "Password and confirm password do not match",
-    "resetPassword": "Reset Password"
+    "resetPassword": "Reset Password",
+    "userNameDesc": "System will auto generate username if left empty."
   }
 }

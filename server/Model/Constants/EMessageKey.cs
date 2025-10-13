@@ -22,7 +22,7 @@ public enum EMessage
     RoleNotFound,
     SuccessMsg,
     TokenInvalid,
-    UsernameExisted,
+    UserNameExisted,
     UserNotFound,
     WarningChangeEmailSubject,
     DeviceIsRequired,

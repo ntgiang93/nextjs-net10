@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
     {
-        var user = await _userService.GetSingleAsync<User>(u => u.Username == loginDto.Username);
+        var user = await _userService.GetSingleAsync<User>(u => u.UserName == loginDto.UserName);
         if (user == null)
             return Ok(ApiResponse<TokenDto>.Fail(_sysMsg.Get(EMessage.AuthenticationFailed)));
 

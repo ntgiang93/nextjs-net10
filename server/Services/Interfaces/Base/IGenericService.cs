@@ -52,7 +52,7 @@ public interface IGenericService<TEntity, TKey>
     ///     Creates a new entity.
     /// </summary>
     /// <param name="entity">The entity to create.</param>
-    /// <param name="username">Username for audit trail</param>
+    /// <param name="username">UserName for audit trail</param>
     /// <returns>A task that represents the asynchronous operation. The task result contains the primary key of the created entity.</returns>
     Task<TKey?> CreateAsync(TEntity entity, string username = "System");
 
@@ -60,7 +60,7 @@ public interface IGenericService<TEntity, TKey>
     ///     Updates an existing entity.
     /// </summary>
     /// <param name="entity">The entity to update</param>
-    /// <param name="username">Username for audit trail</param>
+    /// <param name="username">UserName for audit trail</param>
     /// <returns>A task that represents the asynchronous operation.</returns>
     Task<bool> UpdateAsync(TEntity entity, string username = "System");
 

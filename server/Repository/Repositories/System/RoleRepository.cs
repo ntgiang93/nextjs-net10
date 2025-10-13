@@ -30,7 +30,7 @@ public class RoleRepository : GenericRepository<Role, int>, IRoleRepository
         string userRoleTable = StringHelper.GetTableName<UserRole>();
         string userTable = StringHelper.GetTableName<User>();
         var query = new Query(userRoleTable)
-            .SelectRaw($"{userTable}.{nameof(User.Id)}, {userTable}.{nameof(User.Username)}, {userTable}.{nameof(User.FullName)}, {userTable}.{nameof(User.Avatar)}")
+            .SelectRaw($"{userTable}.{nameof(User.Id)}, {userTable}.{nameof(User.UserName)}, {userTable}.{nameof(User.FullName)}, {userTable}.{nameof(User.Avatar)}")
             .Join(userTable, $"{userRoleTable}.{nameof(UserRole.UserId)}", $"{userTable}.{nameof(User.Id)}")
             .Where($"{userRoleTable}.{nameof(UserRole.RoleId)}", roleId)
             .Where($"{userTable}.{nameof(User.IsDeleted)}", 0)

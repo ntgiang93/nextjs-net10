@@ -5,8 +5,8 @@ namespace Model.DTOs.System.Auth
     public class RegisterUserDto
     {
         [Required]
-        [MinLength(3, ErrorMessage = "Username must be at least 3 characters")]
-        public string Username { get; set; }
+        [MinLength(3, ErrorMessage = "UserName must be at least 3 characters")]
+        public string UserName { get; set; }
 
         [EmailAddress(ErrorMessage = "Invalid email address")]
         public string Email { get; set; }

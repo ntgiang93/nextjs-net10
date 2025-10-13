@@ -1,6 +1,4 @@
 'use client';
-import RoleSelect from '@/components/shared/sys/Select/RoleSelect';
-import { HugeIcons } from '@/components/ui//icon/HugeIcons';
 import { ConfirmModal } from '@/components/ui//overlay/ConfirmModal';
 import { ExtButton } from '@/components/ui/button/ExtButton';
 import AsyncDataTable from '@/components/ui/data-table/AsyncDataTable';
@@ -12,9 +10,9 @@ import { defaultUserTableRequest, UserTableDto, UserTableRequestDto } from '@/ty
 import { Button, Chip, Select, SelectItem, Tooltip, useDisclosure, User } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Add01Icon, Delete02Icon, Edit01Icon, UserAccountIcon } from 'hugeicons-react';
+import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import UserDetailModal from './components/UserDetailModal';
-import { useTranslations } from 'next-intl';
 
 export default function Menu() {
   const t = useTranslations('user');
@@ -26,7 +24,7 @@ export default function Menu() {
   const { data, refetch, isFetching } = UserHook.useGetPagination(filter);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
-  const [selectUserId, setSelectUserId] = useState<string>('0');
+  const [selectUserId, setSelectUserId] = useState<string>('');
   const { mutateAsync: del, isSuccess: delSuccess } = UserHook.useDelete(selectUserId);
   const { navigate } = useAuth();
 
@@ -41,7 +39,9 @@ export default function Menu() {
           return (
             <User
               avatarProps={{
-                src: row.original.avatar || `https://ui-avatars.com/api/?name=${row.original.fullName}`,
+                src:
+                  row.original.avatar ||
+                  `https://ui-avatars.com/api/?name=${row.original.fullName}`,
                 alt: 'Avatar',
               }}
               name={row.original.fullName}
@@ -54,8 +54,8 @@ export default function Menu() {
         },
       },
       {
-        id: 'username',
-        accessorKey: 'username',
+        id: 'userName',
+        accessorKey: 'userName',
         header: () => t('account'),
         footer: (props) => props.column.id,
         minSize: 150,
@@ -66,9 +66,6 @@ export default function Menu() {
         header: () => t('email'),
         footer: (props) => props.column.id,
         size: 150,
-        cell: ({ cell }) => {
-          return <HugeIcons name={(cell.getValue() as string) || ''} />;
-        },
         meta: {
           align: 'center',
         },
@@ -120,7 +117,7 @@ export default function Menu() {
               <Tooltip content={t('userDetails')}>
                 <Button
                   isIconOnly
-                  aria-label="expand-button"
+                  aria-label="user-details-button"
                   color="primary"
                   variant="light"
                   radius="full"
@@ -135,7 +132,7 @@ export default function Menu() {
               <Tooltip content={t('editUser')}>
                 <Button
                   isIconOnly
-                  aria-label="expand-button"
+                  aria-label="edit-button"
                   color="primary"
                   variant="light"
                   radius="full"
@@ -151,7 +148,7 @@ export default function Menu() {
               <Tooltip color="danger" content={msg('delete')}>
                 <Button
                   isIconOnly
-                  aria-label="expand-button"
+                  aria-label="delete-button"
                   color="danger"
                   variant="light"
                   radius="full"
@@ -175,9 +172,14 @@ export default function Menu() {
     [navigate, onOpenDel],
   );
 
+  const pages = useMemo(() => {
+    if (!data) return 1;
+    else return Math.ceil(data.totalCount / filter.pageSize) || 1;
+  }, [data?.totalCount, filter.pageSize]);
+
   useEffect(() => {
     refetch();
-    setSelectUserId('0');
+    setSelectUserId('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [delSuccess]);
 
@@ -192,7 +194,7 @@ export default function Menu() {
               startContent={<Add01Icon size={16} />}
               variant="shadowSmall"
               onPress={() => {
-                setSelectUserId('0');
+                setSelectUserId('');
                 onOpen();
               }}
             >
@@ -203,14 +205,14 @@ export default function Menu() {
       ></PageHeader>
       <AsyncDataTable
         columns={columns}
-        data={data.items}
+        data={data?.items || []}
         isLoading={isFetching}
         fetch={refetch}
         pagination={{
           page: filter.page,
           pageSize: filter.pageSize,
-          totalCount: data.totalCount,
-          totalPages: data.totalPages,
+          totalCount: data?.totalCount || 1,
+          totalPages: pages,
           onPageChange: (page) => {
             setFilter((prev) => ({ ...prev, page }));
           },
@@ -253,22 +255,15 @@ export default function Menu() {
               <SelectItem key={'1'}>{msg('active')}</SelectItem>
               <SelectItem key={'0'}>{msg('inactive')}</SelectItem>
             </Select>
-            <RoleSelect
-              value={filter.roles}
-              onChange={(values) => {
-                setFilter((prev) => ({
-                  ...prev,
-                  roles: values,
-                }));
-              }}
-              selectionMode="multiple"
-              className="w-52"
-              labelPlacement={'outside'}
-            />
           </>
         }
       />
-      <UserDetailModal isOpen={isOpen} onOpenChange={onOpenChange} onRefresh={refetch} id={selectUserId} />
+      <UserDetailModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onRefresh={refetch}
+        id={selectUserId}
+      />
       <ConfirmModal
         isOpen={IsOpenDel}
         title="Delete Menu"

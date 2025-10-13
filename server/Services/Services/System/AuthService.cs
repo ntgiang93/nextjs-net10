@@ -121,7 +121,7 @@ public class AuthService : IAuthService
         // Create new user (initially inactive until verified)
         var newUser = new User
         {
-            Username = registerDto.Username,
+            UserName = registerDto.UserName,
             Email = registerDto.Email,
             PasswordHash = PasswordHelper.HashPassword(registerDto.Password),
             Phone = registerDto.PhoneNumber,
@@ -206,7 +206,7 @@ public class AuthService : IAuthService
 
         if (_appSettings.VerificationType == VerificationType.Sms && string.IsNullOrEmpty(registerDto.PhoneNumber))
             throw new UnprocessableEntityException(_sysMsg.Get(EMessage.Error422Msg));
-        await _userService.ValidateUniqueUser(registerDto.Email, registerDto.PhoneNumber, registerDto.Username);
+        await _userService.ValidateUniqueUser(registerDto.Email, registerDto.PhoneNumber, registerDto.UserName);
     }
 
     private async Task SendVerifyEmail(string code, int expirationMinutes, string toEmail)

@@ -1,4 +1,5 @@
 using Model.Models;
+using System.Text.Json.Serialization;
 
 namespace Model.DTOs.System.User;
 
@@ -8,7 +9,7 @@ namespace Model.DTOs.System.User;
 public class UserTableDto
 {
     public string Id { get; set; }
-    public string Username { get; set; }
+    public string UserName { get; set; }
     public string Avatar { get; set; }
     public string Email { get; set; }
     public string Phone { get; set; }
@@ -16,12 +17,14 @@ public class UserTableDto
     public bool IsActive { get; set; }
     public bool isLocked { get; set; }
     public List<string> Roles { get; set; }
+    [JsonIgnore]
+    public string RolesString { get; set; }
 }
 
 public class UserSelectDto
 {
     public string Id { get; set; }
-    public string Username { get; set; }
+    public string UserName { get; set; }
     public string Avatar { get; set; }
     public string Email { get; set; }
     public string FullName { get; set; }
@@ -29,10 +32,6 @@ public class UserSelectDto
 
 public class UserTableRequestDto : PaginationRequest
 {
-    /// <summary>
-    /// list roles of user, separated by comma
-    /// </summary>
-    public string? Roles { get; set; }
     public bool? IsActive { get; set; }
     public bool? isLocked { get; set; }
 }

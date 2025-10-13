@@ -62,7 +62,7 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
         entity.CreatedBy = existingEntity.CreatedBy;
         entity.CreatedAt = existingEntity.CreatedAt;
         entity.IsDeleted = existingEntity.IsDeleted;
-        entity.UpdatedBy = UserContext.Current?.Username ?? username;
+        entity.UpdatedBy = UserContext.Current?.UserName ?? username;
         entity.UpdatedAt = DateTime.UtcNow;
         var result = await _repository.UpdateAsync(entity);
         if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
@@ -77,7 +77,7 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
         if (existingEntity != null && !existingEntity.IsDeleted)
         {
             existingEntity.IsDeleted = true;
-            existingEntity.UpdatedBy = UserContext.Current?.Username ?? "System";
+            existingEntity.UpdatedBy = UserContext.Current?.UserName ?? "System";
             existingEntity.UpdatedAt = DateTime.UtcNow;
             var result = await _repository.UpdateAsync(existingEntity);
             if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
@@ -115,10 +115,10 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
 
     public virtual async Task<TKey?> CreateAsync(TEntity entity, string username = "System")
     {
-        entity.CreatedBy = UserContext.Current?.Username ?? username;
+        entity.CreatedBy = UserContext.Current?.UserName ?? username;
         entity.CreatedAt = DateTime.UtcNow;
         if (typeof(TKey) == typeof(string) && string.IsNullOrEmpty(entity.Id?.ToString()))
-            entity.Id = (TKey)(object)Ulid.NewUlid();
+            entity.Id = (TKey)(object)Ulid.NewUlid().ToString();
         var id = await _repository.InsertAsync(entity);
         CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return id;

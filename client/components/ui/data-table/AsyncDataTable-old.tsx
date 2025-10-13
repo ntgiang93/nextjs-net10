@@ -25,11 +25,9 @@ import {
   getCoreRowModel,
   getExpandedRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
   RowSelectionState,
   useReactTable,
 } from '@tanstack/react-table';
-import clsx from 'clsx';
 import { ArrowRight01Icon, ReloadIcon, Settings04Icon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -37,15 +35,14 @@ import { ExtButton } from '../button/ExtButton';
 import { PaginationInput } from '../input/PaginationInput';
 import Loading from '../overlay/Loading';
 import {
-  getCommonPinningStyles,
   getfirstColumn,
   getRowSelection,
   getSelectedItemsFromRowSelection,
   tableCheckBoxClass,
 } from './datatableHelper';
-import { DataTableProps, ITEM_PER_PAGE } from './DataTableType';
+import { AsyncDataTableProps, ITEM_PER_PAGE } from './DataTableType';
 
-const DataTable = (props: DataTableProps) => {
+const AsyncDataTable = (props: AsyncDataTableProps) => {
   const {
     data,
     columns,
@@ -56,14 +53,12 @@ const DataTable = (props: DataTableProps) => {
     fetch,
     rightContent,
     leftContent,
-    onRowAction,
+    pagination,
     removeWrapper,
   } = props;
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>(
-    getRowSelection(selection?.selectedKeys || []),
-  );
-  const [tableHeight, setTableHeight] = useState(200);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>(getRowSelection(selection?.selectedKeys || []));
+  const [tableHeight, setTableHeight] = useState(320);
   const cardRef = useRef<HTMLDivElement>(null);
   const msg = useTranslations('msg');
 
@@ -146,7 +141,7 @@ const DataTable = (props: DataTableProps) => {
     const cardHeight = cardRef.current.clientHeight;
     // Calculate the remaining space for the table
     const newTableHeight = cardHeight - 152;
-    setTableHeight(Math.max(newTableHeight, 350));
+    setTableHeight(Math.max(newTableHeight, 320));
   }, []);
 
   const table = useReactTable({
@@ -167,12 +162,12 @@ const DataTable = (props: DataTableProps) => {
       },
     },
     enableRowSelection: true,
+    manualPagination: true,
     onRowSelectionChange: setRowSelection,
     onExpandedChange: setExpanded,
     getSubRows: (row) => row[childrenProperty || 'children'],
     getRowId: (row) => row[keyColumn || 'id'],
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     debugTable: true,
@@ -180,7 +175,7 @@ const DataTable = (props: DataTableProps) => {
 
   return (
     <Card
-      className={clsx('h-full overflow-auto')}
+      className="h-full overflow-auto"
       ref={cardRef}
       shadow={removeWrapper ? 'none' : 'md'}
       classNames={{
@@ -191,32 +186,31 @@ const DataTable = (props: DataTableProps) => {
     >
       <CardHeader className="flex items-center justify-between w-full">
         <div className="flex items-center justify-start gap-4">{leftContent}</div>
-        <div className="flex items-center justify-end gap-1">
+        <div className="flex items-center justify-end gap-2">
           {rightContent}
-          <Button isIconOnly isLoading={isLoading} variant="light" size="sm" onPress={fetch}>
-            <ReloadIcon size={16} />
-          </Button>
+          <ExtButton isIconOnly disabled={isLoading} variant="light" size="sm" onPress={fetch}>
+            <ReloadIcon size={20} />
+          </ExtButton>
           <Dropdown>
             <DropdownTrigger>
-              <ExtButton isIconOnly isLoading={isLoading} variant="light" size="sm" onPress={fetch}>
+              <ExtButton isIconOnly disabled={isLoading} variant="light" size="sm" onPress={fetch}>
                 <Settings04Icon size={20} />
               </ExtButton>
             </DropdownTrigger>
-            <DropdownMenu aria-label="Dynamic Actions" selectionMode="multiple">
+            <DropdownMenu aria-label="Dynamic Actions" items={table.getAllLeafColumns()} selectionMode="multiple">
               <DropdownItem key={1}>Resize column</DropdownItem>
               <DropdownItem key={2}>Move column</DropdownItem>
             </DropdownMenu>
           </Dropdown>
         </div>
       </CardHeader>
-      <CardBody style={{ height: `${tableHeight}px` }} className="py-0">
+      <CardBody style={{ height: `${tableHeight}px` }} className="py-0 ">
         <Table
           aria-label="Data table"
           isHeaderSticky
-          onRowAction={(key) => onRowAction?.(key)}
           classNames={{
-            wrapper: 'p-1 shadow-none',
-            base: `overflow-scroll`,
+            wrapper: 'p-0 shadow-none rounded-lg',
+            base: 'overflow-scroll',
           }}
         >
           <TableHeader>
@@ -229,8 +223,6 @@ const DataTable = (props: DataTableProps) => {
                       colSpan={header.colSpan}
                       width={header.getSize()}
                       align={header.column.columnDef.meta?.align}
-                      className={'border-0'}
-                      style={{ ...getCommonPinningStyles(header.column) }}
                     >
                       {header.isPlaceholder ? null : (
                         <div>{flexRender(header.column.columnDef.header, header.getContext())}</div>
@@ -250,12 +242,9 @@ const DataTable = (props: DataTableProps) => {
                       <TableCell
                         key={cell.id}
                         width={cell.column.getSize()}
-                        className="whitespace-nowrap truncate border-b border-default/50 py-1 bg-background"
-                        style={{ ...getCommonPinningStyles(cell.column) }}
+                        className="whitespace-nowrap truncate border-b py-1"
                       >
-                        <div
-                          className={`flex items-center justify-${cell.column.columnDef.meta?.align}`}
-                        >
+                        <div className={`flex items-center justify-${cell.column.columnDef.meta?.align}`}>
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </div>
                       </TableCell>
@@ -270,34 +259,34 @@ const DataTable = (props: DataTableProps) => {
       <CardFooter className="grid grid-cols-6 gap-4">
         <div className="col-span-2 text-sm font-semibold">
           {(() => {
-            const totalRows = table.getRowCount();
-            return `${msg('totalRow')} : ${totalRows}`;
+            return `${msg('totalRow')} : ${pagination.totalCount}`;
           })()}
         </div>
-        <div className="col-span-4 flex items-center justify-end w-full gap-4">
+        <div className="col-span-4 flex items-center justify-end w-full gap-8">
           <Select
             size="sm"
             classNames={{
               mainWrapper: 'w-16',
               popoverContent: 'w-20',
-              label: 'text-sm',
+              label: 'text-sm font-semibold',
               base: 'w-fit',
             }}
             className="max-w-xs"
             items={ITEM_PER_PAGE}
             label={msg('showPerPage')}
             labelPlacement="outside-left"
-            selectedKeys={[table.getState().pagination.pageSize.toString()]}
+            selectedKeys={[pagination.pageSize.toString()]}
             onChange={(e) => {
-              table.setPageSize(Number(e.target.value));
+              pagination.onPageSizeChange(Number(e.target.value));
             }}
           >
             {(item) => <SelectItem key={item.key}>{item.label}</SelectItem>}
           </Select>
+
           <PaginationInput
-            page={table.getState().pagination.pageIndex + 1}
-            totalPage={table.getPageCount()}
-            onPageChange={(page) => table.setPageIndex(page - 1)}
+            page={pagination.page}
+            totalPage={pagination.totalPages}
+            onPageChange={(value) => pagination.onPageChange(value)}
           />
         </div>
       </CardFooter>
@@ -305,4 +294,4 @@ const DataTable = (props: DataTableProps) => {
   );
 };
 
-export default DataTable;
+export default AsyncDataTable;

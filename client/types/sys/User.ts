@@ -1,10 +1,9 @@
-import { z } from 'zod';
 import { PaginationFilter } from '../base/PaginationFilter';
 
 // Based on UserDto
 export type UserDto = {
   id: string;
-  username: string;
+  userName: string;
   avatar: string;
   email: string;
   phone: string;
@@ -18,8 +17,8 @@ export type UserDto = {
 };
 
 export const defaultUserDto: UserDto = {
-  id: '0',
-  username: '',
+  id: '',
+  userName: '',
   avatar: '',
   email: '',
   phone: '',
@@ -41,18 +40,19 @@ export type UpdateUserDto = {
   twoFa: boolean;
 };
 
-// Based on CreateUserDto
 export type SaveUserDto = {
-  id: string; // Optional for creation, required for updates
+  id: string;
   fullName: string;
+  userName?: string;
   email?: string;
   phoneNumber?: string;
   roles: string[];
 };
 
 export const defaultCreateUserDto: SaveUserDto = {
-  id: '0',
+  id: '',
   fullName: '',
+  userName: '',
   email: '',
   phoneNumber: '',
   roles: [],
@@ -61,7 +61,7 @@ export const defaultCreateUserDto: SaveUserDto = {
 // Based on UserTableDto
 export type UserTableDto = {
   id: string;
-  username: string;
+  userName: string;
   avatar: string;
   email: string;
   phone: string;
@@ -73,7 +73,7 @@ export type UserTableDto = {
 
 export type UserSelectDto = {
   id: string;
-  username: string;
+  userName: string;
   avatar: string;
   email: string;
   fullName: string;

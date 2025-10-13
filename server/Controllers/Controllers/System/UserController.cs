@@ -93,8 +93,8 @@ public class UserController : ControllerBase
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var result = await _userService.CreateUserAsync(createUserDto);
-        if (result == null) return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.SuccessMsg)));
-        return Ok(ApiResponse<string>.Succeed(result, _sysMsg.Get(EMessage.FailureMsg)));
+        if (result == null) return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+        return Ok(ApiResponse<string>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpPost("{userId}/assign-roles")]

@@ -65,15 +65,14 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
             .Select($"r.{nameof(Role.Name)}", $"r.{nameof(Role.Id)}");
 
         var roleSql = _compiler.Compile(roleQuery);
-        var roleData = await connection.QueryAsync<(string Name, long Id)>(roleSql.Sql, roleSql.NamedBindings);
+        var roleData = await connection.QueryAsync<(string Name, int Id)>(roleSql.Sql, roleSql.NamedBindings);
         
-        var roles = roleData.Select(r => r.Name).ToList();
-        var roleIds = roleData.Select(r => r.Id.ToString()).ToList();
+        var roles = roleData.Select(r => r.Id).ToList();
 
         return new UserDto
         {
             Id = user.Id.ToString(),
-            Username = user.Username,
+            UserName = user.UserName,
             Avatar = user.Avatar,
             Email = user.Email,
             Phone = user.Phone,
@@ -83,20 +82,19 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
             isLocked = user.IsLocked,
             LockExprires = user.LockExprires,
             Roles = roles,
-            RoleIds = roleIds
         };
     }
 
-    public async Task<User?> FindLastUserByUsernamePrefixAsync(string prefix)
+    public async Task<User?> FindLastUserByUserNamePrefixAsync(string prefix)
     {
         if (string.IsNullOrEmpty(prefix)) return null;
         
-        var query = new Query($"{_tableName}s")
+        var query = new Query($"{_tableName}")
             .Where(nameof(User.IsDeleted), false)
             .Where(nameof(User.IsActive), true)
-            .WhereRaw($"{nameof(User.Username)} LIKE ?", prefix + "%")
-            .WhereRaw($"LEN({nameof(User.Username)}) = ?", prefix.Length + 3)
-            .OrderByDesc(nameof(User.Username))
+            .WhereRaw($"{nameof(User.UserName)} LIKE ?", prefix + "%")
+            .WhereRaw($"LEN({nameof(User.UserName)}) = ?", prefix.Length + 3)
+            .OrderByDesc(nameof(User.UserName))
             .Limit(1);
 
         var compiledQuery = _compiler.Compile(query);
@@ -110,38 +108,20 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
     public async Task<(List<UserTableDto> Items, int TotalCount)> GetPaginatedUsersAsync(UserTableRequestDto request)
     {
         Query query;
-        
-        // Check if role filtering is needed to determine query structure
-        if (!string.IsNullOrWhiteSpace(request.Roles))
-        {
-            var roleIdsList = request.Roles.Split(',').Select(long.Parse).ToList();
-            
-            // Query with role filtering and aggregation
-            query = new Query($"{_tableName}s as u")
-                .Join($"{_userRoleTable} as ur", $"u.{nameof(User.Id)}", $"ur.{nameof(UserRole.UserId)}")
-                .Join($"{_roleTalbe} as r", $"ur.{nameof(UserRole.RoleId)}", $"r.{nameof(Role.Id)}")
-                .Where($"u.{nameof(User.IsDeleted)}", false)
-                .Where($"r.{nameof(Role.IsDeleted)}", false)
-                .WhereIn($"r.{nameof(Role.Id)}", roleIdsList);
-        }
-        else
-        {
-            // Query without role filtering but with left join for role aggregation
-            query = new Query($"{_tableName}s as u")
+        query = new Query($"{_tableName} as u")
                 .LeftJoin($"{_userRoleTable} as ur", $"u.{nameof(User.Id)}", $"ur.{nameof(UserRole.UserId)}")
                 .LeftJoin($"{_roleTalbe} as r", j => j
                     .On($"ur.{nameof(UserRole.RoleId)}", $"r.{nameof(Role.Id)}")
                     .Where($"r.{nameof(Role.IsDeleted)}", false))
                 .Where($"u.{nameof(User.IsDeleted)}", false);
-        }
 
         // Apply search filter
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
             query.Where(q => q
-                .WhereRaw($"LOWER(u.{nameof(User.Username)}) LIKE ?", $"%{request.SearchTerm.ToLower()}%")
-                .OrWhereRaw($"LOWER(u.{nameof(User.Email)}) LIKE ?", $"%{request.SearchTerm.ToLower()}%")
-                .OrWhereRaw($"LOWER(u.{nameof(User.FullName)}) LIKE ?", $"%{request.SearchTerm.ToLower()}%"));
+                .WhereLike($"u.{nameof(User.UserName)}", $"{request.SearchTerm}")
+                .OrWhereLike($"u.{nameof(User.Email)}", $"{request.SearchTerm}")
+                .OrWhereLike($"u.{nameof(User.FullName)}", $"{request.SearchTerm}"));
         }
 
         // Filter by active status
@@ -162,7 +142,7 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         // Select with string aggregation for roles
         query.Select([
             $"u.{nameof(User.Id)}",
-            $"u.{nameof(User.Username)}",
+            $"u.{nameof(User.UserName)}",
             $"u.{nameof(User.Email)}",
             $"u.{nameof(User.FullName)}",
             $"u.{nameof(User.Phone)}",
@@ -170,10 +150,10 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
             $"u.{nameof(User.IsActive)}",
             $"u.{nameof(User.IsLocked)}"
         ])
-        .SelectRaw($"STRING_AGG(r.{nameof(Role.Name)}, ',') as Roles")
+        .SelectRaw($"STRING_AGG(r.{nameof(Role.Name)}, ' - ') as RolesString")
         .GroupBy([
             $"u.{nameof(User.Id)}",
-            $"u.{nameof(User.Username)}",
+            $"u.{nameof(User.UserName)}",
             $"u.{nameof(User.Email)}",
             $"u.{nameof(User.FullName)}",
             $"u.{nameof(User.Phone)}",
@@ -181,34 +161,37 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
             $"u.{nameof(User.IsActive)}",
             $"u.{nameof(User.IsLocked)}"
         ]);
+        // Count number user
+        using var connection = _dbFactory.Connection;
+        var countQuery = query.Clone().AsCount([$"u.{nameof(User.Id)}"]);
+        var compiledCountQuery = _compiler.Compile(countQuery);
+        var total = await connection.QuerySingleAsync<int>(compiledCountQuery.Sql, compiledCountQuery.NamedBindings);
 
         // Apply pagination and ordering
-        query.OrderBy($"u.{nameof(User.Username)}")
+        query.OrderBy($"u.{nameof(User.UserName)}")
              .Offset((request.Page - 1) * request.PageSize)
              .Limit(request.PageSize);
 
         var compiledQuery = _compiler.Compile(query);
-        
-        using var connection = _dbFactory.Connection;
-        var users = await connection.QueryAsync<UserTableDtoWithRolesString>(compiledQuery.Sql, compiledQuery.NamedBindings);
+        var users = await connection.QueryAsync<UserTableDto>(compiledQuery.Sql, compiledQuery.NamedBindings);
 
         // Convert to final result format
         var result = users.Select(u => new UserTableDto
         {
             Id = u.Id,
-            Username = u.Username,
+            UserName = u.UserName,
             Email = u.Email,
             FullName = u.FullName,
             Phone = u.Phone,
             Avatar = u.Avatar,
             IsActive = u.IsActive,
             isLocked = u.isLocked,
-            Roles = string.IsNullOrEmpty(u.Roles) 
+            Roles = string.IsNullOrEmpty(u.RolesString) 
                 ? new List<string>() 
-                : u.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+                : u.RolesString.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
         }).ToList();
 
-        return (result, 0); // Return 0 for total count as requested
+        return (result, total); // Return 0 for total count as requested
     }
 
     public async Task<(List<UserSelectDto> Items, int TotalCount)> GetPaginatedUser2SelectAsync(PaginationRequest request)
@@ -222,7 +205,7 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         if (!string.IsNullOrEmpty(request.SearchTerm))
         {
             query.Where(q => q
-                .WhereLike($"{nameof(User.Username)}", $"%{request.SearchTerm}%")
+                .WhereLike($"{nameof(User.UserName)}", $"%{request.SearchTerm}%")
                 .OrWhereLike($"{nameof(User.Email)}", $"%{request.SearchTerm}%")
                 .OrWhereLike($"{nameof(User.FullName)}", $"%{request.SearchTerm}%"));
         }
@@ -238,12 +221,12 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         var selectQuery = query.Clone()
             .Select([
                 nameof(User.Id),
-                nameof(User.Username),
+                nameof(User.UserName),
                 nameof(User.Email),
                 nameof(User.FullName),
                 nameof(User.Avatar)
             ])
-            .OrderBy(nameof(User.Username))
+            .OrderBy(nameof(User.UserName))
             .Offset((request.Page - 1) * request.PageSize)
             .Limit(request.PageSize);
 
@@ -253,26 +236,12 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         var result = users.Select(user => new UserSelectDto
         {
             Id = user.Id.ToString(),
-            Username = user.Username,
+            UserName = user.UserName,
             Email = user.Email,
             FullName = user.FullName,
             Avatar = user.Avatar,
         }).ToList();
 
         return (result, totalCount);
-    }
-
-    // Helper DTO for string aggregation result
-    private class UserTableDtoWithRolesString
-    {
-        public string Id { get; set; }
-        public string Username { get; set; }
-        public string Avatar { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public string FullName { get; set; }
-        public bool IsActive { get; set; }
-        public bool isLocked { get; set; }
-        public string Roles { get; set; } // Comma-separated role names
     }
 }

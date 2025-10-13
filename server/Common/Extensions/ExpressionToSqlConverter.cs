@@ -19,7 +19,7 @@ namespace Common.Extensions
     public class SqlQueryResult
     {
         /// <summary>
-        /// Đoạn SQL WHERE sinh ra từ biểu thức predicate (ví dụ: "(Username = @p0 AND IsActive = @p1)").
+        /// Đoạn SQL WHERE sinh ra từ biểu thức predicate (ví dụ: "(UserName = @p0 AND IsActive = @p1)").
         /// </summary>
         public string WhereClause { get; set; } = string.Empty;
 
@@ -38,7 +38,7 @@ namespace Common.Extensions
     /// Các nút biểu thức được hỗ trợ:
     /// - So sánh nhị phân: ==, !=, &gt;, &gt;=, &lt;, &lt;=
     /// - Tổ hợp logic: <see cref="ExpressionType.AndAlso"/> (AND), <see cref="ExpressionType.OrElse"/> (OR), NOT
-    /// - Truy cập thuộc tính trên thực thể: ví dụ x =&gt; x.Username, x =&gt; x.IsActive
+    /// - Truy cập thuộc tính trên thực thể: ví dụ x =&gt; x.UserName, x =&gt; x.IsActive
     /// - Hằng số và biến đóng (closure) sẽ được trích giá trị và tham số hóa
     /// - Các phương thức: string.Contains, string.StartsWith, string.EndsWith, string.IsNullOrEmpty, và IEnumerable.Contains(value)
     /// </para>
@@ -46,7 +46,7 @@ namespace Common.Extensions
     /// Trình chuyển đổi này chỉ sinh phần WHERE. Cách chạy với Dapper:
     /// <code>
     /// var converter = new ExpressionToSqlConverter();
-    /// var result = converter.Convert<User>(x => x.Username == username && x.IsActive);
+    /// var result = converter.Convert<User>(x => x.UserName == username && x.IsActive);
     /// var sql = $"SELECT * FROM Users WHERE {result.WhereClause}";
     /// var rows = await connection.QueryAsync<User>(sql, result.Parameters);
     /// </code>

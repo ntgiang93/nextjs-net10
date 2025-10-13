@@ -77,6 +77,7 @@
     "confirmPassword": "Xác nhận mật khẩu",
     "oldPassword": "Mật khẩu cũ",
     "passwordMismatch": "Mật khẩu và xác nhận mật khẩu không khớp",
-    "resetPassword": "Đặt lại mật khẩu"
+    "resetPassword": "Đặt lại mật khẩu",
+    "userNameDesc": "Hệ thống sẽ tự động tạo tên đăng nhập nếu để trống."
   }
 }

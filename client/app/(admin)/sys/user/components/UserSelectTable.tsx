@@ -21,15 +21,10 @@ export default function UserSelectTable(props: IUserSelectTable) {
   const [selectedItems, setSelectedItems] = useState<string[]>([...selectedUserIds]);
   const { data, refetch, isFetching } = UserHook.useGetPaginationToSelect(filter);
 
-  // useEffect(() => {
-  //   onSeledtedChange(selectedItems);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [selectedItems]);
-
-    useEffect(() => {
-     onSeledtedChange(selectedUserIds);
+  useEffect(() => {
+    onSeledtedChange(selectedItems);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedUserIds]);
+  }, [selectedItems]);
 
   const columns = useMemo<ColumnDef<UserSelectDto>[]>(
     () => [
@@ -42,10 +37,12 @@ export default function UserSelectTable(props: IUserSelectTable) {
           return (
             <User
               avatarProps={{
-                src: row.original.avatar || `https://ui-avatars.com/api/?name=${row.original.fullName}`,
+                src:
+                  row.original.avatar ||
+                  `https://ui-avatars.com/api/?name=${row.original.fullName}`,
                 alt: 'Avatar',
               }}
-              name={row.original.username}
+              name={row.original.userName}
               description={row.original.fullName}
             />
           );

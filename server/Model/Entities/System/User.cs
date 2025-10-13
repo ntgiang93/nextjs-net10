@@ -6,7 +6,10 @@ namespace Model.Entities.System;
 [Table("Users")]
 public class User : BaseEntity<string>
 {
-    [Required] [StringLength(100)] public string Username { get; set; }
+    [Dapper.Contrib.Extensions.ExplicitKey]
+    public override string Id { get; set; }
+    [Required] [StringLength(100)] public string UserName { get; set; }
+    public int EmployeeCode { get; set; }
 
     [Required]
     [EmailAddress]
@@ -26,6 +29,6 @@ public class User : BaseEntity<string>
     public bool IsActive { get; set; } = true;
     public bool TwoFa { get; set; }
     public bool IsLocked { get; set; } = false;
-    public DateTime LockExprires { get; set; } = default;
+    public DateTime? LockExprires { get; set; }
     [StringLength(50)] public string? Language { get; set; }
 }

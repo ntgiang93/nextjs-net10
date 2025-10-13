@@ -27,7 +27,7 @@ public interface IUserRepository : IGenericRepository<User, string>
     /// </summary>
     /// <param name="prefix">The username prefix to search for</param>
     /// <returns>Last user with matching username prefixes</returns>
-    Task<User?> FindLastUserByUsernamePrefixAsync(string prefix);
+    Task<User?> FindLastUserByUserNamePrefixAsync(string prefix);
 
     /// <summary>
     ///     Retrieves a paginated list of users with total count based on the specified request criteria

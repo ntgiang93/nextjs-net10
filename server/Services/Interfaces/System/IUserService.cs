@@ -69,7 +69,7 @@ public interface IUserService : IGenericService<User, string>
     /// </summary>
     /// <param name="email">Email to validate</param>
     /// <param name="phoneNumber">Phone number to validate</param>
-    /// <param name="username">Username to validate</param>
+    /// <param name="username">UserName to validate</param>
     /// <param name="userId">User ID to exclude from validation (for updates)</param>
     /// <returns>True if all provided values are unique, otherwise false</returns>
     Task<bool> ValidateUniqueUser(string? email, string? phoneNumber, string? username, string userId = default);

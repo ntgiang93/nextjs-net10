@@ -90,8 +90,8 @@ public static class MessageList
             { EMessage.SuccessMsg, new Translations("Operation successful.", "Thao tác thành công.") },
             { EMessage.TokenInvalid, new Translations("Invalid token.", "Token không chính xác.") },
             {
-                EMessage.UsernameExisted,
-                new Translations("Username already exists.", "Tên tài khoản này đã tồn tại.")
+                EMessage.UserNameExisted,
+                new Translations("UserName already exists.", "Tên tài khoản này đã tồn tại.")
             },
             {
                 EMessage.UserNotFound,

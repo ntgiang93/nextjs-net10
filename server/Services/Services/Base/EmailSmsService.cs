@@ -32,7 +32,7 @@ public class EmailSmsService : IEmailSmsService
             {
                 EnableSsl = emailSettings.EnableSsl,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(emailSettings.Username, emailSettings.Password)
+                Credentials = new NetworkCredential(emailSettings.UserName, emailSettings.Password)
             };
 
             var from = new MailAddress(emailSettings.FromEmail, emailSettings.FromName);

@@ -1,7 +1,7 @@
-import { ESysModule } from '@/components/ui/layout/AuthHelper';
-import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { UserHook } from '@/hooks/user';
-import { EPermission } from '@/libs/AuthHelper';
+import { hasPermission } from '@/libs/AuthHelper';
+import { useAuthStore } from '@/store/auth-store';
+import { EPermission } from '@/types/base/Permission';
 import { UserDto } from '@/types/sys/User';
 import { Card, CardBody, CardHeader, Link, Spinner, addToast, useDisclosure } from '@heroui/react';
 import {
@@ -15,9 +15,8 @@ import {
 } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useRef } from 'react';
-import UserDetailModal from '../components/UserDetailModal';
 import ChangePasswordModal from '../components/ChangePasswordModal';
-import { useAuthStore } from '@/store/auth-store';
+import UserDetailModal from '../components/UserDetailModal';
 
 interface IActionCardProps {
   user: UserDto;
@@ -28,11 +27,14 @@ export default function ActionCard(props: IActionCardProps) {
   const { user, fetchUser } = props;
   const t = useTranslations('user');
   const msg = useTranslations('msg');
-  const { hasPermission } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { mutateAsync: updateAvatar, isPending } = UserHook.useUpdateAvatar();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { isOpen: isOpenChangePass, onOpen: openChangePass, onOpenChange: openChangeChangePass } = useDisclosure();
+  const {
+    isOpen: isOpenChangePass,
+    onOpen: openChangePass,
+    onOpenChange: openChangeChangePass,
+  } = useDisclosure();
   const { user: loginUser } = useAuthStore();
 
   // Hàm xử lý khi người dùng chọn file
@@ -71,7 +73,7 @@ export default function ActionCard(props: IActionCardProps) {
           <Link
             color="foreground"
             href="#"
-            hidden={!hasPermission(EPermission.Edition, ESysModule.Users)}
+            hidden={!hasPermission('User', EPermission.Edit)}
             onPress={onOpen}
           >
             {t('editUser')}
@@ -142,12 +144,12 @@ export default function ActionCard(props: IActionCardProps) {
         {!user.twoFa && (
           <div className="flex items-center text-primary gap-2">
             <ShieldUserIcon size={18} />
-            <Link href="#" hidden={!hasPermission(EPermission.Edition, ESysModule.Users)}>
+            <Link href="#" hidden={!hasPermission('User', EPermission.Edit)}>
               {t('enable2fa')}
             </Link>
           </div>
         )}
-        {hasPermission(EPermission.Edition, ESysModule.Users) && user.isLocked && (
+        {hasPermission('User', EPermission.Edit) && user.isLocked && (
           <div className="flex items-center text-danger gap-2">
             <ShieldUserIcon size={18} />
             <Link href="#" color="danger">
@@ -156,8 +158,17 @@ export default function ActionCard(props: IActionCardProps) {
           </div>
         )}
       </CardBody>
-      <UserDetailModal isOpen={isOpen} onOpenChange={onOpenChange} onRefresh={fetchUser} id={user.id} />
-      <ChangePasswordModal isOpen={isOpenChangePass} onOpenChange={openChangeChangePass} onRefresh={fetchUser} />
+      <UserDetailModal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        onRefresh={fetchUser}
+        id={user.id}
+      />
+      <ChangePasswordModal
+        isOpen={isOpenChangePass}
+        onOpenChange={openChangeChangePass}
+        onRefresh={fetchUser}
+      />
     </Card>
   );
 }

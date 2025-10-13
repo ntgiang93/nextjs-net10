@@ -24,6 +24,7 @@ export const PaginationInput = (props: IPaginationInput) => {
   }, [pageIndex]);
 
   useEffect(() => {
+    console.log('totalPage', totalPage);
     if (totalPage == 0) {
       const handleTotal = setTimeout(() => {
         setTotal(1);
