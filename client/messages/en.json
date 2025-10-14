@@ -77,6 +77,8 @@
     "oldPassword": "Old Password",
     "passwordMismatch": "Password and confirm password do not match",
     "resetPassword": "Reset Password",
-    "userNameDesc": "System will auto generate username if left empty."
+    "userNameDesc": "System will auto generate username if left empty.",
+    "activeUser": "Active user",
+    "inactiveUser": "Inactive user"
   }
 }

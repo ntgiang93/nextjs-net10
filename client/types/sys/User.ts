@@ -13,7 +13,7 @@ export type UserDto = {
   twoFa: boolean;
   lockExprires: Date;
   roles: string[];
-  roleIds: string[];
+  rolesName: string[];
 };
 
 export const defaultUserDto: UserDto = {
@@ -28,7 +28,7 @@ export const defaultUserDto: UserDto = {
   isLocked: false,
   lockExprires: new Date(),
   roles: [],
-  roleIds: [],
+  rolesName: [],
 };
 
 // Based on UpdateUserDto

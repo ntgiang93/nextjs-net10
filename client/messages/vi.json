@@ -78,6 +78,8 @@
     "oldPassword": "Mật khẩu cũ",
     "passwordMismatch": "Mật khẩu và xác nhận mật khẩu không khớp",
     "resetPassword": "Đặt lại mật khẩu",
-    "userNameDesc": "Hệ thống sẽ tự động tạo tên đăng nhập nếu để trống."
+    "userNameDesc": "Hệ thống sẽ tự động tạo tên đăng nhập nếu để trống.",
+    "activeUser": "Kích hoạt người dùng",
+    "inactiveUser": "Vô hiệu hóa người dùng"
   }
 }

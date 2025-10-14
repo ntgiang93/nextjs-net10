@@ -1,31 +1,33 @@
+import { JwtClaim } from './JwtClaim';
+
 export interface UserClaim {
   id: string;
   username: string; // Username
   email: string; // User email
-  firstName: string; // First name
-  lastName: string; // Last name
+  fullName: string; // First name
   language: string; // User language preference
-  role: string[];
+  role: number[];
+  roleCode: string;
 }
 
 export const defaultUserClaim: UserClaim = {
   id: '',
   username: '',
   email: '',
-  firstName: '',
-  lastName: '',
+  fullName: '',
   language: 'vi',
   role: [],
+  roleCode: '',
 };
 
-export const mapJwtClaimToUserClaim = (jwtClaim: any): UserClaim => {
+export const mapJwtClaimToUserClaim = (jwtClaim: JwtClaim): UserClaim => {
   return {
     id: jwtClaim?.nameid || '',
-    username: jwtClaim?.username || '',
+    username: jwtClaim?.name || '',
     email: jwtClaim?.email || '',
-    firstName: jwtClaim?.firstName || '',
-    lastName: jwtClaim?.lastName || '',
-    language: jwtClaim?.language || 'en-US',
+    fullName: jwtClaim?.FullName || '',
+    language: jwtClaim?.Language || 'en-US',
     role: jwtClaim?.role || [],
+    roleCode: jwtClaim?.RoleCode || '',
   };
 };

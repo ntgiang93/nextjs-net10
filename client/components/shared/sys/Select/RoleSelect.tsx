@@ -1,9 +1,9 @@
 'use client';
 
 import { RoleHook } from '@/hooks/role';
-import { Select, SelectItem } from '@heroui/react';
+import { Select, SelectItem, Selection } from '@heroui/react';
 import { useTranslations } from 'next-intl';
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
 
 interface IRoleSelectProps {
   value: string[];
@@ -28,17 +28,22 @@ export default function RoleSelect({
 }: IRoleSelectProps) {
   const { data, isLoading } = RoleHook.useGetAll();
   const t = useTranslations('role');
-  const [selected, setSelected] = useState<string[]>();
 
-  useEffect(() => {
-    const debouncedOnChange = setTimeout(() => {
-      if (selected) onChange(selected);
-    }, 400);
-    return () => {
-      clearTimeout(debouncedOnChange);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selected]);
+  const items = useMemo(
+    () =>
+      (data ?? []).map((item) => ({
+        key: item.id,
+        label: item.name,
+      })),
+    [data],
+  );
+
+  const selectedKeys = useMemo(() => new Set<string>(value ?? []), [value]);
+
+  const handleSelectionChange = (keys: Selection) => {
+    if (keys === 'all') return;
+    onChange(Array.from(keys as Set<string>));
+  };
 
   return (
     <Select
@@ -46,18 +51,13 @@ export default function RoleSelect({
       isLoading={isLoading}
       isVirtualized
       variant={variant}
-      items={data.map((item) => {
-        return { key: item.id, label: item.name };
-      })}
+      items={items}
       label={label}
       selectionMode={selectionMode}
       labelPlacement={labelPlacement}
-      defaultSelectedKeys={[...value]}
+      selectedKeys={selectedKeys}
+      onSelectionChange={handleSelectionChange}
       maxListboxHeight={200}
-      onChange={(e) => {
-        const values = e.target.value.split(',') as string[];
-        setSelected(values);
-      }}
       isRequired={isRequired}
       placeholder={t('selectRole')}
       className={className}

@@ -109,16 +109,4 @@ public class AuthController : ControllerBase
         if (result) return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
-
-    /// <summary>
-    ///     Changes a user's password and revokes all active sessions
-    /// </summary>
-    [HttpPost("change-password")]
-    [Authorize]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
-    {
-        var result = await _authService.ChangePasswordAsync(model.OldPassword, model.NewPassword);
-        if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
-        return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
-    }
 }

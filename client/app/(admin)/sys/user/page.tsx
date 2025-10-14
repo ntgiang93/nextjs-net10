@@ -9,9 +9,15 @@ import { UserHook } from '@/hooks/user';
 import { defaultUserTableRequest, UserTableDto, UserTableRequestDto } from '@/types/sys/User';
 import { Button, Chip, Select, SelectItem, Tooltip, useDisclosure, User } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Add01Icon, Delete02Icon, Edit01Icon, UserAccountIcon } from 'hugeicons-react';
+import {
+  Add01Icon,
+  Edit01Icon,
+  UserAccountIcon,
+  UserCheck01Icon,
+  UserRemove01Icon,
+} from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import UserDetailModal from './components/UserDetailModal';
 
 export default function Menu() {
@@ -23,9 +29,15 @@ export default function Menu() {
   });
   const { data, refetch, isFetching } = UserHook.useGetPagination(filter);
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
-  const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
-  const [selectUserId, setSelectUserId] = useState<string>('');
-  const { mutateAsync: del, isSuccess: delSuccess } = UserHook.useDelete(selectUserId);
+  const {
+    isOpen: IsOpenActive,
+    onOpen: onOpenActive,
+    onOpenChange: OnOpenActiveChange,
+  } = useDisclosure();
+  const [selectUser, setSelectUser] = useState<UserTableDto | undefined>(undefined);
+  const { mutateAsync: changeActive, isSuccess: changeActiveSuccess } = UserHook.useChangeActive(
+    selectUser?.id || '',
+  );
   const { navigate } = useAuth();
 
   const columns = useMemo<ColumnDef<UserTableDto>[]>(
@@ -138,29 +150,49 @@ export default function Menu() {
                   radius="full"
                   size="sm"
                   onPress={() => {
-                    setSelectUserId(row.original.id);
+                    setSelectUser(row.original);
                     onOpen();
                   }}
                 >
                   <Edit01Icon size={16} />
                 </Button>
               </Tooltip>
-              <Tooltip color="danger" content={msg('delete')}>
-                <Button
-                  isIconOnly
-                  aria-label="delete-button"
-                  color="danger"
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                  onPress={() => {
-                    setSelectUserId(row.original.id);
-                    onOpenDel();
-                  }}
-                >
-                  <Delete02Icon size={16} />
-                </Button>
-              </Tooltip>
+              {row.original.isActive && (
+                <Tooltip color="danger" content={t('inactiveUser')}>
+                  <Button
+                    isIconOnly
+                    aria-label="deactive-button"
+                    color="danger"
+                    variant="light"
+                    radius="full"
+                    size="sm"
+                    onPress={() => {
+                      setSelectUser(row.original);
+                      onOpenActive();
+                    }}
+                  >
+                    <UserRemove01Icon size={16} />
+                  </Button>
+                </Tooltip>
+              )}
+              {!row.original.isActive && (
+                <Tooltip color="success" content={t('activeUser')}>
+                  <Button
+                    isIconOnly
+                    aria-label="active-button"
+                    color="success"
+                    variant="light"
+                    radius="full"
+                    size="sm"
+                    onPress={() => {
+                      setSelectUser(row.original);
+                      onOpenActive();
+                    }}
+                  >
+                    <UserCheck01Icon size={16} />
+                  </Button>
+                </Tooltip>
+              )}
             </div>
           );
         },
@@ -169,7 +201,7 @@ export default function Menu() {
         },
       },
     ],
-    [navigate, onOpenDel],
+    [navigate, onOpenActive],
   );
 
   const pages = useMemo(() => {
@@ -177,11 +209,15 @@ export default function Menu() {
     else return Math.ceil(data.totalCount / filter.pageSize) || 1;
   }, [data?.totalCount, filter.pageSize]);
 
-  useEffect(() => {
-    refetch();
-    setSelectUserId('');
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [delSuccess]);
+  const handleChangeActive = () => {
+    changeActive(undefined, {
+      onSuccess: () => {
+        // ✅ Callback được gọi sau khi mutation thành công
+        refetch();
+        setSelectUser(undefined);
+      },
+    });
+  };
 
   return (
     <div className={'h-full flex flex-col gap-2'}>
@@ -194,7 +230,7 @@ export default function Menu() {
               startContent={<Add01Icon size={16} />}
               variant="shadowSmall"
               onPress={() => {
-                setSelectUserId('');
+                setSelectUser(undefined);
                 onOpen();
               }}
             >
@@ -262,15 +298,15 @@ export default function Menu() {
         isOpen={isOpen}
         onOpenChange={onOpenChange}
         onRefresh={refetch}
-        id={selectUserId}
+        id={selectUser?.id || ''}
       />
       <ConfirmModal
-        isOpen={IsOpenDel}
-        title="Delete Menu"
-        message="Do you want to delete this menu.This action cannot be undone."
-        confirmColor="danger"
-        onOpenChange={OnOpenDelChange}
-        onConfirm={() => del()}
+        isOpen={IsOpenActive}
+        title={selectUser?.isActive ? t('inactiveUser') : t('activeUser')}
+        confirmColor={selectUser?.isActive ? 'danger' : 'success'}
+        onOpenChange={OnOpenActiveChange}
+        onConfirm={() => handleChangeActive()}
+        objectName={[`${selectUser?.fullName} - ${selectUser?.userName}`]}
       />
     </div>
   );

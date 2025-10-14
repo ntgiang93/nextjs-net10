@@ -1,7 +1,7 @@
-import { useAuthStore } from "@/store/auth-store";
-import { EPermission } from "@/types/base/Permission";
-import { RolePermissionDto } from "@/types/sys/Role";
-
+import { useAuthStore } from '@/store/auth-store';
+import { EPermission } from '@/types/base/Permission';
+import { SysRoles } from '@/types/constant/SysRoles';
+import { RolePermissionDto } from '@/types/sys/Role';
 
 export const hasPermission = (sysModule: string, required: EPermission): boolean => {
   // Assuming you have an auth store that provides user permissions
@@ -10,8 +10,16 @@ export const hasPermission = (sysModule: string, required: EPermission): boolean
 
   const authStore = useAuthStore(); // or however you access your auth store
   const userPermissions = authStore.permissions || [];
-  // Check if user has the required permission for the specific module
-  return userPermissions?.some((permission: RolePermissionDto) => 
-    permission.sysModule === sysModule && (permission.permission && required)=== required
-  ) || false;
+  const userClaim = authStore.user || undefined;
+  if (userClaim) {
+    const userRoleCodes = userClaim.roleCode.split(';');
+    return userRoleCodes.includes(SysRoles.SuperAdmin); // SuperAdmin has all permissions
+  } else
+    // Check if user has the required permission for the specific module
+    return (
+      userPermissions?.some(
+        (permission: RolePermissionDto) =>
+          permission.sysModule === sysModule && (permission.permission && required) === required,
+      ) || false
+    );
 };

@@ -1,9 +1,18 @@
-import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { UserProfileHook } from '@/hooks/userProfile';
 import { UserDto } from '@/types/sys/User';
 import { defaultUserProfileDto, UserProfileDto } from '@/types/sys/UserProfile';
-import { parseDate, parseDateTime } from '@internationalized/date';
-import { Button, Card, CardBody, CardFooter, DatePicker, Form, Input, Select, SelectItem } from '@heroui/react';
+import {
+  Button,
+  Card,
+  CardBody,
+  CardFooter,
+  DatePicker,
+  Form,
+  Input,
+  Select,
+  SelectItem,
+} from '@heroui/react';
+import { parseDateTime } from '@internationalized/date';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -15,7 +24,6 @@ export default function UserProfileForm(props: IUserProfileFormProps) {
   const { user } = props;
   const t = useTranslations('user');
   const msg = useTranslations('msg');
-  const { hasPermission } = useAuth();
   const [form, setForm] = useState<UserProfileDto>({ ...defaultUserProfileDto });
   const { data, isFetching, refetch } = UserProfileHook.useGetUserProfile(user.id);
   const { mutateAsync: save, isPending } = UserProfileHook.useSave();
@@ -39,7 +47,11 @@ export default function UserProfileForm(props: IUserProfileFormProps) {
   return (
     <Card className="border-none shadow-none h-full">
       <CardBody>
-        <Form className="w-full max-w-[700px] justify-start" onSubmit={onSubmit} id="user-profile-form">
+        <Form
+          className="w-full max-w-[700px] justify-start"
+          onSubmit={onSubmit}
+          id="user-profile-form"
+        >
           <div className="flex flex-col gap-4 w-full">
             <Input
               label={t('address')}

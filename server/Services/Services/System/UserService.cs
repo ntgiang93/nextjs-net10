@@ -126,7 +126,7 @@ public class UserService : GenericService<User, string>, IUserService
             await _userRoleService.AddUserRoleAsync(model.Roles.Select(r => new UserRole()
             {
                 UserId = id,
-                RoleId = int.Parse(r)
+                RoleId = r
             }));
         }
 
@@ -148,7 +148,7 @@ public class UserService : GenericService<User, string>, IUserService
             await _userRoleService.UpdateUserRoleAsync(model.Roles.Select(r => new UserRole()
             {
                 UserId = user.Id,
-                RoleId = int.Parse(r)
+                RoleId = r
             }), user.Id);
         }
 

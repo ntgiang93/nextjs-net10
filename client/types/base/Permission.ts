@@ -5,5 +5,5 @@ export enum EPermission {
   Edit = 1 << 2,
   Delete = 1 << 3,
   Approve = 1 << 4,
-  All = View | Create | Edit | Delete | Approve 
+  All = View | Create | Edit | Delete | Approve,
 }

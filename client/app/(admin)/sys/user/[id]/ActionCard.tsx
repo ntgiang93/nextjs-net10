@@ -14,7 +14,7 @@ import {
   TelephoneIcon,
 } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import ChangePasswordModal from '../components/ChangePasswordModal';
 import UserDetailModal from '../components/UserDetailModal';
 
@@ -60,7 +60,10 @@ export default function ActionCard(props: IActionCardProps) {
   };
 
   console.log('user', user);
-  console.log('loginUser', loginUser);
+
+  const isCurrentUser = useMemo(() => {
+    return loginUser?.id === user.id;
+  }, [loginUser, user]);
 
   return (
     <Card className="md:col-span-2">
@@ -68,44 +71,43 @@ export default function ActionCard(props: IActionCardProps) {
         <h4 className="text-lg font-semibold">{t('changeAccountInfo')}</h4>
       </CardHeader>
       <CardBody className="flex  flex-col gap-4 text-sm h-max overflow-hidden">
-        <div className="flex items-center gap-2">
-          <Edit01Icon size={18} />
-          <Link
-            color="foreground"
-            href="#"
-            hidden={!hasPermission('User', EPermission.Edit)}
-            onPress={onOpen}
-          >
-            {t('editUser')}
-          </Link>
-        </div>
-        <div className="flex items-center gap-2">
-          <Image02Icon size={18} />
-          {isPending && <Spinner variant="dots" classNames={{ base: 'h-5' }} />}
-          {!isPending && (
-            <Link
-              color="foreground"
-              href="#"
-              onClick={(e) => {
-                e.preventDefault();
-                handleAvatarClick();
-              }}
-              isDisabled={isPending}
-            >
-              {t('changeAvatar')}
+        {hasPermission('User', EPermission.Edit) && (
+          <div className="flex items-center gap-2">
+            <Edit01Icon size={18} />
+            <Link color="foreground" href="#" onPress={onOpen}>
+              {msg('edit')}
             </Link>
-          )}
-          {/* Input file ẩn */}
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleFileChange}
-            accept="image/*"
-            className="hidden"
-            aria-label={t('changeAvatar')}
-          />
-        </div>
-        {loginUser?.id === user.id && (
+          </div>
+        )}
+        {isCurrentUser && (
+          <div className="flex items-center gap-2">
+            <Image02Icon size={18} />
+            {isPending && <Spinner variant="dots" classNames={{ base: 'h-5' }} />}
+            {!isPending && (
+              <Link
+                color="foreground"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleAvatarClick();
+                }}
+                isDisabled={isPending}
+              >
+                {t('changeAvatar')}
+              </Link>
+            )}
+            {/* Input file ẩn */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              accept="image/*"
+              className="hidden"
+              aria-label={t('changeAvatar')}
+            />
+          </div>
+        )}
+        {isCurrentUser && (
           <>
             <div className="flex items-center gap-2">
               <MailAccount01Icon size={18} />
@@ -133,7 +135,7 @@ export default function ActionCard(props: IActionCardProps) {
             {t('resetPassword')}
           </Link>
         </div>
-        {user.twoFa && (
+        {user.twoFa && isCurrentUser && (
           <div className="flex items-center text-danger gap-2">
             <ShieldUserIcon size={18} />
             <Link href="#" color="danger">
@@ -141,12 +143,10 @@ export default function ActionCard(props: IActionCardProps) {
             </Link>
           </div>
         )}
-        {!user.twoFa && (
+        {!user.twoFa && isCurrentUser && (
           <div className="flex items-center text-primary gap-2">
             <ShieldUserIcon size={18} />
-            <Link href="#" hidden={!hasPermission('User', EPermission.Edit)}>
-              {t('enable2fa')}
-            </Link>
+            <Link href="#">{t('enable2fa')}</Link>
           </div>
         )}
         {hasPermission('User', EPermission.Edit) && user.isLocked && (

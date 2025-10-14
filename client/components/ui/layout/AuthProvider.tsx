@@ -111,7 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const accessToken = response.data.accessToken;
         if (accessToken) {
           const jwtClaim = JwtHelper.decodeToken(accessToken);
-          console.log('JWT Claim:', jwtClaim);
           if (jwtClaim) {
             setToken(accessToken);
             setExpiredAt(jwtClaim?.exp);

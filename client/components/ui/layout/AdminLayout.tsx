@@ -27,7 +27,12 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <div className={clsx(`text-foreground bg-background`, 'min-h-screen flex flex-row')}>
+    <div
+      className={clsx(
+        `text-foreground bg-background overflow-hidden`,
+        'min-h-screen flex flex-row',
+      )}
+    >
       {/* SidebarMenu */}
       <aside
         className={clsx(
@@ -66,7 +71,11 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       {/* SidebarMenu và Main content */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <Topbar toggleSidebar={onOpen} setCompactMode={() => setIsCompact(!isCompact)} isCompact={isCompact} />
+        <Topbar
+          toggleSidebar={onOpen}
+          setCompactMode={() => setIsCompact(!isCompact)}
+          isCompact={isCompact}
+        />
         {/* Main content */}
         <main className="bg-primary-50 flex-1 p-4 rounded-xl shadow-inner overflow-auto">
           {navigating && <PageContentSkeleton />}

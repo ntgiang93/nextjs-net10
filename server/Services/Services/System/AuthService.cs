@@ -194,8 +194,50 @@ public class AuthService : IAuthService
         var success = await _userService.UpdateAsync(user);
         if (success)
             // Revoke all tokens for this user
-            await RevokeAllUserRoleAsync(currentUser.UserId);
+            await RevokeAllUserTokenAsync(user.Id);
         return success;
+    }
+
+    public async Task<bool> ResetPasswordAsync(string userId)
+    {
+        var user = await _userService.GetByIdAsync<User>(userId);
+        if (user == null)
+            throw new NotFoundException(_sysMsg.Get(EMessage.UserNotFound), "USER_NOT_FOUND");
+        string newPassword = new Guid().ToString();
+
+        // Update password
+        user.PasswordHash = PasswordHelper.HashPassword(newPassword);
+        var success = await _userService.UpdateAsync(user);
+        if (success)
+            // Revoke all tokens for this user
+            await RevokeAllUserTokenAsync(userId);
+        return success;
+    }
+
+    private async Task SendPasswordChangeEmail(string password, string toEmail)
+    {
+        var template = await _emailSmsService.GetEmailTemplate("ResetPassword.html");
+        if (!string.IsNullOrEmpty(template))
+        {
+            var appName = _appSettings?.EmailConfiguration?.SMTP?.FromName ?? "App";
+            var supportEmail = _appSettings?.EmailConfiguration?.SMTP?.FromEmail ?? toEmail;
+            var loginUrl = ($"{_appSettings?.FileDomain ?? string.Empty}").TrimEnd('/') + "/login";
+            var body = template
+                .Replace("{{AppName}}", appName)
+                .Replace("{{UserName}}", toEmail)
+                .Replace("{{NewPassword}}", password)
+                .Replace("{{ActionUrl}}", loginUrl)
+                .Replace("{{SupportEmail}}", supportEmail)
+                .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+
+            await _emailSmsService.SendSMTPEmailAsync(new EmailMessage
+            {
+                Subject = "Mật khẩu của bạn đã được đặt lại",
+                Body = body,
+                ToEmail = toEmail,
+                IsHtml = true
+            });
+        }
     }
 
     private async Task ValidateRegister(RegisterUserDto registerDto)
@@ -233,9 +275,8 @@ public class AuthService : IAuthService
         await _emailSmsService.SendSmsAsync(phoneNumber, content);
     }
 
-    private async Task RevokeAllUserRoleAsync(string userId)
+    private async Task RevokeAllUserTokenAsync(string userId)
     {
-        var user = UserContext.Current;
         var sessions = await _userTokenService.FindAsync<UserToken>(x => x.UserId == userId && x.IsDeleted == false);
         await RevokeTokenAssync(sessions.Select(x => x.Device).ToList());
     }

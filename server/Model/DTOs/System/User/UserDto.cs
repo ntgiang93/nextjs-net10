@@ -13,5 +13,6 @@ public class UserDto
     public bool isLocked { get; set; }
     public DateTime? LockExprires { get; set; }
     public List<int> Roles { get; set; }
+    public List<string> RolesName { get; set; }
 
 }

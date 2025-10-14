@@ -48,8 +48,7 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
         // Get user details
         var userQuery = new Query($"{nameof(User)}s")
             .Where(nameof(User.Id), userId)
-            .Where(nameof(User.IsDeleted), false)
-            .Where(nameof(User.IsActive), true);
+            .Where(nameof(User.IsDeleted), false);
 
         var userSql = _compiler.Compile(userQuery);
         using var connection = _dbFactory.Connection;
@@ -66,8 +65,6 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
 
         var roleSql = _compiler.Compile(roleQuery);
         var roleData = await connection.QueryAsync<(string Name, int Id)>(roleSql.Sql, roleSql.NamedBindings);
-        
-        var roles = roleData.Select(r => r.Id).ToList();
 
         return new UserDto
         {
@@ -81,7 +78,8 @@ public class UserRepository : GenericRepository<User, string>, IUserRepository
             TwoFa = user.TwoFa,
             isLocked = user.IsLocked,
             LockExprires = user.LockExprires,
-            Roles = roles,
+            Roles = roleData.Select(r => r.Id).ToList(),
+            RolesName = roleData.Select(r => r.Name).ToList()
         };
     }
 

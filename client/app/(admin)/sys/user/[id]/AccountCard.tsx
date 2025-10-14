@@ -1,13 +1,13 @@
 import { UserDto } from '@/types/sys/User';
-import { Card, CardBody, User, Chip, Skeleton } from '@heroui/react';
+import { Card, CardBody, Chip, Skeleton, User } from '@heroui/react';
 import dayjs from 'dayjs';
 import {
   CheckmarkCircle03Icon,
-  UserLock01Icon,
-  UserIcon,
   MailAtSign01Icon,
-  TelephoneIcon,
   ShieldUserIcon,
+  TelephoneIcon,
+  UserIcon,
+  UserLock01Icon,
 } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 interface IAccountCardProps {
@@ -74,7 +74,7 @@ export default function AccountCard(props: IAccountCardProps) {
             )}
             <div className="flex items-center gap-2">
               <UserIcon size={16} />
-              <span>{user.username}</span>
+              <span>{user.userName}</span>
             </div>
             <div className="flex items-center gap-2">
               <MailAtSign01Icon size={16} />
@@ -97,7 +97,7 @@ export default function AccountCard(props: IAccountCardProps) {
               </div>
             )}
             <div className="flex gap-2">
-              {user.roles?.map((r) => (
+              {user.rolesName?.map((r) => (
                 <Chip key={r} variant="flat">
                   {r}
                 </Chip>

@@ -30,7 +30,7 @@ export const useGetPagination = (params: UserTableRequestDto) => {
       }
       return defualtPaginatedResult;
     },
-    placeholderData: keepPreviousData,
+    placeholderData: keepPreviousData || defualtPaginatedResult,
   });
 };
 
@@ -46,7 +46,7 @@ export const useGetPaginationToSelect = (params: PaginationFilter) => {
       }
       return defualtPaginatedResult;
     },
-    initialData: defualtPaginatedResult,
+    placeholderData: keepPreviousData || defualtPaginatedResult,
   });
 };
 
@@ -54,15 +54,13 @@ export const useGet = (id: string) => {
   return useQuery<UserDto, Error>({
     queryKey: [endpoint, 'get', id],
     queryFn: async () => {
-      if (id != undefined && id !== '') {
-        const response = await apiService.get<ApiResponse<UserDto>>(`${endpoint}/${id}`);
-        if (response.success && response.data) {
-          return response.data;
-        }
+      const response = await apiService.get<ApiResponse<UserDto>>(`${endpoint}/${id}`);
+      if (response.success && response.data) {
+        return response.data;
       }
       return { ...defaultUserDto };
     },
-    placeholderData: { ...defaultUserDto },
+    enabled: id != undefined && id !== '',
   });
 };
 
@@ -78,7 +76,7 @@ export const useGetPermissions = () => {
       }
       return [];
     },
-    initialData: [],
+    placeholderData: keepPreviousData || [],
   });
 };
 
@@ -94,10 +92,10 @@ export const useSaveUser = () => {
   });
 };
 
-export const useDelete = (id: string) => {
+export const useChangeActive = (id: string) => {
   return useMutation({
     mutationFn: async () => {
-      await apiService.delete<ApiResponse<MenuItem>>(`${endpoint}/${id}`);
+      await apiService.put<ApiResponse<boolean>>(`${endpoint}/${id}/change-active-status`);
     },
   });
 };
@@ -117,7 +115,7 @@ export const UserHook = {
   useGetPaginationToSelect,
   useGet,
   useSaveUser,
-  useDelete,
+  useChangeActive,
   useGetPermissions,
   useUpdateAvatar, // Add the new hook to the exported object
 };

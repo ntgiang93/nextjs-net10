@@ -11,6 +11,7 @@ using Model.Entities.System;
 using Model.Models;
 using Service.Interfaces;
 using Service.Interfaces.Base;
+using Service.Services;
 using System.Net;
 
 namespace NextDotNet.Api.Controllers;
@@ -90,8 +91,6 @@ public class UserController : ControllerBase
     [Policy(ESysModule.Users, EPermission.Create)]
     public async Task<IActionResult> Create([FromBody] CreateUserDto createUserDto)
     {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
         var result = await _userService.CreateUserAsync(createUserDto);
         if (result == null) return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
         return Ok(ApiResponse<string>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
@@ -123,11 +122,10 @@ public class UserController : ControllerBase
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
 
-    [HttpPut("change-active-status")]
+    [HttpPut("{id}/change-active-status")]
     [Policy(ESysModule.Users, EPermission.Edit)]
-    public async Task<IActionResult> ChangeActiveStatus([FromBody] string id)
+    public async Task<IActionResult> ChangeActiveStatus(string id)
     {
-        var currentUser = UserContext.Current;
         var result = await _userService.ChangeActiveStatus(id);
         if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
@@ -155,7 +153,31 @@ public class UserController : ControllerBase
         if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
-    
+
+    /// <summary>
+    ///     Changes a user's password and revokes all active sessions
+    /// </summary>
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
+    {
+        var result = await _authService.ChangePasswordAsync(model.OldPassword, model.NewPassword);
+        if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+    }
+
+    /// <summary>
+    ///     Changes a user's password and revokes all active sessions
+    /// </summary>
+    [HttpPost("reset-password")]
+    [Authorize]
+    public async Task<IActionResult> ResetPassword([FromBody] )
+    {
+        var result = await _authService.ChangePasswordAsync(model.OldPassword, model.NewPassword);
+        if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+    }
+
     // DELETE methods
     // No DELETE methods currently defined
 }

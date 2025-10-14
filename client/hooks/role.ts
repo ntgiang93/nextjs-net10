@@ -2,13 +2,21 @@
 
 import { ApiResponse } from '@/types/base/ApiResponse';
 import { MenuItem } from '@/types/sys/Menu';
-import { defaultRoleDto, RoleDto, RoleMembersDto, RolePermissionDto, UserRoleDto } from '@/types/sys/Role';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import {
+  defaultRoleDto,
+  RoleDto,
+  RoleMembersDto,
+  RolePermissionDto,
+  UserRoleDto,
+} from '@/types/sys/Role';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../services/api';
 
 const endpoint = 'role';
 
 export const useGetAll = () => {
+  const queryClient = useQueryClient();
+  const cachedData = queryClient.getQueryData<RoleDto[]>([endpoint, 'getAll']);
   return useQuery<RoleDto[], Error>({
     queryKey: [endpoint, 'getAll'],
     queryFn: async () => {
@@ -18,7 +26,8 @@ export const useGetAll = () => {
       }
       return [];
     },
-    initialData: [],
+    placeholderData: [],
+    enabled: !cachedData || cachedData.length === 0,
   });
 };
 
@@ -32,7 +41,7 @@ export const useGet = (id: number) => {
       }
       return { ...defaultRoleDto };
     },
-    placeholderData: { ...defaultRoleDto },
+    placeholderData: keepPreviousData || { ...defaultRoleDto },
     enabled: id > 0,
   });
 };
@@ -41,13 +50,15 @@ export const useGetMember = (roleId: number) => {
   return useQuery<RoleMembersDto[], Error>({
     queryKey: [endpoint, 'useGetMember', roleId],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<RoleMembersDto[]>>(`${endpoint}/${roleId}/get-members`);
+      const response = await apiService.get<ApiResponse<RoleMembersDto[]>>(
+        `${endpoint}/${roleId}/get-members`,
+      );
       if (response.success && response.data) {
         return response.data;
       }
       return [];
     },
-    initialData: [],
+    placeholderData: keepPreviousData || [],
     enabled: roleId > 0,
   });
 };
@@ -56,13 +67,15 @@ export const useGetPermission = (roleId: number) => {
   return useQuery<RolePermissionDto[], Error>({
     queryKey: [endpoint, 'useGetPermission', roleId],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<RolePermissionDto[]>>(`${endpoint}/${roleId}/permissions`);
+      const response = await apiService.get<ApiResponse<RolePermissionDto[]>>(
+        `${endpoint}/${roleId}/permissions`,
+      );
       if (response.success && response.data) {
         return response.data;
       }
       return [];
     },
-    initialData: [],
+    placeholderData: keepPreviousData || [],
     enabled: roleId > 0,
   });
 };
@@ -82,7 +95,10 @@ export const useSave = () => {
 export const useAssignPermission = (roleId: number) => {
   return useMutation({
     mutationFn: async (permission: RolePermissionDto[]) => {
-      return await apiService.post<ApiResponse<any>>(`${endpoint}/${roleId}/permissions`, permission);
+      return await apiService.post<ApiResponse<any>>(
+        `${endpoint}/${roleId}/permissions`,
+        permission,
+      );
     },
   });
 };
@@ -90,7 +106,10 @@ export const useAssignPermission = (roleId: number) => {
 export const useAssignMember = (roleId: number) => {
   return useMutation({
     mutationFn: async (userRole: UserRoleDto[]) => {
-      return await apiService.post<ApiResponse<any>>(`${endpoint}/${roleId}/assign-members`, userRole);
+      return await apiService.post<ApiResponse<any>>(
+        `${endpoint}/${roleId}/assign-members`,
+        userRole,
+      );
     },
   });
 };
@@ -106,7 +125,9 @@ export const useDelete = (id: number) => {
 export const useRemoveMember = (roleId: number, userId: string) => {
   return useMutation({
     mutationFn: async () => {
-      await apiService.delete<ApiResponse<MenuItem>>(`${endpoint}/${roleId}/remove-member/${userId}`);
+      await apiService.delete<ApiResponse<MenuItem>>(
+        `${endpoint}/${roleId}/remove-member/${userId}`,
+      );
     },
   });
 };

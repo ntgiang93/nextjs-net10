@@ -248,7 +248,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
                       <TableCell
                         key={cell.id}
                         width={cell.column.getSize()}
-                        className="whitespace-nowrap truncate border-b py-1"
+                        className="whitespace-nowrap truncate border-b border-default/50 py-1"
                       >
                         <div
                           className={`flex items-center justify-${cell.column.columnDef.meta?.align}`}

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đổi email - {{AppName}}</title>
+  <style>
+    body { font-family: Arial, Helvetica, sans-serif; background:#f6f9fc; color:#333; margin:0; padding:0; }
+    .container { max-width:600px; margin:30px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.06); }
+    .header { background:#0d6efd; color:#fff; padding:16px 24px; font-size:18px; font-weight:600; }
+    .content { padding:24px; }
+    .btn { display:inline-block; background:#0d6efd; color:#fff !important; text-decoration:none; padding:12px 20px; border-radius:6px; font-weight:600; }
+    .note { color:#666; font-size:13px; margin-top:16px; }
+    .footer { padding:16px 24px; color:#777; font-size:12px; background:#fafafa; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">Xác nhận đổi địa chỉ email</div>
+    <div class="content">
+      <p>Xin chào {{UserName}},</p>
+      <p>Bạn vừa yêu cầu đổi địa chỉ email đăng nhập trên {{AppName}} thành {{NewEmail}}. Nhấn nút bên dưới để xác nhận thay đổi.</p>
+      <p style="margin:24px 0;">
+        <a class="btn" href="{{ActionUrl}}" target="_blank" rel="noopener">Xác nhận đổi email</a>
+      </p>
+      <p class="note">Liên kết có hiệu lực trong {{ExpiryHours}} giờ. Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email.</p>
+      <p class="note">Hỗ trợ: {{SupportEmail}}</p>
+    </div>
+    <div class="footer">© {{Year}} {{AppName}}. Mọi quyền được bảo lưu.</div>
+  </div>
+</body>
+</html>

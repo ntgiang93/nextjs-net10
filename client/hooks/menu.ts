@@ -1,10 +1,9 @@
 'use client';
 
 import { ApiResponse } from '@/types/base/ApiResponse';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiService } from '../services/api';
 import { defaultMenuItem, MenuItem, SaveMenuDto } from '@/types/sys/Menu';
-import dayjs from 'dayjs';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { apiService } from '../services/api';
 
 const endpoint = 'menu';
 
@@ -18,8 +17,7 @@ export const useGetUserMenu = () => {
       }
       return [];
     },
-    initialData: [],
-    initialDataUpdatedAt: dayjs().add(-5, 'second').valueOf(), // Set initial data to be stale
+    placeholderData: keepPreviousData || [],
     refetchOnMount: true,
   });
 };
@@ -36,9 +34,8 @@ export const useGetMenuTree = () => {
       }
       return [];
     },
-    initialData: [],
+    placeholderData: keepPreviousData || [],
     enabled: !cachedData || cachedData.length === 0,
-    retry: 1,
   });
 };
 
@@ -52,9 +49,8 @@ export const useGet = (id: number) => {
       }
       return { ...defaultMenuItem };
     },
-    initialData: { ...defaultMenuItem },
+    placeholderData: keepPreviousData || { ...defaultMenuItem },
     enabled: id > 0,
-    retry: 1,
   });
 };
 
