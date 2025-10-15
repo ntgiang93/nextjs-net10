@@ -1,3 +1,5 @@
+import { ConfirmModal } from '@/components/ui/overlay/ConfirmModal';
+import { AuthHook } from '@/hooks/auth';
 import { UserHook } from '@/hooks/user';
 import { hasPermission } from '@/libs/AuthHelper';
 import { useAuthStore } from '@/store/auth-store';
@@ -29,11 +31,17 @@ export default function ActionCard(props: IActionCardProps) {
   const msg = useTranslations('msg');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { mutateAsync: updateAvatar, isPending } = UserHook.useUpdateAvatar();
+  const { mutateAsync: resetPassword, isPending: isPendingReset } = AuthHook.useResetPassword();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const {
     isOpen: isOpenChangePass,
     onOpen: openChangePass,
     onOpenChange: openChangeChangePass,
+  } = useDisclosure();
+  const {
+    isOpen: isOpenResetPass,
+    onOpen: openResetPass,
+    onOpenChange: openChangeResetPass,
   } = useDisclosure();
   const { user: loginUser } = useAuthStore();
 
@@ -59,7 +67,11 @@ export default function ActionCard(props: IActionCardProps) {
     fileInputRef.current?.click();
   };
 
-  console.log('user', user);
+  const handleResetPassword = () => {
+    resetPassword(user.id).then(() => {
+      openChangeResetPass(); // Đóng modal
+    });
+  };
 
   const isCurrentUser = useMemo(() => {
     return loginUser?.id === user.id;
@@ -131,7 +143,7 @@ export default function ActionCard(props: IActionCardProps) {
         )}
         <div className="flex items-center gap-2">
           <ResetPasswordIcon size={18} />
-          <Link color="foreground" href="#" onPress={openChangePass}>
+          <Link color="foreground" href="#" onPress={openResetPass}>
             {t('resetPassword')}
           </Link>
         </div>
@@ -168,6 +180,15 @@ export default function ActionCard(props: IActionCardProps) {
         isOpen={isOpenChangePass}
         onOpenChange={openChangeChangePass}
         onRefresh={fetchUser}
+      />
+      <ConfirmModal
+        isOpen={isOpenResetPass}
+        title={t('resetPassword')}
+        message={t('resetPasswordWarning')}
+        confirmColor="warning"
+        onOpenChange={openChangeResetPass}
+        onConfirm={handleResetPassword}
+        loading={isPendingReset}
       />
     </Card>
   );

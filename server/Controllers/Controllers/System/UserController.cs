@@ -104,7 +104,7 @@ public class UserController : ControllerBase
         if (!success)
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // PUT methods
@@ -150,30 +150,6 @@ public class UserController : ControllerBase
         if (!userRoles.Contains(DefaultRoles.SuperAdmin) && !userRoles.Contains(DefaultRoles.Admin) &&
             !currentUser.UserId.Equals(id)) return Forbid(_sysMsg.Get(EMessage.Error403Msg));
         var result = await _userService.UpdateAvatarAsync(file, id);
-        if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
-        return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
-    }
-
-    /// <summary>
-    ///     Changes a user's password and revokes all active sessions
-    /// </summary>
-    [HttpPost("change-password")]
-    [Authorize]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
-    {
-        var result = await _authService.ChangePasswordAsync(model.OldPassword, model.NewPassword);
-        if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
-        return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
-    }
-
-    /// <summary>
-    ///     Changes a user's password and revokes all active sessions
-    /// </summary>
-    [HttpPost("reset-password")]
-    [Authorize]
-    public async Task<IActionResult> ResetPassword([FromBody] )
-    {
-        var result = await _authService.ChangePasswordAsync(model.OldPassword, model.NewPassword);
         if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }

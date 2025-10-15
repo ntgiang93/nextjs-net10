@@ -49,7 +49,6 @@ export const useGet = (id: number) => {
       }
       return { ...defaultMenuItem };
     },
-    placeholderData: keepPreviousData || { ...defaultMenuItem },
     enabled: id > 0,
   });
 };
@@ -69,7 +68,8 @@ export const useSave = () => {
 export const useDelete = (id: number) => {
   return useMutation({
     mutationFn: async () => {
-      await apiService.delete<ApiResponse<MenuItem>>(`${endpoint}/${id}`);
+      var response = await apiService.delete<ApiResponse<boolean>>(`${endpoint}/${id}`);
+      return response.success;
     },
   });
 };

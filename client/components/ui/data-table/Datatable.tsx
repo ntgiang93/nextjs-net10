@@ -9,6 +9,7 @@ import {
   DropdownItem,
   DropdownMenu,
   DropdownTrigger,
+  Pagination,
   Select,
   SelectItem,
   Table,
@@ -34,7 +35,6 @@ import { ArrowRight01Icon, ReloadIcon, Settings04Icon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExtButton } from '../button/ExtButton';
-import { PaginationInput } from '../input/PaginationInput';
 import Loading from '../overlay/Loading';
 import {
   getCommonPinningStyles,
@@ -215,7 +215,7 @@ const DataTable = (props: DataTableProps) => {
           isHeaderSticky
           onRowAction={(key) => onRowAction?.(key)}
           classNames={{
-            wrapper: 'p-1 shadow-none',
+            wrapper: 'p-0 shadow-none',
             base: `overflow-scroll`,
           }}
         >
@@ -294,10 +294,15 @@ const DataTable = (props: DataTableProps) => {
           >
             {(item) => <SelectItem key={item.key}>{item.label}</SelectItem>}
           </Select>
-          <PaginationInput
+          <Pagination
+            classNames={{
+              item: 'hover:cursor-pointer',
+            }}
+            isCompact
+            showShadow
             page={table.getState().pagination.pageIndex + 1}
-            totalPage={table.getPageCount()}
-            onPageChange={(page) => table.setPageIndex(page - 1)}
+            total={table.getPageCount() || 1}
+            onChange={(page) => table.setPageIndex(page - 1)}
           />
         </div>
       </CardFooter>

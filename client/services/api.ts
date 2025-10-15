@@ -1,7 +1,7 @@
-import { addToast } from '@heroui/react';
-import { ApiResponse } from '@/types/base/ApiResponse';
-import { forbidden, notFound } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
+import { ApiResponse } from '@/types/base/ApiResponse';
+import { addToast } from '@heroui/react';
+import { forbidden } from 'next/navigation';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -95,7 +95,7 @@ export async function fetchApi<T>(
     };
   }
 
-  if (options.body && typeof options.body === 'object' && !(options.body instanceof FormData)) {
+  if (options.body && !(options.body instanceof FormData)) {
     headers = {
       'Content-Type': 'application/json',
       ...headers,
@@ -149,8 +149,12 @@ export async function fetchApi<T>(
 
 // Hàm tiện ích cho các phương thức HTTP phổ biến
 export const apiService = {
-  get: <T = ApiResponse<any>>(endpoint: string, options?: RequestInit, notiOff?: boolean, isPublic?: boolean) =>
-    fetchApi<T>(endpoint, { ...options, method: 'GET' }, notiOff, isPublic),
+  get: <T = ApiResponse<any>>(
+    endpoint: string,
+    options?: RequestInit,
+    notiOff?: boolean,
+    isPublic?: boolean,
+  ) => fetchApi<T>(endpoint, { ...options, method: 'GET' }, notiOff, isPublic),
 
   post: <T = ApiResponse<any>>(
     endpoint: string,

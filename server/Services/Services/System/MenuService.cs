@@ -1,17 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Mapster;
 using Common.Exceptions;
 using Common.Security;
+using Mapster;
 using Model.Constants;
 using Model.DTOs.System.Menu;
 using Model.Entities.System;
 using Repository.Interfaces.System;
 using Service.Interfaces.System;
 using Service.Services.Base;
-using Model.DTOs.System.Module;
 
 namespace Service.Services.System;
 
@@ -73,6 +68,17 @@ public class MenuService : GenericService<Menu, int>, IMenuService
     }
 
     public async Task<bool> UpdateMenuAsync(UpdateMenuDto dto)
+    {
+        var existUrl = await GetSingleAsync<Menu>(m =>
+            m.Url == dto.Url && m.Id != dto.Id && m.IsDeleted == false && m.IsActive == true);
+        if (existUrl != null)
+            throw new BusinessException(SysMsg.Get(EMessage.MenuLinkAlreadyExists), "MENU_URL_EXISTS");
+
+        var success = await UpdateAsync(dto.Adapt<Menu>());
+        return success;
+    }
+
+    public async Task<bool> DeleteMenuAsync(int id)
     {
         var existUrl = await GetSingleAsync<Menu>(m =>
             m.Url == dto.Url && m.Id != dto.Id && m.IsDeleted == false && m.IsActive == true);

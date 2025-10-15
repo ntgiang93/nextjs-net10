@@ -1,4 +1,5 @@
 using Common.Exceptions;
+using Common.Extensions;
 using Common.Security;
 using Microsoft.Extensions.Caching.Memory;
 using Model.Constants;
@@ -9,6 +10,7 @@ using Service.DTOs.System.Auth;
 using Service.Interfaces;
 using Service.Interfaces.Base;
 using System.IdentityModel.Tokens.Jwt;
+using static MimeDetective.Definitions.DefaultDefinitions.FileTypes;
 
 namespace Service.Services;
 
@@ -203,7 +205,7 @@ public class AuthService : IAuthService
         var user = await _userService.GetByIdAsync<User>(userId);
         if (user == null)
             throw new NotFoundException(_sysMsg.Get(EMessage.UserNotFound), "USER_NOT_FOUND");
-        string newPassword = new Guid().ToString();
+        string newPassword = StringHelper.GenerateRandomString(8);
 
         // Update password
         user.PasswordHash = PasswordHelper.HashPassword(newPassword);
@@ -211,6 +213,7 @@ public class AuthService : IAuthService
         if (success)
             // Revoke all tokens for this user
             await RevokeAllUserTokenAsync(userId);
+            SendPasswordChangeEmail(newPassword, user.Email);
         return success;
     }
 
@@ -221,7 +224,7 @@ public class AuthService : IAuthService
         {
             var appName = _appSettings?.EmailConfiguration?.SMTP?.FromName ?? "App";
             var supportEmail = _appSettings?.EmailConfiguration?.SMTP?.FromEmail ?? toEmail;
-            var loginUrl = ($"{_appSettings?.FileDomain ?? string.Empty}").TrimEnd('/') + "/login";
+            var loginUrl = ($"{_appSettings?.ClientDomain ?? string.Empty}").TrimEnd('/') + "/login";
             var body = template
                 .Replace("{{AppName}}", appName)
                 .Replace("{{UserName}}", toEmail)

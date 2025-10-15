@@ -20,16 +20,21 @@ export default function AssignRoleUserModal(props: IAssignRoleUserModal) {
   const { data: members, isFetching } = RoleHook.useGetMember(role.id);
 
   const onSubmit = async () => {
-    const response = await save(form);
-    if (response && response.success) {
+    const success = await save(form);
+    if (success) {
       onOpenChange();
-      setForm([]);
       onRefresh();
     }
   };
 
   return (
-    <Modal isOpen={isOpen} size="3xl" onOpenChange={onOpenChange} scrollBehavior="inside" onClose={() => setForm([])}>
+    <Modal
+      isOpen={isOpen}
+      size="3xl"
+      onOpenChange={onOpenChange}
+      scrollBehavior="inside"
+      onClose={() => setForm([])}
+    >
       <ModalContent>
         <>
           <ModalHeader className="flex flex-col gap-1">
@@ -38,7 +43,7 @@ export default function AssignRoleUserModal(props: IAssignRoleUserModal) {
           <ModalBody>
             <UserSelectTable
               loadingInitialData={isFetching}
-              selectedUserIds={members.map((user) => user.id)}
+              selectedUserIds={members ? members.map((user) => user.id) : []}
               onSeledtedChange={(usersIds) => {
                 setForm(usersIds.map((id) => ({ userId: id, roleId: role?.id || 0 })));
               }}

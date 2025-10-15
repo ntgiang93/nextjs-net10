@@ -15,7 +15,16 @@ export const useChangePassword = () => {
   });
 };
 
+export const useResetPassword = () => {
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      return await apiService.post<ApiResponse<boolean>>(`${endpoint}/reset-password`, userId);
+    },
+  });
+};
+
 export const AuthHook = {
   useChangePassword,
+  useResetPassword,
   // Add the new hook to the exported object
 };

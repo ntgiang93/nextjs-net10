@@ -58,7 +58,7 @@ export const useGetMember = (roleId: number) => {
       }
       return [];
     },
-    placeholderData: keepPreviousData || [],
+    placeholderData: [],
     enabled: roleId > 0,
   });
 };
@@ -84,9 +84,9 @@ export const useSave = () => {
   return useMutation({
     mutationFn: async (role: RoleDto) => {
       if (role.id > 0) {
-        return await apiService.post<ApiResponse<RoleDto>>(`${endpoint}`, role);
-      } else {
         return await apiService.put<ApiResponse<any>>(`${endpoint}`, role);
+      } else {
+        return await apiService.post<ApiResponse<RoleDto>>(`${endpoint}`, role);
       }
     },
   });
@@ -95,10 +95,11 @@ export const useSave = () => {
 export const useAssignPermission = (roleId: number) => {
   return useMutation({
     mutationFn: async (permission: RolePermissionDto[]) => {
-      return await apiService.post<ApiResponse<any>>(
+      var response = await apiService.post<ApiResponse<any>>(
         `${endpoint}/${roleId}/permissions`,
         permission,
       );
+      return response.success;
     },
   });
 };
@@ -106,10 +107,11 @@ export const useAssignPermission = (roleId: number) => {
 export const useAssignMember = (roleId: number) => {
   return useMutation({
     mutationFn: async (userRole: UserRoleDto[]) => {
-      return await apiService.post<ApiResponse<any>>(
+      var response = await apiService.post<ApiResponse<any>>(
         `${endpoint}/${roleId}/assign-members`,
         userRole,
       );
+      return response.success;
     },
   });
 };
@@ -117,7 +119,8 @@ export const useAssignMember = (roleId: number) => {
 export const useDelete = (id: number) => {
   return useMutation({
     mutationFn: async () => {
-      await apiService.delete<ApiResponse<MenuItem>>(`${endpoint}/${id}`);
+      var response = await apiService.delete<ApiResponse<MenuItem>>(`${endpoint}/${id}`);
+      return response.success;
     },
   });
 };

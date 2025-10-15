@@ -5,7 +5,7 @@ import { defaultPaginationFilter, PaginationFilter } from '@/types/base/Paginati
 import { UserSelectDto } from '@/types/sys/User';
 import { User } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 interface IUserSelectTable {
   selectedUserIds: string[];
@@ -18,13 +18,22 @@ export default function UserSelectTable(props: IUserSelectTable) {
   const [filter, setFilter] = useState<PaginationFilter>({
     ...defaultPaginationFilter,
   });
-  const [selectedItems, setSelectedItems] = useState<string[]>([...selectedUserIds]);
+
   const { data, refetch, isFetching } = UserHook.useGetPaginationToSelect(filter);
 
-  useEffect(() => {
-    onSeledtedChange(selectedItems);
+  const selectedItems = useMemo(() => {
+    return [...selectedUserIds];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedItems]);
+  }, [selectedUserIds]);
+
+  const handleSelectedChange = (usersIds: string[]) => {
+    onSeledtedChange(usersIds);
+  };
+
+  // useEffect(() => {
+  //   onSeledtedChange(selectedItems);
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [selectedItems]);
 
   const columns = useMemo<ColumnDef<UserSelectDto>[]>(
     () => [
@@ -70,15 +79,15 @@ export default function UserSelectTable(props: IUserSelectTable) {
     <div className="w-full h-full flex flex-col gap-2">
       <AsyncDataTable
         columns={columns}
-        data={data.items}
+        data={data?.items || []}
         isLoading={isFetching}
         fetch={refetch}
         removeWrapper={true}
         pagination={{
           page: filter.page,
           pageSize: filter.pageSize,
-          totalCount: data.totalCount,
-          totalPages: data.totalPages,
+          totalCount: data?.totalCount || 0,
+          totalPages: data?.totalPages || 1,
           onPageChange: (page) => {
             setFilter((prev) => ({ ...prev, page }));
           },
@@ -89,7 +98,7 @@ export default function UserSelectTable(props: IUserSelectTable) {
         selection={{
           selectedKeys: selectedItems,
           onChangeSelection(value) {
-            setSelectedItems(value);
+            handleSelectedChange(value);
           },
         }}
         leftContent={

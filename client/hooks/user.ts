@@ -95,7 +95,10 @@ export const useSaveUser = () => {
 export const useChangeActive = (id: string) => {
   return useMutation({
     mutationFn: async () => {
-      await apiService.put<ApiResponse<boolean>>(`${endpoint}/${id}/change-active-status`);
+      const response = await apiService.put<ApiResponse<boolean>>(
+        `${endpoint}/${id}/change-active-status`,
+      );
+      return response.success;
     },
   });
 };

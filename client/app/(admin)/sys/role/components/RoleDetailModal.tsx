@@ -1,7 +1,16 @@
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
 import { RoleHook } from '@/hooks/role';
 import { defaultRoleDto, RoleDto } from '@/types/sys/Role';
-import { Button, Form, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 interface UserCreateModalProps {
@@ -9,20 +18,19 @@ interface UserCreateModalProps {
   isOpen: boolean;
   onOpenChange: () => void;
   onRefresh: () => void;
-  resetSelected: () => void;
 }
 
 export default function RoleDetailModal(props: UserCreateModalProps) {
   const t = useTranslations('role');
   const msg = useTranslations('msg');
-  const { id, isOpen, onOpenChange, onRefresh, resetSelected } = props;
+  const { id, isOpen, onOpenChange, onRefresh } = props;
   const [form, setForm] = useState<RoleDto>({ ...defaultRoleDto });
-  const { data: role, isFetching } = RoleHook.useGet(id);
+  const { data: role, isFetching } = RoleHook.useGet(isOpen ? id : 0);
   const { mutateAsync: save, isPending } = RoleHook.useSave();
 
   const handleRoleCode = (value: string) => {
     const roleCode = value.trim().toUpperCase().replace(/\s+/g, '_');
-    setForm({ ...form, code: roleCode });
+    setForm((prev) => ({ ...prev, code: roleCode }));
   };
 
   const onSubmit = async (e: any) => {
@@ -30,7 +38,6 @@ export default function RoleDetailModal(props: UserCreateModalProps) {
     const response = await save(form);
     if (response && response.success) {
       onOpenChange();
-      setForm({ ...defaultRoleDto });
       onRefresh();
     }
   };
@@ -47,8 +54,7 @@ export default function RoleDetailModal(props: UserCreateModalProps) {
       onOpenChange={onOpenChange}
       scrollBehavior="inside"
       onClose={() => {
-        setForm({ ...defaultRoleDto });
-        resetSelected();
+        setForm((prev) => ({ ...prev, ...defaultRoleDto }));
       }}
     >
       <ModalContent>
@@ -57,7 +63,7 @@ export default function RoleDetailModal(props: UserCreateModalProps) {
             {role?.id && role.id > 0 ? t('editRole') : t('addRole')}
           </ModalHeader>
           <ModalBody>
-            {isFetching && <FormSkeleton row={4} />}
+            {isFetching && <FormSkeleton row={3} />}
             {!isFetching && (
               <Form id="roleForm" onSubmit={onSubmit} className={'flex flex-col gap-3'}>
                 <Input
@@ -81,7 +87,7 @@ export default function RoleDetailModal(props: UserCreateModalProps) {
                   name="roleName"
                   placeholder={t('roleName')}
                   value={form.name}
-                  onValueChange={(value) => setForm({ ...form, name: value })}
+                  onValueChange={(value) => setForm((prev) => ({ ...prev, name: value }))}
                   validate={(value) => {
                     return !value || value.trim() === '' ? msg('required') : null;
                   }}
@@ -93,7 +99,7 @@ export default function RoleDetailModal(props: UserCreateModalProps) {
                   name="description"
                   placeholder={t('description')}
                   value={form.description}
-                  onValueChange={(value) => setForm({ ...form, description: value })}
+                  onValueChange={(value) => setForm((prev) => ({ ...prev, description: value }))}
                   type="text"
                   variant={'bordered'}
                 />

@@ -9,6 +9,7 @@ using Model.Entities.System;
 using Service.DTOs.System.Auth;
 using Service.Interfaces;
 using Service.Interfaces.Base;
+using Common.Security.Policies;
 
 namespace NextDotNet.Api.Controllers;
 
@@ -106,6 +107,25 @@ public class AuthController : ControllerBase
         if (dto.DeviceIds == null || dto.DeviceIds.Count == 0)
             return BadRequest(_sysMsg.Get(EMessage.DeviceIsRequired));
         var result = await _authService.RevokeTokenAssync(dto.DeviceIds);
+        if (result) return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+    }
+
+    [HttpPost("reset-password")]
+    [Policy(ESysModule.Users, EPermission.Edit)]
+    public async Task<IActionResult> ResetPassword([FromBody] string userId)
+    {
+        var result = await _authService.ResetPasswordAsync(userId);
+        if (result) return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+        var result = await _authService.ChangePasswordAsync(dto.OldPassword, dto.NewPassword);
         if (result) return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }

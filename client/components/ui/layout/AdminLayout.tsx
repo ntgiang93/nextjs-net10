@@ -69,7 +69,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       </Drawer>
 
       {/* SidebarMenu và Main content */}
-      <div className="flex-1 flex flex-col">
+      <div className="w-full flex flex-col min-w-0">
         {/* Header */}
         <Topbar
           toggleSidebar={onOpen}

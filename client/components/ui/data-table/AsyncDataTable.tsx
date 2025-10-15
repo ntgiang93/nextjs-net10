@@ -295,6 +295,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
               item: 'hover:cursor-pointer',
             }}
             isCompact
+            showShadow
             page={pagination.page}
             total={pagination.totalPages}
             onChange={(page) => pagination.onPageChange(page)}

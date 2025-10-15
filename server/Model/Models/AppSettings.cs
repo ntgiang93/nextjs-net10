@@ -5,6 +5,7 @@ namespace Model.Models;
 public class AppSettings
 {
     public string FileDomain { get; set; }
+    public string ClientDomain { get; set; }
     public List<string> Cors { get; set; }
     public JwtSettings Jwt { get; set; }
     public EmailConfigurationSettings EmailConfiguration { get; set; }

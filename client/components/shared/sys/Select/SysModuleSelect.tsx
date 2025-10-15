@@ -2,6 +2,7 @@
 
 import { SysCategoryHook } from '@/hooks/sysCategories';
 import { Autocomplete, AutocompleteItem } from '@heroui/react';
+import { useTranslations } from 'next-intl';
 
 interface ISysModuleSelectProps {
   value: string;
@@ -18,20 +19,21 @@ export default function SysModuleSelect({
   isRequired,
 }: ISysModuleSelectProps) {
   const { data, isLoading } = SysCategoryHook.useGetSysModule();
+  const msg = useTranslations('msg');
 
   return (
     <Autocomplete
       isLoading={isLoading}
       isVirtualized
       variant="bordered"
-      defaultItems={data}
-      label="System Module"
+      defaultItems={data || []}
+      label={msg('module')}
       labelPlacement={labelPlacement}
       selectedKey={value}
       isClearable
       onSelectionChange={(key) => (key === null ? onChange('') : onChange(String(key)))}
       isRequired={isRequired}
-      placeholder="Select system module"
+      placeholder={`${msg('select')} ${msg('module')}`}
     >
       {(item) => <AutocompleteItem key={item.value}>{item.label}</AutocompleteItem>}
     </Autocomplete>

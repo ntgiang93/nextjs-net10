@@ -118,4 +118,28 @@ public static class StringHelper
             return entityType.Name;
         }
     }
+
+    // Plan:
+    // - If length <= 0, return empty string.
+    // - Define allowed characters (A-Z, a-z, 0-9).
+    // - Use string.Create to allocate the exact length.
+    // - For each position, pick a cryptographically strong random index using
+    //   System.Security.Cryptography.RandomNumberGenerator.GetInt32(charset.Length).
+    // - Assign the character to the span and return the result.
+    public static string GenerateRandomString(int length)
+    {
+        if (length <= 0)
+            return string.Empty;
+
+        const string charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+        return string.Create(length, charset, (span, chars) =>
+        {
+            for (int i = 0; i < span.Length; i++)
+            {
+                int idx = System.Security.Cryptography.RandomNumberGenerator.GetInt32(chars.Length);
+                span[i] = chars[idx];
+            }
+        });
+    }
 }

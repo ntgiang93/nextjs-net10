@@ -1,14 +1,11 @@
-using System.Text;
+using Common.Extensions;
 using Dapper;
-using SqlKata;
-using Model.Constants;
 using Model.DTOs.System.Menu;
 using Model.Entities.System;
+using Repository.Interfaces.Base;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
-using Repository.Interfaces.Base;
-using Common.Extensions;
-using Model.DTOs.System.Module;
+using SqlKata;
 
 namespace Repository.Repositories.System;
 
@@ -78,4 +75,5 @@ public class MenuRepository : GenericRepository<Menu, int>, IMenuRepository
             
         return rootMenus.OrderBy(m => m.DisplayOrder).ToList();
     }
+
 }

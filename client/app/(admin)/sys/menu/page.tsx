@@ -5,26 +5,35 @@ import { ConfirmModal } from '@/components/ui//overlay/ConfirmModal';
 import { ExtButton } from '@/components/ui/button/ExtButton';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
 import { MenuHook } from '@/hooks/menu';
+import { hasPermission } from '@/libs/AuthHelper';
+import { EPermission } from '@/types/base/Permission';
+import { ESysModule } from '@/types/constant/SysModule';
 import { MenuItem } from '@/types/sys/Menu';
 import { Button, Tooltip, useDisclosure } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Add01Icon, Delete02Icon, Edit01Icon } from 'hugeicons-react';
-import { useEffect, useMemo, useState } from 'react';
-import MenuDetail from './components/detail';
+import { useTranslations } from 'next-intl';
+import { useMemo, useState } from 'react';
+import MenuDetail from './components/MenuDetailModal';
 
 export default function Menu() {
   const { data, refetch, isLoading } = MenuHook.useGetMenuTree();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
-  const [currentId, setCurrentId] = useState<number>(0);
-  const { mutateAsync: del, isSuccess: delSuccess } = MenuHook.useDelete(currentId);
+  const [selectedMenu, setSelectedMenu] = useState<MenuItem | undefined>(undefined);
+  const { mutateAsync: del, isPending: isDelPending } = MenuHook.useDelete(selectedMenu?.id || 0);
+  const canCreate = hasPermission(ESysModule.Menu, EPermission.Create);
+  const canEdit = hasPermission(ESysModule.Menu, EPermission.Edit);
+  const canDelete = hasPermission(ESysModule.Menu, EPermission.Delete);
+  const t = useTranslations('menu');
+  const msg = useTranslations('msg');
 
   const columns = useMemo<ColumnDef<MenuItem>[]>(
     () => [
       {
         accessorFn: (row) => row.name,
         id: 'name',
-        header: () => <span>Name</span>,
+        header: () => msg('name'),
         footer: (props) => props.column.id,
         size: 300,
         meta: {
@@ -34,13 +43,13 @@ export default function Menu() {
       {
         id: 'url',
         accessorKey: 'url',
-        header: () => 'Path',
+        header: () => msg('path'),
         footer: (props) => props.column.id,
         minSize: 200,
       },
       {
         accessorKey: 'icon',
-        header: () => <span>Icon</span>,
+        header: () => 'Icon',
         footer: (props) => props.column.id,
         size: 80,
         cell: ({ cell }) => {
@@ -52,50 +61,54 @@ export default function Menu() {
       },
       {
         accessorKey: 'status',
-        header: 'Status',
+        header: () => msg('status'),
         footer: (props) => props.column.id,
         size: 100,
       },
       {
         accessorKey: 'actions',
-        header: 'Actions',
+        header: () => msg('actions'),
         footer: (props) => props.column.id,
         size: 100,
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
-              <Tooltip content="Edit menu">
-                <Button
-                  isIconOnly
-                  aria-label="expand-button"
-                  color="primary"
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                  onPress={() => {
-                    setCurrentId(row.original.id);
-                    onOpen();
-                  }}
-                >
-                  <Edit01Icon size={16} />
-                </Button>
-              </Tooltip>
-              <Tooltip color="danger" content="Delete menu">
-                <Button
-                  isIconOnly
-                  aria-label="expand-button"
-                  color="danger"
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                  onPress={() => {
-                    setCurrentId(row.original.id);
-                    onOpenDel();
-                  }}
-                >
-                  <Delete02Icon size={16} />
-                </Button>
-              </Tooltip>
+              {canEdit && (
+                <Tooltip content={msg('edit')}>
+                  <Button
+                    isIconOnly
+                    aria-label="expand-button"
+                    color="primary"
+                    variant="light"
+                    radius="full"
+                    size="sm"
+                    onPress={() => {
+                      setSelectedMenu(row.original);
+                      onOpen();
+                    }}
+                  >
+                    <Edit01Icon size={16} />
+                  </Button>
+                </Tooltip>
+              )}
+              {(!row.original.children || row.original.children?.length === 0) && canDelete && (
+                <Tooltip color="danger" content={msg('delete')}>
+                  <Button
+                    isIconOnly
+                    aria-label="expand-button"
+                    color="danger"
+                    variant="light"
+                    radius="full"
+                    size="sm"
+                    onPress={() => {
+                      setSelectedMenu(row.original);
+                      onOpenDel();
+                    }}
+                  >
+                    <Delete02Icon size={16} />
+                  </Button>
+                </Tooltip>
+              )}
             </div>
           );
         },
@@ -104,40 +117,62 @@ export default function Menu() {
         },
       },
     ],
-    [],
+    [canEdit, canDelete],
   );
 
-  useEffect(() => {
-    if (!isOpen) setCurrentId(0);
-  }, [isOpen]);
-
-  useEffect(() => {
-    refetch();
-    setCurrentId(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [delSuccess]);
+  const handleDelete = async () => {
+    var success = await del();
+    if (success) {
+      refetch();
+      OnOpenDelChange();
+      setSelectedMenu(undefined);
+    }
+  };
 
   return (
     <div className={'h-full flex flex-col gap-2'}>
       <PageHeader
-        title={'Danh sách menu'}
+        title={t('title')}
         toolbar={
           <>
-            <ExtButton color="primary" startContent={<Add01Icon size={16} />} variant="shadowSmall" onPress={onOpen}>
-              Add
-            </ExtButton>
+            {canCreate && (
+              <ExtButton
+                color="primary"
+                startContent={<Add01Icon size={16} />}
+                variant="shadowSmall"
+                onPress={() => {
+                  setSelectedMenu(undefined);
+                  onOpen();
+                }}
+              >
+                {msg('add')}
+              </ExtButton>
+            )}
           </>
         }
       ></PageHeader>
-      <DataTable columns={columns} data={data} childrenProperty="children" isLoading={isLoading} fetch={refetch} />
-      <MenuDetail isOpen={isOpen} onOpenChange={onOpenChange} id={currentId} onRefresh={refetch} />
+      <DataTable
+        columns={columns}
+        data={data || []}
+        childrenProperty="children"
+        isLoading={isLoading}
+        fetch={refetch}
+      />
+      <MenuDetail
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        id={selectedMenu?.id || 0}
+        onRefresh={refetch}
+      />
       <ConfirmModal
         isOpen={IsOpenDel}
-        title="Delete Menu"
-        message="Do you want to delete this menu.This action cannot be undone."
+        title={msg('delete')}
+        message={t('deleteMenuWarning')}
         confirmColor="danger"
         onOpenChange={OnOpenDelChange}
-        onConfirm={() => del()}
+        onConfirm={handleDelete}
+        objectName={[selectedMenu?.name || '']}
+        loading={isDelPending}
       />
     </div>
   );

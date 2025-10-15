@@ -29,7 +29,14 @@
     "canNotUndo": "This action can not be undone.",
     "fileRequired": "File is empty or not selected",
     "module": "Module",
-    "description": "Description"
+    "description": "Description",
+    "confirmWarning": "Are you sure you want to perform this action?",
+    "name": "Name",
+    "code": "Code",
+    "type": "Type",
+    "path": "Path",
+    "displayOrder": "Display order",
+    "requiredField": "This field is required"
   },
   "role": {
     "title": "Role management",
@@ -79,6 +86,13 @@
     "resetPassword": "Reset Password",
     "userNameDesc": "System will auto generate username if left empty.",
     "activeUser": "Active user",
-    "inactiveUser": "Inactive user"
+    "inactiveUser": "Inactive user",
+    "resetPasswordWarning": "This action will reset the user's password. Are you sure you want to continue?"
+  },
+  "menu": {
+    "title": "Menu management",
+    "menu": "Menu",
+    "deleteMenuWarning": "This action will delete the menu and all its items. Are you sure you want to continue?",
+    "parentMenu": "Parent menu"
   }
 }

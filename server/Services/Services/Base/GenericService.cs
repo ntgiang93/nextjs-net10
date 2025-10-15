@@ -77,7 +77,7 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
         if (existingEntity != null && !existingEntity.IsDeleted)
         {
             existingEntity.IsDeleted = true;
-            existingEntity.UpdatedBy = UserContext.Current?.UserName ?? "System";
+            existingEntity.UpdatedBy = UserContext.Current?.UserName ?? "";
             existingEntity.UpdatedAt = DateTime.UtcNow;
             var result = await _repository.UpdateAsync(existingEntity);
             if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);

@@ -3,29 +3,27 @@
 import { ApiResponse } from '@/types/base/ApiResponse';
 import { SelectOption } from '@/types/base/SelectOption';
 import { defaultMenuItem, MenuItem, SaveMenuDto } from '@/types/sys/Menu';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../services/api';
 
 const endpoint = 'categories';
 
 export const useGetSysModule = () => {
   const queryClient = useQueryClient();
-  const cachedData = queryClient.getQueryData<SelectOption<string>[]>([
-    'getSysModules',
-  ]);
+  const cachedData = queryClient.getQueryData<SelectOption<string>[]>(['getSysModules']);
 
   return useQuery<SelectOption<string>[], Error>({
     queryKey: ['getSysModules'],
     queryFn: async () => {
-      const response = await apiService.get<
-        ApiResponse<SelectOption<string>[]>
-      >(`${endpoint}/system-modules`);
+      const response = await apiService.get<ApiResponse<SelectOption<string>[]>>(
+        `${endpoint}/system-modules`,
+      );
       if (response.success && response.data) {
         return response.data;
       }
       return cachedData || [];
     },
-    initialData: [],
+    placeholderData: keepPreviousData || [],
     enabled: !cachedData || cachedData.length === 0,
     retry: 1,
   });
@@ -33,22 +31,20 @@ export const useGetSysModule = () => {
 
 export const useGetPermission = () => {
   const queryClient = useQueryClient();
-  const cachedData = queryClient.getQueryData<SelectOption<number>[]>([
-    'getPermission',
-  ]);
+  const cachedData = queryClient.getQueryData<SelectOption<number>[]>(['getPermission']);
 
   return useQuery<SelectOption<number>[], Error>({
     queryKey: ['getPermission'],
     queryFn: async () => {
-      const response = await apiService.get<
-          ApiResponse<SelectOption<number>[]>
-      >(`${endpoint}/system-permissions`);
+      const response = await apiService.get<ApiResponse<SelectOption<number>[]>>(
+        `${endpoint}/system-permissions`,
+      );
       if (response.success && response.data) {
         return response.data;
       }
       return cachedData || [];
     },
-    initialData: [],
+    placeholderData: keepPreviousData || [],
     enabled: !cachedData || cachedData.length === 0,
     retry: 1,
   });
@@ -58,9 +54,7 @@ export const useGet = (id: number) => {
   return useQuery<MenuItem, Error>({
     queryKey: ['get', id],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<MenuItem>>(
-        `${endpoint}/${id}`,
-      );
+      const response = await apiService.get<ApiResponse<MenuItem>>(`${endpoint}/${id}`);
       if (response.success && response.data) {
         return response.data;
       }

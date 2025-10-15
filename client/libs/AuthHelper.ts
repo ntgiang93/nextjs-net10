@@ -1,9 +1,10 @@
 import { useAuthStore } from '@/store/auth-store';
 import { EPermission } from '@/types/base/Permission';
+import { ESysModule } from '@/types/constant/SysModule';
 import { SysRoles } from '@/types/constant/SysRoles';
 import { RolePermissionDto } from '@/types/sys/Role';
 
-export const hasPermission = (sysModule: string, required: EPermission): boolean => {
+export const hasPermission = (sysModule: string | ESysModule, required: EPermission): boolean => {
   // Assuming you have an auth store that provides user permissions
   // You'll need to import your auth store here
   // import { useAuthStore } from 'path/to/your/authstore';
@@ -19,7 +20,8 @@ export const hasPermission = (sysModule: string, required: EPermission): boolean
     return (
       userPermissions?.some(
         (permission: RolePermissionDto) =>
-          permission.sysModule === sysModule && (permission.permission && required) === required,
+          permission.sysModule === sysModule.toString() &&
+          (permission.permission && required) === required,
       ) || false
     );
 };

@@ -4,7 +4,15 @@ import { RoleHook } from '@/hooks/role';
 import { SysCategoryHook } from '@/hooks/sysCategories';
 import { EPermission } from '@/types/base/Permission';
 import { RoleDto, RolePermissionDto } from '@/types/sys/Role';
-import { Button, Checkbox, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
+import {
+  Button,
+  Checkbox,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { useTranslations } from 'next-intl';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -28,12 +36,14 @@ export default function RolePermissonModal(props: IRoleUserProps) {
   const [form, setForm] = useState<RolePermissionDto[]>([]);
   const { data: rolePermissions, refetch, isLoading } = RoleHook.useGetPermission(role.id);
   const { data: sysmodules, isLoading: loadingModule } = SysCategoryHook.useGetSysModule();
-  const { mutateAsync: save, isPending, isSuccess } = RoleHook.useAssignPermission(role.id);
+  const { mutateAsync: save, isPending } = RoleHook.useAssignPermission(role.id);
   const { data: permissons, isLoading: loadingPermssion } = SysCategoryHook.useGetPermission();
 
   const checkedPermisson = useCallback(
     (sysmodule: string, permission: EPermission) => {
-      return form.some((rp) => rp.sysModule === sysmodule && (rp.permission & permission) === permission);
+      return form.some(
+        (rp) => rp.sysModule === sysmodule && (rp.permission & permission) === permission,
+      );
     },
     [form],
   );
@@ -42,15 +52,19 @@ export default function RolePermissonModal(props: IRoleUserProps) {
     (sysmodule: string, permission: EPermission, checked: boolean) => {
       if (!role) return;
       if (!checked) {
-        const newForm = form.filter((rp) => rp.sysModule !== sysmodule || ( (rp.permission & permission) !== permission));
+        const newForm = form.filter(
+          (rp) => rp.sysModule !== sysmodule || (rp.permission & permission) !== permission,
+        );
         setForm([...newForm]);
       } else {
-        if(permission === EPermission.All) {
+        if (permission === EPermission.All) {
           const newForm = form.filter((rp) => rp.sysModule !== sysmodule);
           setForm([...newForm, { sysModule: sysmodule, permission: permission, roleId: role.id }]);
-        }
-        else {
-          const newForm = [...form, { sysModule: sysmodule, permission: permission, roleId: role.id }];
+        } else {
+          const newForm = [
+            ...form,
+            { sysModule: sysmodule, permission: permission, roleId: role.id },
+          ];
           setForm([...newForm]);
         }
       }
@@ -59,7 +73,10 @@ export default function RolePermissonModal(props: IRoleUserProps) {
   );
 
   const onSubmit = async () => {
-    await save(form);
+    var success = await save(form);
+    if (success) {
+      onOpenChange();
+    }
   };
 
   const columns = useMemo<ColumnDef<PermissionTable>[]>(() => {
@@ -75,35 +92,41 @@ export default function RolePermissonModal(props: IRoleUserProps) {
         },
       },
     ];
-    permissons.forEach((p) => {
-      const permissonsCol: ColumnDef<PermissionTable> = {
-        id: p.value.toString(),
-        accessorKey: p.label,
-        header: () => p.label,
-        footer: (props) => props.column.id,
-        size: 100,
-        cell: ({ row }) => {
-          return (
-            <Checkbox
-              defaultSelected={checkedPermisson(row.original.id, p.value)}
-              onValueChange={(value) => handleCheckedChange(row.original.id, p.value, value)}
-            ></Checkbox>
-          );
-        },
-        meta: {
-          align: 'center',
-        },
-      };
-      cols.push(permissonsCol);
-    });
+    if (permissons) {
+      permissons.forEach((p) => {
+        const permissonsCol: ColumnDef<PermissionTable> = {
+          id: p.value.toString(),
+          accessorKey: p.label,
+          header: () => p.label,
+          footer: (props) => props.column.id,
+          size: 100,
+          cell: ({ row }) => {
+            return (
+              <Checkbox
+                defaultSelected={checkedPermisson(row.original.id, p.value)}
+                onValueChange={(value) => handleCheckedChange(row.original.id, p.value, value)}
+              ></Checkbox>
+            );
+          },
+          meta: {
+            align: 'center',
+          },
+        };
+        cols.push(permissonsCol);
+      });
+    }
+
     return cols;
   }, [permissons, checkedPermisson]);
 
   useEffect(() => {
     let rawData: any[] = [];
     if (!searchTerm || searchTerm.trim() === '') {
-      rawData = [...sysmodules];
-    } else rawData = sysmodules.filter((m) => m.label.toLowerCase().includes(searchTerm.toLowerCase()));
+      rawData = [...(sysmodules || [])];
+    } else
+      rawData = (sysmodules || []).filter((m) =>
+        m.label.toLowerCase().includes(searchTerm.toLowerCase()),
+      );
     setTableData(
       rawData.map((m) => {
         return { id: m.value, moduleName: m.label };
@@ -115,20 +138,8 @@ export default function RolePermissonModal(props: IRoleUserProps) {
     if (rolePermissions) setForm([...rolePermissions]);
   }, [rolePermissions]);
 
-  useEffect(() => {
-    if (isSuccess) {
-      onOpenChange();
-    } 
-  }, [isSuccess])
-  
-
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      scrollBehavior="inside"
-      size='5xl'
-    >
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside" size="5xl">
       <ModalContent>
         <>
           <ModalHeader className="flex flex-col gap-1">
@@ -136,17 +147,21 @@ export default function RolePermissonModal(props: IRoleUserProps) {
           </ModalHeader>
           <ModalBody>
             <DataTable
-                    removeWrapper={true}
-                    columns={columns}
-                    data={tableData}
-                    isLoading={loadingModule || loadingPermssion || isLoading}
-                    fetch={refetch}
-                    leftContent={
-                      <>
-                        <SearchInput className="w-64" value={searchTerm} onValueChange={(value) => setSearchTerm(value)} />
-                      </>
-                    }
+              removeWrapper={true}
+              columns={columns}
+              data={tableData}
+              isLoading={loadingModule || loadingPermssion || isLoading}
+              fetch={refetch}
+              leftContent={
+                <>
+                  <SearchInput
+                    className="w-64"
+                    value={searchTerm}
+                    onValueChange={(value) => setSearchTerm(value)}
                   />
+                </>
+              }
+            />
           </ModalBody>
           <ModalFooter>
             <Button color="danger" variant="light" onPress={onOpenChange}>

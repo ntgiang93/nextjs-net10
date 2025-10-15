@@ -29,7 +29,14 @@
     "canNotUndo": "Thao tác này không thể hoàn tác.",
     "fileRequired": "Tệp đã chọn rỗng hoặc chưa được chọn",
     "module": "Tính năng",
-    "description": "Mô tả"
+    "description": "Mô tả",
+    "confirmWarning": "Bạn có chắc chắn muốn thực hiện thao tác này không?",
+    "name": "Tên",
+    "code": "Mã",
+    "type": "Loại",
+    "path": "Đường dẫn",
+    "displayOrder": "Thứ tự hiển thị",
+    "requiredField": "Trường này là bắt buộc"
   },
   "role": {
     "title": "Quản lý Vai trò",
@@ -80,6 +87,14 @@
     "resetPassword": "Đặt lại mật khẩu",
     "userNameDesc": "Hệ thống sẽ tự động tạo tên đăng nhập nếu để trống.",
     "activeUser": "Kích hoạt người dùng",
-    "inactiveUser": "Vô hiệu hóa người dùng"
+    "inactiveUser": "Vô hiệu hóa người dùng",
+    "resetPasswordWarning": "Thao tác này sẽ đặt lại mật khẩu của người dùng. Bạn chắc chắn muốn tiếp tục?"
+  },
+  "menu": {
+    "title": "Quản lý Menu",
+    "menu": "Menu",
+    "menuName": "Tên menu",
+    "deleteMenuWarning": "Thao tác này sẽ xóa menu và tất cả các mục của nó. Bạn có chắc chắn muốn tiếp tục không?",
+    "parentMenu": "Menu cha"
   }
 }

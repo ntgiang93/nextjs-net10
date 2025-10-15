@@ -1,8 +1,12 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Common.Exceptions;
+using Common.Security;
+using Model.Constants;
 using Model.DTOs.System.Auth;
 using Model.Entities.System;
 using Service.DTOs.System.Auth;
+using Service.Services.System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Service.Interfaces;
 
@@ -16,4 +20,5 @@ public interface IAuthService
     Task<bool> VerifyAccountAsync(VerifyAccountDto dto);
     Task ResendVerificationAsync(string verificationId);
     Task<bool> ChangePasswordAsync(string oldPassword, string newpPassword);
+    Task<bool> ResetPasswordAsync(string userId);
 }

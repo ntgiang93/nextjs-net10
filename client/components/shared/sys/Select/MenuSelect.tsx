@@ -4,6 +4,7 @@ import { TreeItemType } from '@/components/ui//hierarchy/TreeItem';
 import { TreeSelect } from '@/components/ui//hierarchy/TreeSelect';
 import { MenuHook } from '@/hooks/menu';
 import { MenuItem } from '@/types/sys/Menu';
+import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';
 
 interface IMenuSelectProps {
@@ -26,7 +27,8 @@ export default function MenuSelect({
   anyLevel = true,
 }: IMenuSelectProps) {
   const { data } = MenuHook.useGetMenuTree();
-
+  const msg = useTranslations('msg');
+  const t = useTranslations('menu');
   // Flatten menu tree để hiển thị trong select
   const options = useMemo<TreeItemType[]>(() => {
     if (!data || data == null) return [];
@@ -50,7 +52,7 @@ export default function MenuSelect({
       options={options}
       label={label}
       selectedValues={values}
-      placeholder="Select a menu"
+      placeholder={`${msg('select')} ${t('menu')}`}
       multiple={multiple}
       isRequired={isRequired}
       labelPlacement={labelPlacement}

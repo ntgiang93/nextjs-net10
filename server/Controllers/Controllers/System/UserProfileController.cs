@@ -82,7 +82,7 @@ public class UserProfileController : ControllerBase
         var profile = updateProfileDto.Adapt<UserProfile>();
         var success = await _userProfileService.UpdateAsync(profile);
         if (success)
-            return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+            return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
         return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
 }

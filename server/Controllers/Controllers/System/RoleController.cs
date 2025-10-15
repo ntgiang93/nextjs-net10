@@ -82,7 +82,7 @@ public class RoleController : ControllerBase
         if (!success)
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpPost("{roleId}/assign-members")]
@@ -93,7 +93,7 @@ public class RoleController : ControllerBase
         if (!success)
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpPut]
@@ -102,9 +102,9 @@ public class RoleController : ControllerBase
     {
         var success = await _roleService.UpdateRoleAsync(roleDto);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpDelete("{id}")]
@@ -115,7 +115,7 @@ public class RoleController : ControllerBase
         if (!success)
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }
     [HttpDelete("{id}/remove-member/{userId}")]
     [Policy(ESysModule.Roles, EPermission.Delete)]
@@ -125,6 +125,6 @@ public class RoleController : ControllerBase
         if (!success)
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 }

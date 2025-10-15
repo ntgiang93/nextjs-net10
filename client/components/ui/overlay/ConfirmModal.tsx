@@ -13,6 +13,7 @@ interface ConfirmModalProps {
   confirmColor?: 'default' | 'primary' | 'success' | 'warning' | 'danger';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   objectName?: string[];
+  loading?: boolean;
 }
 
 export function ConfirmModal({
@@ -24,12 +25,13 @@ export function ConfirmModal({
   confirmText,
   cancelText,
   objectName,
+  loading,
   confirmColor = 'primary',
   size = 'md',
 }: ConfirmModalProps) {
   const msg = useTranslations('msg');
   return (
-    <Modal isOpen={isOpen} size={size} onOpenChange={onOpenChange} scrollBehavior='inside'>
+    <Modal isOpen={isOpen} size={size} onOpenChange={onOpenChange} scrollBehavior="inside">
       <ModalContent>
         {(onClose) => (
           <>
@@ -38,11 +40,13 @@ export function ConfirmModal({
               {title ?? msg('confirm')}
             </ModalHeader>
             <ModalBody>
-              <p>{message ?? msg('deleteWarning')}</p>
+              <p>{message ?? msg('confirmWarning')}</p>
               {Array.isArray(objectName) && (
                 <ul className="list-disc">
                   {objectName.map((name) => (
-                    <li key={name} className="font-semibold flex gap-2"><AlertCircleIcon /> {name}</li>
+                    <li key={name} className="font-semibold flex gap-2">
+                      <AlertCircleIcon /> {name}
+                    </li>
                   ))}
                 </ul>
               )}
@@ -53,9 +57,9 @@ export function ConfirmModal({
               </Button>
               <Button
                 color={confirmColor}
+                isLoading={loading}
                 onPress={() => {
                   onConfirm();
-                  onOpenChange();
                 }}
               >
                 {confirmText ?? msg('confirm')}
