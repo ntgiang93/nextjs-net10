@@ -25,6 +25,8 @@ interface IActionCardProps {
   fetchUser: () => void;
 }
 
+const MAX_AVATAR_SIZE = 1 * 1024 * 1024; // 2 MB
+
 export default function ActionCard(props: IActionCardProps) {
   const { user, fetchUser } = props;
   const t = useTranslations('user');
@@ -48,18 +50,29 @@ export default function ActionCard(props: IActionCardProps) {
   // Hàm xử lý khi người dùng chọn file
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      await updateAvatar({ userId: user.id, file });
-      fetchUser();
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''; // Reset input file
-      }
-    } else {
+    if (!file) {
       addToast({
         title: msg('error'),
         description: msg('fileRequired'),
         color: 'danger',
       });
+      return;
+    }
+
+    if (file.size > MAX_AVATAR_SIZE) {
+      addToast({
+        title: msg('error'),
+        description: msg('fileTooLarge'),
+        color: 'danger',
+      });
+      fileInputRef.current && (fileInputRef.current.value = '');
+      return;
+    }
+
+    await updateAvatar({ userId: user.id, file });
+    fetchUser();
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
   // Hàm mở hộp thoại chọn file

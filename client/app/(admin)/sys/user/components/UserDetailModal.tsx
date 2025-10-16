@@ -74,9 +74,6 @@ export default function UserDetailModal(props: UserCreateModalProps) {
     }
   }, [user]);
 
-  useEffect(() => {
-    console.log('form changed', form);
-  }, [form]);
   return (
     <Modal
       isDismissable={false}

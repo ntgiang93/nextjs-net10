@@ -7,7 +7,7 @@ import { Card, CardBody, Tab, Tabs } from '@heroui/react';
 import { ArrowLeft01Icon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { use, useState } from 'react';
+import { use } from 'react';
 import AccountCard from './AccountCard';
 import ActionCard from './ActionCard';
 import UserProfileForm from './UserProfileForm';
@@ -20,9 +20,6 @@ export default function Page({ params }: IUserDetailPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const t = useTranslations('user');
-  const msg = useTranslations('msg');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<any>({});
   const { data: user, isFetching, refetch } = UserHook.useGet(id);
   return (
     <div className="h-full flex flex-col gap-4">

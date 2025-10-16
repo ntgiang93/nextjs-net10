@@ -36,8 +36,6 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
         {
             new(JwtRegisteredClaimNames.Jti, tokenId),
             new(ClaimTypes.Name, user.UserName),
-            new(ClaimTypes.Email, user.Email),
-            new("FullName", user.FullName),
             new("Language", DetectLanguage(user)),
             new(ClaimTypes.NameIdentifier, user.Id),
             new("RoleCode", string.Join(";", roles.Select(r => r.Code)))
@@ -60,7 +58,7 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
     {
         var session = await GetSingleAsync<UserToken>(x => x.RefreshToken == refreshToken);
         if (session == null) return true;
-        session.Expires = default;
+        session.Expires = DateTime.Now.AddYears(-1);
         session.RefreshToken = string.Empty;
         session.IsDeleted = true;
         return await _repository.UpdateAsync(session);

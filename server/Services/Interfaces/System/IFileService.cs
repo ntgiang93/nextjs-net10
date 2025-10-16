@@ -44,4 +44,8 @@ public interface IFileService : IGenericService<FileStorage, int>
     ///     Deletes a file by its path
     /// </summary>
     Task<bool> DeleteFileByPathAsync(string filePath);
+    /// <summary>
+    ///     Deletes a file by reference object
+    /// </summary>
+    Task<bool> DeleteFileByReference(string referenceType, string referenceId);
 }

@@ -11,7 +11,6 @@ using Model.Entities.System;
 using Model.Models;
 using Service.Interfaces;
 using Service.Interfaces.Base;
-using Service.Services;
 using System.Net;
 
 namespace NextDotNet.Api.Controllers;
@@ -35,6 +34,16 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetById(string id)
     {
         var user = await _userService.GetDetailAsync(id);
+        if (user == null) throw new NotFoundException(_sysMsg.Get(EMessage.UserNotFound), "USER_NOT_FOUND");
+        return Ok(ApiResponse<UserDto>.Succeed(user, _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+
+    [HttpGet("me")]
+    [Policy(ESysModule.Users, EPermission.View)]
+    public async Task<IActionResult> GetMe()
+    {
+        var currentUser = UserContext.Current;
+        var user = await _userService.GetDetailAsync(currentUser.UserId);
         if (user == null) throw new NotFoundException(_sysMsg.Get(EMessage.UserNotFound), "USER_NOT_FOUND");
         return Ok(ApiResponse<UserDto>.Succeed(user, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -147,8 +156,7 @@ public class UserController : ControllerBase
     {
         var currentUser = UserContext.Current;
         var userRoles = currentUser.RoleCodes.Split(';');
-        if (!userRoles.Contains(DefaultRoles.SuperAdmin) && !userRoles.Contains(DefaultRoles.Admin) &&
-            !currentUser.UserId.Equals(id)) return Forbid(_sysMsg.Get(EMessage.Error403Msg));
+        if (!currentUser.UserId.Equals(id)) return Forbid(_sysMsg.Get(EMessage.Error403Msg));
         var result = await _userService.UpdateAvatarAsync(file, id);
         if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));

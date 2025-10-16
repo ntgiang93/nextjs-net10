@@ -36,7 +36,17 @@
     "type": "Type",
     "path": "Path",
     "displayOrder": "Display order",
-    "requiredField": "This field is required"
+    "requiredField": "This field is required",
+    "login": "Login",
+    "logout": "Logout",
+    "profile": "Profile",
+    "uploadFile": "Upload file",
+    "dropzoneDescription": "Drag & drop or browse to upload files",
+    "dropzoneLimitDescription": "(Max {limitFiles} file(s), up to {limitSize} MB each)",
+    "dropzoneSupportDescription": "Supported types: {fileTypes}",
+    "fileTooLarge": "File size exceeds the maximum limit of {limit} MB",
+    "fileCountExceeded": "Maximum {limit} file(s) allowed",
+    "fileTypeUnsupported": "File type is not supported"
   },
   "role": {
     "title": "Role management",

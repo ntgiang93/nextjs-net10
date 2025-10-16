@@ -25,9 +25,6 @@ public class JwtUserInfoMiddleware
             {
                 UserId = GetClaimValue<string>(context.User, ClaimTypes.NameIdentifier),
                 UserName = GetClaimValue<string>(context.User, ClaimTypes.Name),
-                Email = GetClaimValue<string>(context.User, ClaimTypes.Email),
-                FirstName = GetClaimValue<string>(context.User, "FirstName"),
-                LastName = GetClaimValue<string>(context.User, "LastName"),
                 Language = GetClaimValue<string>(context.User, "Language"),
                 Roles = roles.Select(role => int.TryParse(role, out int roleId) ? roleId : 0).ToList(),
                 RoleCodes = GetClaimValue<string>(context.User, "RoleCode") ?? string.Empty

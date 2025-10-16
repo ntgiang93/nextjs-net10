@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 
 interface IRoleSelectProps {
   value: string[];
-  onChange: (values: string[]) => void;
+  onChange: (values: number[]) => void;
   selectionMode?: 'none' | 'single' | 'multiple';
   isRequired?: boolean;
   labelPlacement: 'outside' | 'inside' | 'outside-left';
@@ -42,7 +42,7 @@ export default function RoleSelect({
 
   const handleSelectionChange = (keys: Selection) => {
     if (keys === 'all') return;
-    onChange(Array.from(keys as Set<string>));
+    onChange(Array.from(keys as Set<number>));
   };
 
   return (

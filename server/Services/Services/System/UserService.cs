@@ -1,6 +1,7 @@
 ﻿using Common.Exceptions;
 using Common.Extensions;
 using Common.Security;
+using Mapster.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Model.Constants;
@@ -16,7 +17,6 @@ using Service.Interfaces;
 using Service.Interfaces.Base;
 using Service.Interfaces.System;
 using Service.Services.Base;
-
 namespace Service.Services.System;
 
 public class UserService : GenericService<User, string>, IUserService
@@ -62,9 +62,10 @@ public class UserService : GenericService<User, string>, IUserService
         var user = await _userRepository.GetDetailAsync(userId);
         if (user != null)
         {
+            var domain = _appSettings.AppDomain;
             user.Avatar = string.IsNullOrEmpty(user.Avatar)
                 ? user.Avatar
-                : $"{_appSettings.FileDomain}{user.Avatar}";
+                : $"{domain}{user.Avatar}";
         }
 
         return user;
@@ -295,11 +296,11 @@ public class UserService : GenericService<User, string>, IUserService
         if (file == null || file.Length == 0)
             throw new BusinessException(SysMsg.Get(EMessage.FileRequired), "FILE_REQUIRED");
         FileUploadDto dto = new FileUploadDto();
-        dto.ReferenceId = userId.ToString();
+        dto.ReferenceId = userId;
         dto.ReferenceType = nameof(User) + "_avatar";
-        if (!string.IsNullOrWhiteSpace(user.Avatar)) await _fileService.DeleteFileByPathAsync(user.Avatar);
+        if (!string.IsNullOrWhiteSpace(user.Avatar)) await _fileService.DeleteFileByReference(dto.ReferenceType, dto.ReferenceId);
         var newFile = await _fileService.UploadFileAsync(file, dto);
-        user.Avatar = newFile.FilePath;
+        user.Avatar = newFile.FilePath.Replace(Path.DirectorySeparatorChar, '/');
         return await UpdateAsync(user);
     }
 

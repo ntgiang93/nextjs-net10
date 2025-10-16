@@ -1,33 +1,31 @@
+import { defaultUserDto, UserDto } from '../sys/User';
 import { JwtClaim } from './JwtClaim';
 
-export interface UserClaim {
-  id: string;
-  username: string; // Username
-  email: string; // User email
-  fullName: string; // First name
+export interface UserClaim extends UserDto {
   language: string; // User language preference
-  role: number[];
-  roleCode: string;
+  roleCode: string; // User role codes (optional)
 }
 
 export const defaultUserClaim: UserClaim = {
-  id: '',
-  username: '',
-  email: '',
-  fullName: '',
+  ...defaultUserDto,
   language: 'vi',
-  role: [],
   roleCode: '',
 };
 
 export const mapJwtClaimToUserClaim = (jwtClaim: JwtClaim): UserClaim => {
   return {
     id: jwtClaim?.nameid || '',
-    username: jwtClaim?.name || '',
-    email: jwtClaim?.email || '',
-    fullName: jwtClaim?.FullName || '',
-    language: jwtClaim?.Language || 'en-US',
-    role: jwtClaim?.role || [],
+    userName: jwtClaim?.name || '',
+    language: jwtClaim?.Language || 'vi-VN',
+    roles: jwtClaim?.role || [],
     roleCode: jwtClaim?.RoleCode || '',
+    avatar: '',
+    email: '',
+    phone: '',
+    fullName: '',
+    isActive: false,
+    twoFa: false,
+    lockExprires: undefined,
+    rolesName: [],
   };
 };

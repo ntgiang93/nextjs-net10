@@ -16,12 +16,14 @@ namespace Common.Security
             byte[] salt = RandomNumberGenerator.GetBytes(SaltSize);
 
             // Tạo key hash dựa trên password, salt và số vòng lặp
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithmName.SHA512))
-            {
-                byte[] key = pbkdf2.GetBytes(KeySize);
-                // Kết hợp salt và key, cách nhau bởi dấu ":"
-                return $"{Convert.ToBase64String(salt)}:{Convert.ToBase64String(key)}";
-            }
+            byte[] key = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                salt,
+                Iterations,
+                HashAlgorithmName.SHA512,
+                KeySize
+            );
+            return $"{Convert.ToBase64String(salt)}:{Convert.ToBase64String(key)}";
         }
 
         public static bool VerifyPassword(string password, string hashedPassword)
@@ -35,12 +37,14 @@ namespace Common.Security
             byte[] key = Convert.FromBase64String(parts[1]);
 
             // Tạo key hash từ password cần xác thực
-            using (var pbkdf2 = new Rfc2898DeriveBytes(password, salt, Iterations, HashAlgorithmName.SHA512))
-            {
-                byte[] keyToCheck = pbkdf2.GetBytes(KeySize);
-                // So sánh key đã tạo với key được lưu trữ
-                return CryptographicOperations.FixedTimeEquals(keyToCheck, key);
-            }
+            byte[] keyToCheck = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                salt,
+                Iterations,
+                HashAlgorithmName.SHA512,
+                KeySize
+            );
+            return CryptographicOperations.FixedTimeEquals(keyToCheck, key);
         }
     }
 }

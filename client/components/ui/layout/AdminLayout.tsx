@@ -1,6 +1,7 @@
 'use client';
 import { Sidebar } from '@/components/ui//navigate/Aside/Sidebar';
 import { Topbar } from '@/components/ui/navigate/Top/Topbar';
+import { UserHook } from '@/hooks/user';
 import { useNavivationStore } from '@/store/navigation-store';
 import { Drawer, DrawerBody, DrawerContent, useDisclosure } from '@heroui/react';
 import clsx from 'clsx';
@@ -17,6 +18,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
   const pathName = usePathname();
   const { isLoading } = useAuth();
   const { navigating } = useNavivationStore();
+  const {} = UserHook.useGetMe();
 
   useEffect(() => {
     onClose();
@@ -69,7 +71,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       </Drawer>
 
       {/* SidebarMenu và Main content */}
-      <div className="w-full flex flex-col min-w-0">
+      <div className="w-full flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
         <Topbar
           toggleSidebar={onOpen}
@@ -77,7 +79,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
           isCompact={isCompact}
         />
         {/* Main content */}
-        <main className="bg-primary-50 flex-1 p-4 rounded-xl shadow-inner overflow-auto">
+        <main className="bg-primary-50 h-[calc(100vh-4rem)] p-4 rounded-xl shadow-inner overflow-auto">
           {navigating && <PageContentSkeleton />}
           {!navigating && children}
         </main>

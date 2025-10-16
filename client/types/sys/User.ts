@@ -11,8 +11,8 @@ export type UserDto = {
   isActive: boolean;
   isLocked?: boolean;
   twoFa: boolean;
-  lockExprires: Date;
-  roles: string[];
+  lockExprires?: Date;
+  roles: number[];
   rolesName: string[];
 };
 
@@ -46,7 +46,7 @@ export type SaveUserDto = {
   userName?: string;
   email?: string;
   phoneNumber?: string;
-  roles: string[];
+  roles: number[];
 };
 
 export const defaultCreateUserDto: SaveUserDto = {

@@ -10,7 +10,6 @@ using Service.DTOs.System.Auth;
 using Service.Interfaces;
 using Service.Interfaces.Base;
 using System.IdentityModel.Tokens.Jwt;
-using static MimeDetective.Definitions.DefaultDefinitions.FileTypes;
 
 namespace Service.Services;
 

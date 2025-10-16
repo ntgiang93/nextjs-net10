@@ -8,8 +8,6 @@ export interface JwtClaim {
 
   // Custom user claims
   name: string; // Username
-  email: string; // User email
-  FullName: string; // Full name
   Language: string; // User language preference
   nameid: string; // User ID
   role: number[]; // User roles id

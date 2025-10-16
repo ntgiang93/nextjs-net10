@@ -15,13 +15,6 @@ export class ApiError extends Error {
   }
 }
 
-const handleBody = (data: any): any => {
-  if (data instanceof FormData) {
-    // If data is FormData, return it as is
-    return data;
-  } else return JSON.stringify(data);
-};
-
 const handleNotice = (data: any, isJson?: boolean, method?: string) => {
   // Check if response is ApiResponse format
   const isApiResponse =
@@ -122,6 +115,7 @@ export async function fetchApi<T>(
 
       if (response.status === 401) {
         window.location.href = '/login';
+        return Promise.reject(new ApiError('Unauthorized', 401));
       }
 
       const errorMessage = isJson ? data.message || 'Something went wrong' : 'Something went wrong';

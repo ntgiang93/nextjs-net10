@@ -36,7 +36,17 @@
     "type": "Loại",
     "path": "Đường dẫn",
     "displayOrder": "Thứ tự hiển thị",
-    "requiredField": "Trường này là bắt buộc"
+    "requiredField": "Trường này là bắt buộc",
+    "login": "Đăng nhập",
+    "logout": "Đăng xuất",
+    "profile": "Hồ sơ",
+    "uploadFile": "Tải lên tệp",
+    "dropzoneGenericDescription": "Kéo thả hoặc chọn tệp để tải lên",
+    "dropzoneLimitDescription": "(Tối đa {limitFiles} tệp, dung lượng mỗi tệp đến {limitSize} MB)",
+    "dropzoneSupportDescription": "Hỗ trợ: {fileTypes}",
+    "fileTooLarge": "Kích thước tệp vượt quá giới hạn {limit} MB",
+    "fileCountExceeded": "Chỉ cho phép tối đa {limit} tệp",
+    "fileTypeUnsupported": "Loại tệp không được hỗ trợ"
   },
   "role": {
     "title": "Quản lý Vai trò",

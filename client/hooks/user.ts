@@ -1,9 +1,11 @@
 'use client';
 
 import { StringHelper } from '@/libs/StringHelper';
+import { useAuthStore } from '@/store/auth-store';
 import { ApiResponse } from '@/types/base/ApiResponse';
 import { defualtPaginatedResult, PaginatedResultDto } from '@/types/base/PaginatedResultDto';
 import { PaginationFilter } from '@/types/base/PaginationFilter';
+import { defaultUserClaim, UserClaim } from '@/types/base/UserClaim';
 import { MenuItem } from '@/types/sys/Menu';
 import {
   defaultUserDto,
@@ -51,7 +53,7 @@ export const useGetPaginationToSelect = (params: PaginationFilter) => {
 };
 
 export const useGet = (id: string) => {
-  return useQuery<UserDto, Error>({
+  return useQuery<any, Error>({
     queryKey: [endpoint, 'get', id],
     queryFn: async () => {
       const response = await apiService.get<ApiResponse<UserDto>>(`${endpoint}/${id}`);
@@ -61,6 +63,32 @@ export const useGet = (id: string) => {
       return { ...defaultUserDto };
     },
     enabled: id != undefined && id !== '',
+  });
+};
+
+export const useGetMe = () => {
+  const { user, setUser } = useAuthStore((state) => state);
+  return useQuery<UserClaim, Error>({
+    queryKey: [endpoint, 'getme'],
+    queryFn: async () => {
+      const response = await apiService.get<ApiResponse<UserDto>>(`${endpoint}/me`);
+      if (response.success && response.data) {
+        const data = response.data;
+        let me: UserClaim = { ...(user || defaultUserClaim) };
+        if (me) {
+          me.avatar = data.avatar;
+          me.email = data.email;
+          me.fullName = data.fullName;
+          me.phone = data.phone;
+          me.lockExprires = data.lockExprires;
+          me.twoFa = data.twoFa;
+          me.isActive = data.isActive;
+          me.isLocked = data.isLocked;
+          setUser(me);
+        }
+      }
+      return { ...defaultUserClaim };
+    },
   });
 };
 
@@ -120,5 +148,6 @@ export const UserHook = {
   useSaveUser,
   useChangeActive,
   useGetPermissions,
-  useUpdateAvatar, // Add the new hook to the exported object
+  useUpdateAvatar,
+  useGetMe,
 };

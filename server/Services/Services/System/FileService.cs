@@ -55,9 +55,9 @@ public class FileService : GenericService<FileStorage, int>, IFileService
 
         var containerPath = Path.Combine(_uploadDirectory, containerName);
         if (!Directory.Exists(containerPath)) Directory.CreateDirectory(containerPath);
-
         // Generate unique file name to prevent collisions
-        var uniqueFileName = $"{Guid.NewGuid()}_{Path.GetFileName(file.FileName)}";
+        string extension = file.FileName.Split('.').Last();
+        var uniqueFileName = $"{Ulid.NewUlid()}.{extension}";
         var filePath = Path.Combine(containerPath, uniqueFileName);
 
         // Save file to disk
@@ -77,11 +77,11 @@ public class FileService : GenericService<FileStorage, int>, IFileService
             ReferenceType = fileDto.ReferenceType,
             Container = containerName,
             IsPublic = fileDto.IsPublic,
-            UploadedByName = UserContext.Current?.FirstName + " " + UserContext.Current?.LastName
         };
 
         // Save file entity to database
-        var newFile = await CreateAsync(fileEntity);
+        var id = await CreateAsync(fileEntity);
+        var newFile = await GetByIdAsync<FileStorage>(id);
         // Map to DTO
         var result = newFile.Adapt<FileDto>();
         return result;
@@ -155,6 +155,23 @@ public class FileService : GenericService<FileStorage, int>, IFileService
         var file = await GetSingleAsync<FileStorage>(f => f.FilePath == filePath);
         if (file == null || file.IsDeleted)
             throw new NotFoundException(SysMsg.Get(EMessage.Error404Msg), "FILE_NOT_FOUND");
+        try
+        {
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), file.FilePath);
+            if (File.Exists(file.FilePath)) File.Delete(fullPath);
+            return await SoftDeleteAsync(file.Id);
+        }
+        catch (Exception)
+        {
+            Log.Error($"Error deleting file {file.FileName}: {file.FilePath}");
+            throw new BusinessException(SysMsg.Get(EMessage.FileDeleteError), "FILE_DELETE_ERROR");
+        }
+    }
+
+    public async Task<bool> DeleteFileByReference(string referenceType, string referenceId)
+    {
+        var file = await GetSingleAsync<FileStorage>(f => f.ReferenceType == referenceType && f.ReferenceId == referenceId);
+        if (file == null || file.IsDeleted) return true;
         try
         {
             var fullPath = Path.Combine(Directory.GetCurrentDirectory(), file.FilePath);

@@ -77,15 +77,4 @@ public class MenuService : GenericService<Menu, int>, IMenuService
         var success = await UpdateAsync(dto.Adapt<Menu>());
         return success;
     }
-
-    public async Task<bool> DeleteMenuAsync(int id)
-    {
-        var existUrl = await GetSingleAsync<Menu>(m =>
-            m.Url == dto.Url && m.Id != dto.Id && m.IsDeleted == false && m.IsActive == true);
-        if (existUrl != null)
-            throw new BusinessException(SysMsg.Get(EMessage.MenuLinkAlreadyExists), "MENU_URL_EXISTS");
-
-        var success = await UpdateAsync(dto.Adapt<Menu>());
-        return success;
-    }
 }

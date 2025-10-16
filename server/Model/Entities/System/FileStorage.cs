@@ -22,7 +22,5 @@ public class FileStorage : BaseEntity<int>
 
     [StringLength(100)] public string? Container { get; set; }
 
-    [StringLength(255)] public string? UploadedByName { get; set; }
-
     public bool IsPublic { get; set; }
 }

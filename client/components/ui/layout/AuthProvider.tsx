@@ -37,7 +37,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { setNavigating } = useNavivationStore();
   const pathName = usePathname();
-  const { permissions } = useAuthStore();
 
   const resetAuthContext = () => {
     clearSessionFlag();
