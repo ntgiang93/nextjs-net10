@@ -343,3 +343,4 @@ FodyWeavers.xsd
 
 # NVidia Nsight GPU debugger configuration file
 *.nvuser
+/server/Controllers/uploads/user_avatar/45010607491055616
