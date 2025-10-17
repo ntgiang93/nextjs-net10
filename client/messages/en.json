@@ -46,7 +46,9 @@
     "dropzoneSupportDescription": "Supported types: {fileTypes}",
     "fileTooLarge": "File size exceeds the maximum limit of {limit} MB",
     "fileCountExceeded": "Maximum {limit} file(s) allowed",
-    "fileTypeUnsupported": "File type is not supported"
+    "fileTypeUnsupported": "File type is not supported",
+    "uploadBy": "Uploaded by: {userName}",
+    "download": "Download"
   },
   "role": {
     "title": "Role management",

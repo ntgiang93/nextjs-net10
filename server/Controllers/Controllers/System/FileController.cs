@@ -55,12 +55,12 @@ public class FileController : ControllerBase
     [HttpPost("upload")]
     public async Task<IActionResult> UploadFile([FromForm] FileUploadDto fileDto)
     {
-        var file = Request.Form.Files.Count > 0 ? Request.Form.Files[0] : null;
-        if (file == null)
-            return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error422Msg)));
+        var file = fileDto.File;
 
-        var result = await _fileService.UploadFileAsync(file, fileDto);
-        return Ok(ApiResponse<FileDto>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
+        var results = await _fileService.UploadFileAsync(fileDto);
+        if(results != null)
+        return Ok(ApiResponse<FileDto>.Succeed(results, _sysMsg.Get(EMessage.SuccessMsg)));
+        else return Ok(ApiResponse<FileDto>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
 
     [HttpPost("upload/multiple")]

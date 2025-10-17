@@ -44,9 +44,9 @@ public class FileService : GenericService<FileStorage, int>, IFileService
         if (!Directory.Exists(_uploadDirectory)) Directory.CreateDirectory(_uploadDirectory);
     }
 
-    public async Task<FileDto> UploadFileAsync(IFormFile file, FileUploadDto fileDto)
+    public async Task<FileDto> UploadFileAsync(FileUploadDto fileDto)
     {
-        ValidateFile(file);
+        ValidateFile(fileDto.File);
         var user = UserContext.Current;
         // Create container directory based on reference type or use general
         var containerName = !string.IsNullOrEmpty(fileDto.ReferenceType)
@@ -56,22 +56,22 @@ public class FileService : GenericService<FileStorage, int>, IFileService
         var containerPath = Path.Combine(_uploadDirectory, containerName);
         if (!Directory.Exists(containerPath)) Directory.CreateDirectory(containerPath);
         // Generate unique file name to prevent collisions
-        string extension = file.FileName.Split('.').Last();
+        string extension = fileDto.File.FileName.Split('.').Last();
         var uniqueFileName = $"{Ulid.NewUlid()}.{extension}";
         var filePath = Path.Combine(containerPath, uniqueFileName);
 
         // Save file to disk
         using (var stream = new FileStream(filePath, FileMode.Create))
         {
-            await file.CopyToAsync(stream);
+            await fileDto.File.CopyToAsync(stream);
         }
 
         // Create file entity
         var fileEntity = new FileStorage
         {
-            FileName = file.FileName,
-            FileSize = file.Length,
-            MimeType = file.ContentType,
+            FileName = fileDto.File.FileName,
+            FileSize = fileDto.File.Length,
+            MimeType = fileDto.File.ContentType,
             FilePath = filePath.Replace(Directory.GetCurrentDirectory(), string.Empty),
             ReferenceId = fileDto.ReferenceId,
             ReferenceType = fileDto.ReferenceType,
@@ -93,7 +93,7 @@ public class FileService : GenericService<FileStorage, int>, IFileService
 
         foreach (var file in files)
         {
-            var fileResult = await UploadFileAsync(file, fileDto);
+            var fileResult = await UploadFileAsync(fileDto);
             results.Add(fileResult);
         }
         return results;

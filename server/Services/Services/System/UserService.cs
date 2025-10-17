@@ -295,11 +295,14 @@ public class UserService : GenericService<User, string>, IUserService
             throw new NotFoundException(SysMsg.Get(EMessage.UserNotFound), "USER_NOT_FOUND");
         if (file == null || file.Length == 0)
             throw new BusinessException(SysMsg.Get(EMessage.FileRequired), "FILE_REQUIRED");
-        FileUploadDto dto = new FileUploadDto();
-        dto.ReferenceId = userId;
-        dto.ReferenceType = nameof(User) + "_avatar";
+        FileUploadDto dto = new FileUploadDto()
+        {
+            ReferenceId = userId,
+            ReferenceType = nameof(User) + "_avatar",
+            File = file
+        };
         if (!string.IsNullOrWhiteSpace(user.Avatar)) await _fileService.DeleteFileByReference(dto.ReferenceType, dto.ReferenceId);
-        var newFile = await _fileService.UploadFileAsync(file, dto);
+        var newFile = await _fileService.UploadFileAsync(dto);
         user.Avatar = newFile.FilePath.Replace(Path.DirectorySeparatorChar, '/');
         return await UpdateAsync(user);
     }

@@ -14,7 +14,7 @@ public interface IFileService : IGenericService<FileStorage, int>
     /// <summary>
     ///     Uploads a file to storage
     /// </summary>
-    Task<FileDto> UploadFileAsync(IFormFile file, FileUploadDto fileDto);
+    Task<FileDto> UploadFileAsync(FileUploadDto fileDto);
 
     /// <summary>
     ///     Uploads multiple files to storage
