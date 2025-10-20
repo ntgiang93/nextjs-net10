@@ -7,51 +7,54 @@ using Repository.Interfaces.Organization;
 using Repository.Repositories.Base;
 using Repository.Interfaces.Base;
 using Model.Entities.System;
+using Common.Extensions;
 
 namespace Repository.Repositories.Organization;
 
 public class DepartmentRepository : GenericRepository<Department, int>, IDepartmentRepository
 {
     private readonly StringBuilder _sqlBuilder;     
+    private readonly string _tableName;
+    private readonly string _departmentTypeTableName;
 
     public DepartmentRepository(IDbConnectionFactory factory) : base(factory)   
     {
-        _sqlBuilder = new StringBuilder();
+        _tableName = StringHelper.GetTableName<Department>();
+        _departmentTypeTableName = StringHelper.GetTableName<DepartmentType>();
     }
 
-    public async Task<List<TableDepartmentDto>> GetDepartmentTreeAsync()
+    public async Task<List<DepartmentDto>> GetDepartmentTreeAsync()
     {
-        _sqlBuilder.Clear();
-        _sqlBuilder.Append($@"
-            SELECT 
-                d.{nameof(Department.Id)},
-                d.{nameof(Department.Code)},
-                d.{nameof(Department.Name)},
-                d.{nameof(Department.ParentId)},
-                d.{nameof(Department.DepartmentTypeCode)},
-                dt.{nameof(DepartmentType.Name)} as DepartmentTypeName,
-                u.{nameof(User.FullName)} as ManagerName,
-                d.{nameof(Department.ContactInfo)},
-                d.{nameof(Department.Address)}
-            FROM {nameof(Department)}s d
-            INNER JOIN {nameof(DepartmentType)}s dt ON d.{nameof(Department.DepartmentTypeCode)} = dt.{nameof(DepartmentType.Code)}
-            LEFT JOIN {nameof(User)}s u ON d.{nameof(Department.ManagerId)} = u.{nameof(User.Id)}
-            WHERE d.{nameof(Department.IsActive)} = 1 AND d.{nameof(Department.IsDeleted)} = 0
-            ORDER BY d.{nameof(Department.Id)} DESC");
+        var query = new Query(_tableName);
+        query.Select(
+                $"{_tableName}.{nameof(Department.Id)}",
+                $"{_tableName}.{nameof(Department.Code)}",
+                $"{_tableName}.{nameof(Department.Name)}",
+                $"{_tableName}.{nameof(Department.ParentId)}",
+                $"{_tableName}.{nameof(Department.Description)}",
+                $"{_tableName}.{nameof(Department.DepartmentTypeCode)}",
+                $"{_departmentTypeTableName}.{nameof(DepartmentType.Name)} as {nameof(DepartmentDto.DepartmentTypeName)}",
+                $"{_tableName}.{nameof(Department.Address)}",
+                $"{_tableName}.{nameof(Department.TreePath)}"
+            )
+            .LeftJoin(_departmentTypeTableName, $"{_departmentTypeTableName}.{nameof(DepartmentType.Code)}", nameof(Department.DepartmentTypeCode))
+            .Where($"{_tableName}.{nameof(Department.IsDeleted)}", false)
+            .OrderByDesc($"{_tableName}.{nameof(Department.CreatedBy)}");
+        var compiledQuery = _compiler.Compile(query);
 
         var connection = _dbFactory.Connection;
-        var allDepartments = await connection.QueryAsync<TableDepartmentDto>(_sqlBuilder.ToString());
+        var allDepartments = await connection.QueryAsync<DepartmentDto>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return BuildDepartmentTree(allDepartments.ToList());
     }
 
-    private List<TableDepartmentDto> BuildDepartmentTree(List<TableDepartmentDto> allDepartments)
+    private List<DepartmentDto> BuildDepartmentTree(List<DepartmentDto> allDepartments)
     {
         // Build tree structure
         var rootDepartments = allDepartments.Where(m => m.ParentId == null || m.ParentId == 0).ToList();
 
         // Recursive function to build department tree
-        void BuildDepartmentTreeRecursive(TableDepartmentDto parent)
+        void BuildDepartmentTreeRecursive(DepartmentDto parent)
         {
             parent.Children = allDepartments
                 .Where(d => d.ParentId == parent.Id)
@@ -74,7 +77,6 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
         var query = new Query($"{nameof(Department)}s")
             .Where(nameof(Department.DepartmentTypeCode), departmentTypeCode)
             .Where(nameof(Department.IsDeleted), false)
-            .Where(nameof(Department.IsActive), true)
             .OrderBy(nameof(Department.Name));
 
         var compiledQuery = _compiler.Compile(query);
@@ -88,9 +90,7 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
     public async Task<List<Department>> GetByManagerAsync(long managerId)
     {
         var query = new Query($"{nameof(Department)}s")
-            .Where(nameof(Department.ManagerId), managerId)
             .Where(nameof(Department.IsDeleted), false)
-            .Where(nameof(Department.IsActive), true)
             .OrderBy(nameof(Department.Name));
 
         var compiledQuery = _compiler.Compile(query);

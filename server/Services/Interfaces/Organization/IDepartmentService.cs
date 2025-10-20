@@ -11,17 +11,17 @@ public interface IDepartmentService : IGenericService<Department, int>
     /// <summary>
     ///     Gets department tree structure
     /// </summary>
-    Task<List<TableDepartmentDto>> GetDepartmentTreeAsync();
+    Task<List<DepartmentDto>> GetDepartmentTreeAsync();
 
     /// <summary>
     ///     Creates a new department
     /// </summary>
-    Task<DepartmentDto> CreateDepartmentAsync(CreateDepartmentDto dto);
+    Task<DepartmentDto> CreateDepartmentAsync(DetailDepartmentDto dto);
 
     /// <summary>
     ///     Updates an existing department
     /// </summary>
-    Task<bool> UpdateDepartmentAsync(UpdateDepartmentDto dto);
+    Task<bool> UpdateDepartmentAsync(DetailDepartmentDto dto);
 
     /// <summary>
     ///     Deletes a department

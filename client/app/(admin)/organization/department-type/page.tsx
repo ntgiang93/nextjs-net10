@@ -1,70 +1,69 @@
 'use client';
 import DataTable from '@/components/ui//data-table/Datatable';
-import { HugeIcons } from '@/components/ui//icon/HugeIcons';
 import { ConfirmModal } from '@/components/ui//overlay/ConfirmModal';
 import { ExtButton } from '@/components/ui/button/ExtButton';
+import { SearchInput } from '@/components/ui/input/SearchInput';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
-import { MenuHook } from '@/hooks/menu';
+import { DepartmentTypeHook } from '@/hooks/departmentType';
 import { hasPermission } from '@/libs/AuthHelper';
 import { EPermission } from '@/types/base/Permission';
 import { ESysModule } from '@/types/constant/SysModule';
-import { MenuItem } from '@/types/sys/Menu';
+import { DepartmentTypeDto } from '@/types/sys/DepartmentType';
 import { Button, Tooltip, useDisclosure } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Add01Icon, Delete02Icon, Edit01Icon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
-import MenuDetail from './components/MenuDetailModal';
+import { useEffect, useMemo, useState } from 'react';
+import DetailModal from './components/DetailModal';
 
 export default function Menu() {
-  const { data, refetch, isLoading } = MenuHook.useGetMenuTree();
+  const { data, refetch, isLoading } = DepartmentTypeHook.useGetAll();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
-  const [selectedMenu, setSelectedMenu] = useState<MenuItem | undefined>(undefined);
-  const [selectedParent, setSelectedParent] = useState<MenuItem | undefined>(undefined);
-  const { mutateAsync: del, isPending: isDelPending } = MenuHook.useDelete(selectedMenu?.id || 0);
-  const canCreate = hasPermission(ESysModule.Menu, EPermission.Create);
-  const canEdit = hasPermission(ESysModule.Menu, EPermission.Edit);
-  const canDelete = hasPermission(ESysModule.Menu, EPermission.Delete);
-  const t = useTranslations('menu');
+  const [selected, setSelected] = useState<DepartmentTypeDto | undefined>(undefined);
+  const { mutateAsync: del, isPending: isDelPending } = DepartmentTypeHook.useDelete();
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [tableData, setTableData] = useState<DepartmentTypeDto[]>(data || []);
+  const canCreate = hasPermission(ESysModule.DepartmentType, EPermission.Create);
+  const canEdit = hasPermission(ESysModule.DepartmentType, EPermission.Edit);
+  const canDelete = hasPermission(ESysModule.DepartmentType, EPermission.Delete);
   const msg = useTranslations('msg');
+  const t = useTranslations('organization');
 
-  const columns = useMemo<ColumnDef<MenuItem>[]>(
+  const columns = useMemo<ColumnDef<DepartmentTypeDto>[]>(
     () => [
       {
         accessorFn: (row) => row.name,
         id: 'name',
         header: () => msg('name'),
         footer: (props) => props.column.id,
-        size: 300,
+        minSize: 300,
         meta: {
           pinned: 'left',
         },
       },
       {
-        id: 'url',
-        accessorKey: 'url',
-        header: () => msg('path'),
-        footer: (props) => props.column.id,
-        minSize: 200,
-      },
-      {
-        accessorKey: 'icon',
-        header: () => 'Icon',
+        id: 'code',
+        accessorKey: 'code',
+        header: () => msg('code'),
         footer: (props) => props.column.id,
         size: 80,
-        cell: ({ cell }) => {
-          return <HugeIcons name={(cell.getValue() as string) || ''} />;
-        },
+      },
+      {
+        accessorKey: 'description',
+        header: () => msg('description'),
+        footer: (props) => props.column.id,
+        minSize: 300,
         meta: {
           align: 'center',
         },
       },
       {
-        accessorKey: 'status',
-        header: () => msg('status'),
+        id: 'level',
+        accessorKey: 'level',
+        header: () => msg('level'),
         footer: (props) => props.column.id,
-        size: 100,
+        size: 80,
       },
       {
         accessorKey: 'actions',
@@ -74,24 +73,6 @@ export default function Menu() {
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
-              {canCreate && (
-                <Tooltip content={msg('add')}>
-                  <Button
-                    isIconOnly
-                    aria-label="add-button"
-                    color="primary"
-                    variant="light"
-                    radius="full"
-                    size="sm"
-                    onPress={() => {
-                      setSelectedParent(row.original);
-                      onOpen();
-                    }}
-                  >
-                    <Add01Icon size={16} />
-                  </Button>
-                </Tooltip>
-              )}
               {canEdit && (
                 <Tooltip content={msg('edit')}>
                   <Button
@@ -102,7 +83,7 @@ export default function Menu() {
                     radius="full"
                     size="sm"
                     onPress={() => {
-                      setSelectedMenu(row.original);
+                      setSelected(row.original);
                       onOpen();
                     }}
                   >
@@ -110,7 +91,7 @@ export default function Menu() {
                   </Button>
                 </Tooltip>
               )}
-              {(!row.original.children || row.original.children?.length === 0) && canDelete && (
+              {canDelete && (
                 <Tooltip color="danger" content={msg('delete')}>
                   <Button
                     isIconOnly
@@ -120,7 +101,7 @@ export default function Menu() {
                     radius="full"
                     size="sm"
                     onPress={() => {
-                      setSelectedMenu(row.original);
+                      setSelected(row.original);
                       onOpenDel();
                     }}
                   >
@@ -136,11 +117,11 @@ export default function Menu() {
         },
       },
     ],
-    [canEdit, canDelete],
+    [canEdit, canDelete, msg],
   );
 
   const handleDelete = async () => {
-    var success = await del();
+    var success = await del(selected?.id || 0);
     if (success) {
       refetch();
       OnOpenDelChange();
@@ -149,14 +130,28 @@ export default function Menu() {
   };
 
   const onResetSelected = () => {
-    setSelectedMenu(undefined);
-    setSelectedParent(undefined);
+    setSelected(undefined);
   };
+
+  useEffect(() => {
+    if (searchTerm && searchTerm.length > 0) {
+      const searchTermLower = searchTerm.toLocaleLowerCase();
+      const dataSource =
+        data?.filter(
+          (r) =>
+            r.name.toLocaleLowerCase().includes(searchTermLower) ||
+            r.description?.toLocaleLowerCase().includes(searchTermLower),
+        ) || [];
+      setTableData([...dataSource]);
+    } else {
+      setTableData([...(data || [])]);
+    }
+  }, [searchTerm, data]);
 
   return (
     <div className={'h-full flex flex-col gap-2'}>
       <PageHeader
-        title={t('title')}
+        title={`${msg('management')} ${t('departmentType').toLowerCase()}`}
         toolbar={
           <>
             {canCreate && (
@@ -165,7 +160,7 @@ export default function Menu() {
                 startContent={<Add01Icon size={16} />}
                 variant="shadowSmall"
                 onPress={() => {
-                  setSelectedMenu(undefined);
+                  setSelected(undefined);
                   onOpen();
                 }}
               >
@@ -177,27 +172,35 @@ export default function Menu() {
       ></PageHeader>
       <DataTable
         columns={columns}
-        data={data || []}
+        data={tableData || []}
         childrenProperty="children"
         isLoading={isLoading}
         fetch={refetch}
+        leftContent={
+          <>
+            <SearchInput
+              className="w-64"
+              value={searchTerm}
+              onValueChange={(value) => setSearchTerm(value)}
+            />
+          </>
+        }
       />
-      <MenuDetail
+      <DetailModal
         isOpen={isOpen}
         onOpenChange={onOpenChange}
-        id={selectedMenu?.id || 0}
+        id={selected?.id || 0}
         onRefresh={refetch}
-        parent={selectedParent}
         onResetSelected={onResetSelected}
       />
       <ConfirmModal
         isOpen={IsOpenDel}
         title={msg('delete')}
-        message={t('deleteMenuWarning')}
+        message={msg('deleteWarning')}
         confirmColor="danger"
         onOpenChange={OnOpenDelChange}
         onConfirm={handleDelete}
-        objectName={[selectedMenu?.name || '']}
+        objectName={[selected?.name || '']}
         loading={isDelPending}
       />
     </div>

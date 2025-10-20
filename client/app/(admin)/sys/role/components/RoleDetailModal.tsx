@@ -48,15 +48,14 @@ export default function RoleDetailModal(props: UserCreateModalProps) {
     }
   }, [role]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setForm((prev) => ({ ...prev, ...defaultRoleDto }));
+    }
+  }, [isOpen]);
+
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      scrollBehavior="inside"
-      onClose={() => {
-        setForm((prev) => ({ ...prev, ...defaultRoleDto }));
-      }}
-    >
+    <Modal isOpen={isOpen} onOpenChange={onOpenChange} scrollBehavior="inside">
       <ModalContent>
         <>
           <ModalHeader className="flex flex-col gap-1">

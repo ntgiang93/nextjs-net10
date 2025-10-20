@@ -34,7 +34,7 @@ interface IExtDropzoneProps {
 export const ExtDropzone = (props: IExtDropzoneProps) => {
   const { maxSize, maxFiles, accept, existingFiles, referenceId, referenceType } = props;
   const { mutateAsync: uploadFile, isPending } = FileHook.useUpload();
-  const { mutateAsync: deleteFile } = FileHook.useDelete();
+  const { mutateAsync: deleteFile, isPending: isDeleting } = FileHook.useDelete();
   const [selectedFile, setSelectedFile] = useState<FileDto | undefined>(undefined);
   const [uploadedFile, setUploadedFile] = useState<FileDto[]>([]);
   const {
@@ -43,16 +43,15 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
     onOpenChange: OnOpenConfirmChange,
   } = useDisclosure();
   const { user } = useAuthStore();
-  const { acceptedFiles, getRootProps, getInputProps, isDragActive, isFileDialogActive } =
-    useDropzone({
-      accept: accept,
-      maxSize: maxSize * 1024 * 1024,
-      maxFiles: maxFiles,
-      onDropAccepted: (files) => {
-        handleUploadFiles(files);
-      },
-      disabled: isPending,
-    });
+  const { getRootProps, getInputProps, isDragActive, isFileDialogActive } = useDropzone({
+    accept: accept,
+    maxSize: maxSize * 1024 * 1024,
+    maxFiles: maxFiles,
+    onDropAccepted: (files) => {
+      handleUploadFiles(files);
+    },
+    disabled: isPending,
+  });
   const msg = useTranslations('msg');
 
   const newListFile = useMemo(() => {
@@ -189,6 +188,7 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
   const handleDeleteFile = async () => {
     await deleteFile(selectedFile?.id || 0);
     setUploadedFile((prev) => prev.filter((f) => f.id !== selectedFile?.id));
+    OnOpenConfirmChange();
   };
 
   const detailDescription = useMemo(() => {
@@ -228,6 +228,7 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
         onOpenChange={OnOpenConfirmChange}
         onConfirm={() => handleDeleteFile()}
         objectName={[`${selectedFile?.fileName}`]}
+        loading={isDeleting}
       />
     </section>
   );

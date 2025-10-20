@@ -29,16 +29,16 @@ public class DepartmentService : GenericService<Department, int>, IDepartmentSer
         _userDepartmentRepository = userDepartmentRepository;
     }
 
-    public async Task<List<TableDepartmentDto>> GetDepartmentTreeAsync()
+    public async Task<List<DepartmentDto>> GetDepartmentTreeAsync()
     {
         var departments = await _departmentRepository.GetDepartmentTreeAsync();
         return departments;
     }
 
-    public async Task<DepartmentDto> CreateDepartmentAsync(CreateDepartmentDto dto)
+    public async Task<DepartmentDto> CreateDepartmentAsync(DetailDepartmentDto dto)
     {
         // Check if code exists
-        var existingDepartment = await GetSingleAsync<Department>(x => x.Code == dto.Code);
+        var existingDepartment = await GetSingleAsync<Department>(x => x.Code == dto.Code && x.IsDeleted == false);
         if (existingDepartment != null)
             throw new BusinessException(SysMsg.Get(EMessage.CodeIsExist), "DEPARTMENT_CODE_EXISTS");
         // Check if parent department exists
@@ -53,13 +53,19 @@ public class DepartmentService : GenericService<Department, int>, IDepartmentSer
         return newDepartment.Adapt<DepartmentDto>();
     }
 
-    public async Task<bool> UpdateDepartmentAsync(UpdateDepartmentDto dto)
+    public async Task<bool> UpdateDepartmentAsync(DetailDepartmentDto dto)
     {
         // Check if code exists
-        var existingDepartment = await GetSingleAsync<Department>(x => x.Code == dto.Code && x.Id != dto.Id);
-        if (existingDepartment != null)
+        var existingCode = await GetSingleAsync<Department>(x => x.Code == dto.Code && x.Id != dto.Id && x.IsDeleted == false);
+        if (existingCode != null)
             throw new BusinessException(SysMsg.Get(EMessage.CodeIsExist), "DEPARTMENT_CODE_EXISTS");
-        var result = await UpdateAsync(dto.Adapt<Department>());
+        else
+        {
+            var existingDepartment = await GetSingleAsync<Department>(x => x.Id == dto.Id && x.IsDeleted == false);
+            if (existingDepartment == null)
+                throw new NotFoundException(SysMsg.Get(EMessage.Error404Msg), "DEPARTMENT_NOT_FOUND");
+        }
+            var result = await UpdateAsync(dto.Adapt<Department>());
         return result;
     }
 

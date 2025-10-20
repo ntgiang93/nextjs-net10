@@ -1,4 +1,3 @@
-using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -33,7 +32,7 @@ public class DepartmentTypeController : ControllerBase
     [Policy(ESysModule.BusinessCategory, EPermission.View)]
     public async Task<IActionResult> GetAll()
     {
-        var types = await _departmentTypeService.GetAllAsync<DepartmentTypeDto>();
+        var types = await _departmentTypeService.FindAsync<DepartmentTypeDto>(x => x.IsDeleted == false);
         return Ok(ApiResponse<object>.Succeed(types, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
@@ -54,11 +53,11 @@ public class DepartmentTypeController : ControllerBase
     [Policy(ESysModule.Menu, EPermission.Create)]
     public async Task<IActionResult> CreateMenu([FromBody] CreateDepartmentTypeDto dto)
     {
-        var newDepartmentType = await _departmentTypeService.CreateAsync(dto.Adapt<DepartmentType>());
-        if (newDepartmentType == null)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+        var id = await _departmentTypeService.CreateAsync(dto.Adapt<DepartmentType>());
+        if (id < 1)
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<DepartmentTypeDto>.Succeed(newDepartmentType.Adapt<DepartmentTypeDto>(),
+        return Ok(ApiResponse<DepartmentTypeDto>.Succeed(id.Adapt<DepartmentTypeDto>(),
             _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
@@ -69,9 +68,9 @@ public class DepartmentTypeController : ControllerBase
     {
         var success = await _departmentTypeService.UpdateAsync(dto.Adapt<DepartmentType>());
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(success,_sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // DELETE methods
@@ -81,8 +80,8 @@ public class DepartmentTypeController : ControllerBase
     {
         var success = await _departmentTypeService.SoftDeleteAsync(id);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(success, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 }

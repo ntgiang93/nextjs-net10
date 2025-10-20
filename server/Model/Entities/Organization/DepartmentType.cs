@@ -17,5 +17,4 @@ public class DepartmentType : BaseEntity<int>
 
     public int Level { get; set; }
 
-    public bool IsActive { get; set; } = true;
 }

@@ -9,7 +9,7 @@ using Service.Interfaces.Organization;
 
 namespace NextDotNet.Api.Controllers.Department;
 
-[Route("api/organization/department")]
+[Route("api/organization/departments")]
 [ApiController]
 [Authorize]
 public class DepartmentController : ControllerBase
@@ -29,7 +29,7 @@ public class DepartmentController : ControllerBase
     public async Task<IActionResult> GetDepartmentTree()
     {
         var departments = await _departmentService.GetDepartmentTreeAsync();
-        return Ok(ApiResponse<List<TableDepartmentDto>>.Succeed(departments, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<List<DepartmentDto>>.Succeed(departments, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpGet("all")]
@@ -54,11 +54,11 @@ public class DepartmentController : ControllerBase
     // POST methods
     [HttpPost]
     [Policy(ESysModule.Department, EPermission.Create)]
-    public async Task<IActionResult> CreateDepartment([FromBody] CreateDepartmentDto createDepartmentDto)
+    public async Task<IActionResult> CreateDepartment([FromBody] DetailDepartmentDto createDepartmentDto)
     {
         var department = await _departmentService.CreateDepartmentAsync(createDepartmentDto);
         if (department == null)
-            return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return  Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<DepartmentDto>.Succeed(department, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -66,11 +66,11 @@ public class DepartmentController : ControllerBase
     // PUT methods
     [HttpPut]
     [Policy(ESysModule.Department, EPermission.Edit)]
-    public async Task<IActionResult> UpdateDepartment([FromBody] UpdateDepartmentDto updateDepartmentDto)
+    public async Task<IActionResult> UpdateDepartment([FromBody] DetailDepartmentDto updateDepartmentDto)
     {
         var success = await _departmentService.UpdateDepartmentAsync(updateDepartmentDto);
         if (!success)
-            return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -82,7 +82,7 @@ public class DepartmentController : ControllerBase
     {
         var success = await _departmentService.SoftDeleteAsync(id);
         if (!success)
-            return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
     }

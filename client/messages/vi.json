@@ -48,7 +48,9 @@
     "fileCountExceeded": "Chỉ cho phép tối đa {limit} tệp",
     "fileTypeUnsupported": "Loại tệp không được hỗ trợ",
     "uploadBy": "Tải lên bởi: {userName}",
-    "download": "Tải xuống"
+    "download": "Tải xuống",
+    "management": "Quản lý",
+    "level": "Cấp độ"
   },
   "role": {
     "title": "Quản lý Vai trò",
@@ -108,5 +110,10 @@
     "menuName": "Tên menu",
     "deleteMenuWarning": "Thao tác này sẽ xóa menu và tất cả các mục của nó. Bạn có chắc chắn muốn tiếp tục không?",
     "parentMenu": "Menu cha"
+  },
+  "organization": {
+    "jobTitle": "Chức danh",
+    "department": "Bộ phận",
+    "departmentType": "Phân loại bộ phận"
   }
 }

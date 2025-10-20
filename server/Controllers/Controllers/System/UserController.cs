@@ -111,7 +111,7 @@ public class UserController : ControllerBase
     {
         var success = await _userService.AssignRolesAsync(userId, userRoles);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }

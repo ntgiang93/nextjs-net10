@@ -48,7 +48,9 @@
     "fileCountExceeded": "Maximum {limit} file(s) allowed",
     "fileTypeUnsupported": "File type is not supported",
     "uploadBy": "Uploaded by: {userName}",
-    "download": "Download"
+    "download": "Download",
+    "management": "Management",
+    "level": "Level"
   },
   "role": {
     "title": "Role management",
@@ -106,5 +108,10 @@
     "menu": "Menu",
     "deleteMenuWarning": "This action will delete the menu and all its items. Are you sure you want to continue?",
     "parentMenu": "Parent menu"
+  },
+  "organization": {
+    "jobTitle": "Job Title",
+    "department": "Department",
+    "departmentType": "Department Type"
   }
 }

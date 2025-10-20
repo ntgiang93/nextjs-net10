@@ -3,7 +3,7 @@ import SysModuleSelect from '@/components/shared/sys/Select/SysModuleSelect';
 import { IconSelect } from '@/components/ui//icon/IconSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
 import { MenuHook } from '@/hooks/menu';
-import { defaultSaveMenuDto, SaveMenuDto } from '@/types/sys/Menu';
+import { defaultSaveMenuDto, MenuItem, SaveMenuDto } from '@/types/sys/Menu';
 import {
   Button,
   Form,
@@ -20,13 +20,15 @@ import { useEffect, useState } from 'react';
 
 interface MenuDetailProps {
   isOpen: boolean;
+  parent: MenuItem | undefined;
   onOpenChange: () => void;
   id: number;
   onRefresh: () => void;
+  onResetSelected: () => void;
 }
 
 export default function MenuDetail(props: MenuDetailProps) {
-  const { isOpen, onOpenChange, id, onRefresh } = props;
+  const { isOpen, onOpenChange, id, onRefresh, parent, onResetSelected } = props;
   const [form, setForm] = useState<SaveMenuDto>({ ...defaultSaveMenuDto });
   const { data, isFetching } = MenuHook.useGet(isOpen ? id : 0);
   const { mutateAsync: save, isPending } = MenuHook.useSave();
@@ -43,6 +45,16 @@ export default function MenuDetail(props: MenuDetailProps) {
   };
 
   useEffect(() => {
+    if (!data) {
+      setForm({
+        ...defaultSaveMenuDto,
+        parentId: parent?.id || 0,
+        url: parent?.url + '/' || '/',
+      });
+    }
+  }, [parent?.id]);
+
+  useEffect(() => {
     if (data) {
       setForm({
         ...data,
@@ -51,13 +63,19 @@ export default function MenuDetail(props: MenuDetailProps) {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setForm((prev) => ({ ...prev, ...defaultSaveMenuDto }));
+      onResetSelected();
+    }
+  }, [isOpen]);
+
   return (
     <Modal
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      onClose={() => setForm((prev) => ({ ...prev, ...defaultSaveMenuDto }))}
       scrollBehavior="inside"
     >
       <ModalContent>

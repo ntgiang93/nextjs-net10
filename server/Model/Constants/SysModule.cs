@@ -14,6 +14,7 @@ public enum ESysModule
     SysCategories,
     BusinessCategory,
     Department,
+    DepartmentType,
     JobTitle
 }
 
@@ -30,6 +31,7 @@ public static class SysModule
         { nameof(ESysModule.SysCategories), "Static system categories management" },
         { nameof(ESysModule.BusinessCategory), "Business Category management" },
         { nameof(ESysModule.Department), "Department management" },
+        { nameof(ESysModule.DepartmentType), "Department type management" },
         { nameof(ESysModule.JobTitle), "Job Title management" }
     };
 

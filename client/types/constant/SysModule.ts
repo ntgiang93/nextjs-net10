@@ -9,5 +9,6 @@ export enum ESysModule {
   SysCategories = 'SysCategories',
   BusinessCategory = 'BusinessCategory',
   Department = 'Department',
+  DepartmentType = 'DepartmentType',
   JobTitle = 'JobTitle',
 }

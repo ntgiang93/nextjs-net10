@@ -1,3 +1,4 @@
+import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { useAuthStore } from '@/store/auth-store';
 import { ApiResponse } from '@/types/base/ApiResponse';
 import { addToast } from '@heroui/react';
@@ -114,7 +115,11 @@ export async function fetchApi<T>(
       }
 
       if (response.status === 401) {
-        window.location.href = '/login';
+        const refreshTokenFn = useAuth().refreshToken;
+        if (refreshTokenFn) {
+          await refreshTokenFn();
+          return fetchApi<T>(endpoint, options, notiOff, isPublic);
+        }
         return Promise.reject(new ApiError('Unauthorized', 401));
       }
 

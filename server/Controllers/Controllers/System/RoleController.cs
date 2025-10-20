@@ -39,7 +39,7 @@ public class RoleController : ControllerBase
     {
         var role = await _roleService.GetByIdAsync<RoleViewDto>(id);
         if (role == null)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error404Msg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error404Msg)));
 
         return Ok(ApiResponse<RoleViewDto>.Succeed(role, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -50,7 +50,7 @@ public class RoleController : ControllerBase
     {
         var result = await _roleService.GetRoleMembers(roleId);
         if (result == null)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<List<RoleMembersDto>>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -69,7 +69,7 @@ public class RoleController : ControllerBase
     {
         var createdRole = await _roleService.CreateRoleAsync(roleDto);
         if (createdRole == null)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<RoleDto>.Succeed(createdRole, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -80,7 +80,7 @@ public class RoleController : ControllerBase
     {
         var success = await _roleService.AssignPermissionsToRoleAsync(roleId, permissionsDto);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -91,7 +91,7 @@ public class RoleController : ControllerBase
     {
         var success = await _roleService.AssignRoleMembers(roleId, userRoles);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -113,7 +113,7 @@ public class RoleController : ControllerBase
     {
         var success = await _roleService.DeleteRoleAsync(id);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -123,7 +123,7 @@ public class RoleController : ControllerBase
     {
         var success = await _roleService.RemoveRoleMember(id, userId);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
     }

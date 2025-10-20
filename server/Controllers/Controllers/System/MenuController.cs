@@ -46,7 +46,7 @@ public class MenuController : ControllerBase
     {
         var menu = await _menuService.GetByIdAsync<MenuDto>(id);
         if (menu == null)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error404Msg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error404Msg)));
 
         return Ok(ApiResponse<object>.Succeed(menu, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -58,7 +58,7 @@ public class MenuController : ControllerBase
     {
         var menu = await _menuService.CreateMenuAsync(createMenuDto);
         if (menu == null)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<MenuDto>.Succeed(menu, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -70,9 +70,9 @@ public class MenuController : ControllerBase
     {
         var success = await _menuService.UpdateMenuAsync(updateMenuDto);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // DELETE methods
@@ -82,7 +82,7 @@ public class MenuController : ControllerBase
     {
         var success = await _menuService.SoftDeleteAsync(id);
         if (!success)
-            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
     }

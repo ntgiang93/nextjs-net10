@@ -74,13 +74,18 @@ export default function UserDetailModal(props: UserCreateModalProps) {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setForm((prev) => ({ ...prev, ...defaultUserDto }));
+    }
+  }, [isOpen]);
+
   return (
     <Modal
       isDismissable={false}
       isKeyboardDismissDisabled={true}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      onClose={() => setForm((prev) => ({ ...prev, ...defaultUserDto }))}
       scrollBehavior="inside"
     >
       <ModalContent>

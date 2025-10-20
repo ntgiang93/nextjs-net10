@@ -119,9 +119,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             return;
           }
         }
+      } else {
+        router.push('/login');
       }
     } catch (error: any) {
       console.log('Refresh token error:', error);
+      router.push('/login');
     }
     resetAuthContext();
   };
@@ -130,20 +133,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setNavigating(true);
     router.push(url);
   };
-
-  /**
-   * Checks if the current user has the specified permission within a system module.
-   *
-   * @param permission - The permission to check for
-   * @param sysModule - The system module identifier where the permission applies (e.g., "Users", "Products"). Always use camel case. Get list from ESysModule
-   * @returns True if the user has the specified permission, false otherwise
-   *
-   * @example
-   * // Check if the user can edit in the "users" module
-   * if (hasPermission(EPermission.EDIT, "Users")) {
-   *   // User has edit permission for the users module
-   * }
-   */
 
   // Kiểm tra session khi component mount
   useLayoutEffect(() => {
