@@ -10,29 +10,12 @@ namespace Service.Interfaces.Organization;
 public interface IUserDepartmentService : IGenericService<UserDepartment, int>
 {
     /// <summary>
-    ///     Gets user's primary department
-    /// </summary>
-    Task<UserDepartment?> GetUserPrimaryDepartmentAsync(long userId);
-
-    /// <summary>
-    ///     Gets all departments for a user
-    /// </summary>
-    Task<List<UserDepartmentDto>> GetUserDepartmentsAsync(long userId);
-
-    /// <summary>
     ///     Gets paginated list of user department assignments
     /// </summary>
     Task<PaginatedResultDto<DepartmentMemberDto>> GetDepartmentMembersPaginatedAsync(UserDepartmentFilterDto filter);
-
+    
     /// <summary>
-    ///     Creates a new user department assignment
-    ///     If the assignment is marked as primary, any existing primary assignments will be updated
+    ///     Gets paginated list of users that are not assigned to the specified department
     /// </summary>
-    Task<int> CreateUserDepartmentAsync(UserDepartment userDepartment);
-
-    /// <summary>
-    ///     Updates a user department assignment
-    ///     If the assignment is marked as primary, any existing primary assignments will be updated
-    /// </summary>
-    Task<bool> UpdateUserDepartmentAsync(UserDepartment userDepartment);
+    Task<PaginatedResultDto<DepartmentMemberDto>> GetUserNotInDepartmentAsync(int id);
 }

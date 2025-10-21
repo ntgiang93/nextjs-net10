@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Mapster;
 using Common.Exceptions;
+using Mapster;
 using Model.Constants;
 using Model.DTOs.Organization;
 using Model.Entities.Organization;
@@ -10,28 +7,28 @@ using Repository.Interfaces.Organization;
 using Service.Interfaces.Organization;
 using Service.Services.Base;
 
-namespace Service.Services.Organization;
+namespace Services.Services.Organization;
 
 public class DepartmentService : GenericService<Department, int>, IDepartmentService
 {
     private readonly IDepartmentRepository _departmentRepository;
-    private readonly IDepartmentTypeRepository _departmentTypeRepository;
-    private readonly IUserDepartmentRepository _userDepartmentRepository;
 
     public DepartmentService(
         IDepartmentRepository departmentRepository,
-        IDepartmentTypeRepository departmentTypeRepository,
-        IUserDepartmentRepository userDepartmentRepository,
         IServiceProvider serviceProvider) : base(departmentRepository, serviceProvider)
     {
         _departmentRepository = departmentRepository;
-        _departmentTypeRepository = departmentTypeRepository;
-        _userDepartmentRepository = userDepartmentRepository;
     }
 
     public async Task<List<DepartmentDto>> GetDepartmentTreeAsync()
     {
         var departments = await _departmentRepository.GetDepartmentTreeAsync();
+        return departments;
+    }
+    
+    public async Task<List<DepartmentDto>> GetSingleDepartmentTreeAsync(int id)
+    {
+        var departments = await _departmentRepository.GetSingleDepartmentTreeAsync(id);
         return departments;
     }
 
@@ -48,7 +45,7 @@ public class DepartmentService : GenericService<Department, int>, IDepartmentSer
             var parentDepartment = await GetSingleAsync<Department>(x => x.Id == dto.ParentId);
             department.TreePath = $"{parentDepartment?.TreePath}.{parentDepartment?.Id}";
         }
-
+        else department.TreePath = "0";
         var newDepartment = await CreateAsync(department);
         return newDepartment.Adapt<DepartmentDto>();
     }

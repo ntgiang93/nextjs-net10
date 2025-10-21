@@ -1,17 +1,24 @@
 'use client';
 
+import { StringHelper } from '@/libs/StringHelper';
 import { apiService } from '@/services/api';
 import { ApiResponse } from '@/types/base/ApiResponse';
+import { defualtPaginatedResult, PaginatedResultDto } from '@/types/base/PaginatedResultDto';
 import {
+  AssignDepartmentMemberDto,
   defaultDetailDepartmentDto,
   DepartmentDto,
+  DepartmentMemberDto,
+  DepartmentMemberFilter,
   DetailDepartmentDto,
 } from '@/types/sys/Department';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const endpoint = 'organization/departments';
 
 export const useGetAll = () => {
+  var queryClient = useQueryClient();
+  var cachedData = queryClient.getQueryData<DepartmentDto[]>([endpoint, 'getAll']);
   return useQuery<DepartmentDto[], Error>({
     queryKey: [endpoint, 'getAll'],
     queryFn: async () => {
@@ -21,7 +28,25 @@ export const useGetAll = () => {
       }
       return [];
     },
+    enabled: !cachedData || cachedData.length === 0,
     placeholderData: keepPreviousData || [],
+  });
+};
+
+export const useGetSingleTree = (id: number) => {
+  var queryClient = useQueryClient();
+  var cachedData = queryClient.getQueryData<DepartmentDto>([endpoint, 'getSingleTree']);
+  return useQuery<DepartmentDto, Error>({
+    queryKey: [endpoint, 'getSingleTree', id],
+    queryFn: async () => {
+      const response = await apiService.get<ApiResponse<DepartmentDto>>(`${endpoint}/${id}/tree`);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return {} as DepartmentDto;
+    },
+    enabled: !cachedData,
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -59,9 +84,64 @@ export const useDelete = () => {
   });
 };
 
+export const useGetMembers = (filter: DepartmentMemberFilter) => {
+  return useQuery<PaginatedResultDto<DepartmentMemberDto>, Error>({
+    queryKey: [endpoint, 'getMembers', filter],
+    queryFn: async () => {
+      const response = await apiService.get<ApiResponse<PaginatedResultDto<DepartmentMemberDto>>>(
+        `${endpoint}/get-members?${StringHelper.objectToUrlParams(filter)}`,
+      );
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return { ...defualtPaginatedResult };
+    },
+    enabled: filter.departmentId > 0,
+    placeholderData: keepPreviousData,
+  });
+};
+
+export const useAssignMember = (departmentId: number) => {
+  return useMutation({
+    mutationFn: async (payload: AssignDepartmentMemberDto[]) => {
+      const response = await apiService.post<ApiResponse<boolean>>(
+        `${endpoint}/${departmentId}/assign-members`,
+        payload,
+      );
+      return response.success;
+    },
+  });
+};
+
+export const useGetUsersNotInDepartment = (
+  departmentId: number,
+  searchTerm: string,
+  enabled: boolean = true,
+) => {
+  return useQuery<DepartmentMemberDto[], Error>({
+    queryKey: [endpoint, 'usersNotInDepartment', departmentId, searchTerm],
+    queryFn: async () => {
+      const query = StringHelper.objectToUrlParams({ searchTerm });
+      const url = query
+        ? `${endpoint}/${departmentId}/users-not-in-department?${query}`
+        : `${endpoint}/${departmentId}/users-not-in-department`;
+      const response = await apiService.get<ApiResponse<DepartmentMemberDto[]>>(url);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return [];
+    },
+    enabled: enabled && departmentId > 0,
+    placeholderData: [],
+  });
+};
+
 export const DepartmentHook = {
   useGetAll,
   useGet,
   useSave,
   useDelete,
+  useGetMembers,
+  useAssignMember,
+  useGetUsersNotInDepartment,
 };

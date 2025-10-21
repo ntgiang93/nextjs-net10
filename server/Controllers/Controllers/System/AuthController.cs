@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Common.Extensions;
 using Common.Security;
+using Common.Security.Policies;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.System.Auth;
@@ -9,9 +10,8 @@ using Model.Entities.System;
 using Service.DTOs.System.Auth;
 using Service.Interfaces;
 using Service.Interfaces.Base;
-using Common.Security.Policies;
 
-namespace NextDotNet.Api.Controllers;
+namespace Controllers.Controllers.System;
 
 [Route("api/auth")]
 [ApiController]

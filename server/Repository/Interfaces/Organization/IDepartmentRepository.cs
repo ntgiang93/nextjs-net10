@@ -10,4 +10,8 @@ public interface IDepartmentRepository : IGenericRepository<Department, int>
     ///     Gets all departments as a tree structure
     /// </summary>
     Task<List<DepartmentDto>> GetDepartmentTreeAsync();
+    /// <summary>
+    ///     Gets a departments as a tree structure
+    /// </summary>
+    Task<List<DepartmentDto>> GetSingleDepartmentTreeAsync(int id);
 }

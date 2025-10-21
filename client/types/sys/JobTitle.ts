@@ -1,9 +1,9 @@
-export interface JobTitleDto {
+export type JobTitleDto = {
   id: number;
   code: string;
   name: string;
   description?: string;
-}
+};
 
 export const defaultJobTitleDto: JobTitleDto = {
   id: 0,

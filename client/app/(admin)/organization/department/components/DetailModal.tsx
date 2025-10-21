@@ -1,3 +1,5 @@
+import DepartmentSelect from '@/components/shared/sys/select/DepartmentSelect';
+import DepartmentTypeSelect from '@/components/shared/sys/select/DepartmentTypeSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
 import { DepartmentHook } from '@/hooks/department';
 import { DepartmentTypeHook } from '@/hooks/departmentType';
@@ -6,7 +8,6 @@ import {
   DepartmentDto,
   DetailDepartmentDto,
 } from '@/types/sys/Department';
-import { DepartmentTypeDto } from '@/types/sys/DepartmentType';
 import {
   Button,
   Form,
@@ -16,11 +17,9 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Select,
-  SelectItem,
 } from '@heroui/react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface DetailProps {
   isOpen: boolean;
@@ -28,14 +27,14 @@ interface DetailProps {
   id: number;
   onRefresh: () => void;
   onResetSelected: () => void;
+  parent?: DepartmentDto;
 }
 
 export default function DetailModal(props: DetailProps) {
-  const { isOpen, onOpenChange, id, onRefresh, onResetSelected } = props;
+  const { isOpen, onOpenChange, id, onRefresh, onResetSelected, parent } = props;
   const [form, setForm] = useState<DetailDepartmentDto>({ ...defaultDetailDepartmentDto });
   const { data, isFetching } = DepartmentHook.useGet(isOpen ? id : 0);
   const { data: departmentTypes } = DepartmentTypeHook.useGetAll();
-  const { data: departments } = DepartmentHook.useGetAll();
   const { mutateAsync: save, isPending } = DepartmentHook.useSave();
   const t = useTranslations('organization');
   const msg = useTranslations('msg');
@@ -48,25 +47,6 @@ export default function DetailModal(props: DetailProps) {
       onRefresh();
     }
   };
-
-  const flattenDepartments = useMemo(() => {
-    const list: DepartmentDto[] = [];
-    const traverse = (items?: DepartmentDto[], prefix = '') => {
-      if (!items) return;
-      items.forEach((item) => {
-        list.push({ ...item, name: `${prefix}${item.name}` });
-        if (item.children && item.children.length > 0) {
-          traverse(item.children, `${prefix}— `);
-        }
-      });
-    };
-    traverse(departments);
-    return list;
-  }, [departments]);
-
-  const parentOptions = useMemo(() => {
-    return flattenDepartments.filter((dept) => dept.id !== id);
-  }, [flattenDepartments, id]);
 
   useEffect(() => {
     if (data) {
@@ -84,12 +64,11 @@ export default function DetailModal(props: DetailProps) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (!isOpen || id > 0) return;
-    if (form.departmentTypeCode && form.departmentTypeCode.length > 0) return;
-    if (departmentTypes && departmentTypes.length > 0) {
-      setForm((prev) => ({ ...prev, departmentTypeCode: departmentTypes[0].code }));
+    if (id > 0) return;
+    if (parent && parent.id) {
+      setForm((prev) => ({ ...prev, parentId: parent.id }));
     }
-  }, [departmentTypes, form.departmentTypeCode, id, isOpen]);
+  }, [parent, id]);
 
   return (
     <Modal
@@ -142,48 +121,26 @@ export default function DetailModal(props: DetailProps) {
                   onValueChange={(value) => setForm((prev) => ({ ...prev, description: value }))}
                   variant="bordered"
                 />
-                <Select
-                  label={t('departmentType')}
+                <DepartmentTypeSelect
+                  value={form.departmentTypeCode ? [form.departmentTypeCode] : []}
+                  onChange={(values) => {
+                    setForm((prev) => ({ ...prev, departmentTypeCode: values[0] ?? '' }));
+                  }}
+                  selectionMode="single"
                   isRequired
-                  placeholder={msg('select')}
-                  selectedKeys={
-                    form.departmentTypeCode && form.departmentTypeCode.length > 0
-                      ? new Set([form.departmentTypeCode])
-                      : new Set([])
-                  }
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string | undefined;
-                    setForm((prev) => ({ ...prev, departmentTypeCode: key ?? '' }));
-                  }}
+                  labelPlacement="outside"
                   variant="bordered"
-                >
-                  {(departmentTypes || []).map((item: DepartmentTypeDto) => (
-                    <SelectItem key={item.code} textValue={item.name}>
-                      {item.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label={t('department')}
-                  isClearable
-                  placeholder={msg('select')}
-                  selectedKeys={
-                    form.parentId && form.parentId > 0
-                      ? new Set([String(form.parentId)])
-                      : new Set([])
-                  }
-                  onSelectionChange={(keys) => {
-                    const key = Array.from(keys)[0] as string | undefined;
-                    setForm((prev) => ({ ...prev, parentId: key ? Number(key) : undefined }));
+                />
+                <DepartmentSelect
+                  values={form.parentId ? [form.parentId] : []}
+                  onChange={(values) => {
+                    setForm((prev) => ({ ...prev, parentId: values[0] ?? 0 }));
                   }}
-                  variant="bordered"
-                >
-                  {parentOptions.map((item) => (
-                    <SelectItem key={String(item.id)} textValue={item.name}>
-                      {item.name}
-                    </SelectItem>
-                  ))}
-                </Select>
+                  multiple={false}
+                  label={t('parentDepartment')}
+                  labelPlacement="outside"
+                  anyLevel
+                />
                 <Input
                   label={msg('address')}
                   name="address"

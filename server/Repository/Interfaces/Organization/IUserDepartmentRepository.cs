@@ -8,15 +8,11 @@ namespace Repository.Interfaces.Organization;
 public interface IUserDepartmentRepository : IGenericRepository<UserDepartment, int>
 {
     /// <summary>
-    ///     Gets user's primary department
-    /// </summary>
-    Task<UserDepartment?> GetUserPrimaryDepartmentAsync(long userId);
-
-
-    /// <summary>
     ///     Gets paginated list of user department assignments
     /// </summary>
     Task<PaginatedResultDto<DepartmentMemberDto>> GetPaginatedAsync(UserDepartmentFilterDto filter);
-
-    Task<List<UserDepartmentDto>> GetUserDepartmentAsync(long userId);
+    /// <summary>
+    ///     Gets paginated list of users that are not assigned to the specified department
+    /// </summary>
+    Task<PaginatedResultDto<DepartmentMemberDto>> GetUserNotInDepartment(int id);
 }

@@ -20,6 +20,4 @@ public class Department : BaseEntity<int>
     public int ParentId { get; set; }
 
     [MaxLength(500)] public string? Address { get; set; }
-
-    [NotMapped] public List<Department>? Children { get; set; }
 }

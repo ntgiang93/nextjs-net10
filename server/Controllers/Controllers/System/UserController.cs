@@ -1,3 +1,4 @@
+using System.Net;
 using Common.Exceptions;
 using Common.Security;
 using Common.Security.Policies;
@@ -11,9 +12,8 @@ using Model.Entities.System;
 using Model.Models;
 using Service.Interfaces;
 using Service.Interfaces.Base;
-using System.Net;
 
-namespace NextDotNet.Api.Controllers;
+namespace Controllers.Controllers.System;
 
 [Route("api/[controller]")]
 [ApiController]

@@ -10,11 +10,4 @@ public class UserDepartment : BaseEntity<int>
     [Required] public long UserId { get; set; }
 
     [Required] public int DepartmentId { get; set; }
-
-    [MaxLength(50)] public string JobTitleCode { get; set; }
-
-    /// <summary>
-    ///     true if this is the primary department for the user, false otherwise.
-    /// </summary>
-    public bool IsPrimary { get; set; } = true;
 }

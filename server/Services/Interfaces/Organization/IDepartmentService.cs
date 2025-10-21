@@ -27,4 +27,8 @@ public interface IDepartmentService : IGenericService<Department, int>
     ///     Deletes a department
     /// </summary>
     Task<bool> DeleteDepartmentAsync(int id);
+    /// <summary>
+    ///     Gets a department tree structure
+    /// </summary>
+    Task<List<DepartmentDto>> GetSingleDepartmentTreeAsync(int id);
 }

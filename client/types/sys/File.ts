@@ -1,11 +1,11 @@
-export interface FileUploadDto {
+export type FileUploadDto = {
   referenceId?: string;
   referenceType?: string;
   isPublic?: boolean;
   file: File;
-}
+};
 
-export interface FileDto {
+export type FileDto = {
   id: number;
   fileName: string;
   fileSize: number;
@@ -18,7 +18,7 @@ export interface FileDto {
   uploadedByName: string;
   createdAt: string; // ISO 8601 date string
   queueIndex: number;
-}
+};
 
 export const defaultFileDto: FileDto = {
   id: 0,

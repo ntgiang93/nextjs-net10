@@ -1,5 +1,5 @@
-import MenuSelect from '@/components/shared/sys/Select/MenuSelect';
-import SysModuleSelect from '@/components/shared/sys/Select/SysModuleSelect';
+import MenuSelect from '@/components/shared/sys/select/MenuSelect';
+import SysModuleSelect from '@/components/shared/sys/select/SysModuleSelect';
 import { IconSelect } from '@/components/ui//icon/IconSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
 import { MenuHook } from '@/hooks/menu';

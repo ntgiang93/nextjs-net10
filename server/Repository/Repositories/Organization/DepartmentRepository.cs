@@ -47,7 +47,33 @@ public class DepartmentRepository : GenericRepository<Department, int>, IDepartm
         
         return BuildDepartmentTree(allDepartments.ToList());
     }
-
+    
+   public async Task<List<DepartmentDto>> GetSingleDepartmentTreeAsync(int id)
+   {
+       var query = new Query(_tableName);
+       query.Select(
+               $"{_tableName}.{nameof(Department.Id)}",
+               $"{_tableName}.{nameof(Department.Code)}",
+               $"{_tableName}.{nameof(Department.Name)}",
+               $"{_tableName}.{nameof(Department.ParentId)}",
+               $"{_tableName}.{nameof(Department.Description)}",
+               $"{_tableName}.{nameof(Department.DepartmentTypeCode)}",
+               $"{_departmentTypeTableName}.{nameof(DepartmentType.Name)} as {nameof(DepartmentDto.DepartmentTypeName)}",
+               $"{_tableName}.{nameof(Department.Address)}",
+               $"{_tableName}.{nameof(Department.TreePath)}"
+           )
+           .LeftJoin(_departmentTypeTableName, $"{_departmentTypeTableName}.{nameof(DepartmentType.Code)}", nameof(Department.DepartmentTypeCode))
+           .Where($"{_tableName}.{nameof(Department.IsDeleted)}", false)
+           .WhereRaw($"CONCAT('.',{_tableName}.{nameof(Department.TreePath)},'.') LIKE CONCAT('%.',?,'.%')", id)
+           .OrderByDesc($"{_tableName}.{nameof(Department.CreatedBy)}");
+       
+       var compiledQuery = _compiler.Compile(query);
+   
+       var connection = _dbFactory.Connection;
+       var allDepartments = await connection.QueryAsync<DepartmentDto>(compiledQuery.Sql, compiledQuery.NamedBindings);
+   
+       return BuildDepartmentTree(allDepartments.ToList());
+    }
     private List<DepartmentDto> BuildDepartmentTree(List<DepartmentDto> allDepartments)
     {
         // Build tree structure

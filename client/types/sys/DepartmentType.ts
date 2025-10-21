@@ -1,10 +1,10 @@
-export interface DepartmentTypeDto {
+export type DepartmentTypeDto = {
   id: number;
   code: string;
   name: string;
   description?: string;
   level?: number;
-}
+};
 
 export const defaultDepartmentTypeDto: DepartmentTypeDto = {
   id: 0,
@@ -14,4 +14,4 @@ export const defaultDepartmentTypeDto: DepartmentTypeDto = {
   level: 0,
 };
 
-export interface SaveDepartmentTypeDto extends DepartmentTypeDto {}
+export type SaveDepartmentTypeDto = DepartmentTypeDto;

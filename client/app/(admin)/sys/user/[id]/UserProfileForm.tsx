@@ -1,4 +1,3 @@
-import { DropZone } from '@/components/ui/input/DropZone';
 import { UserProfileHook } from '@/hooks/userProfile';
 import { UserDto } from '@/types/sys/User';
 import { defaultUserProfileDto, UserProfileDto } from '@/types/sys/UserProfile';
@@ -55,9 +54,9 @@ export default function UserProfileForm(props: IUserProfileFormProps) {
         >
           <div className="flex flex-col gap-4 w-full">
             <Input
-              label={t('address')}
+              label={msg('address')}
               name="address"
-              placeholder={t('address')}
+              placeholder={msg('address')}
               value={form.address}
               onValueChange={(value) => setForm({ ...form, address: value })}
             />
@@ -87,7 +86,6 @@ export default function UserProfileForm(props: IUserProfileFormProps) {
             <div className="flex gap-4"></div>
           </div>
         </Form>
-        <DropZone limitFiles={10} limitSize={1} accept={'image'} />
       </CardBody>
       <CardFooter className="flex gap-4 justify-end">
         <Button color="primary" type="submit" form="user-profile-form" isLoading={isPending}>

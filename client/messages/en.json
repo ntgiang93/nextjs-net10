@@ -50,7 +50,10 @@
     "uploadBy": "Uploaded by: {userName}",
     "download": "Download",
     "management": "Management",
-    "level": "Level"
+    "level": "Level",
+    "address": "Address",
+    "memberManagement": "Member Management",
+    "addMember": "Add member"
   },
   "role": {
     "title": "Role management",
@@ -88,7 +91,6 @@
     "changeAvatar": "Change avatar",
     "changeAccountInfo": "Change account information",
     "generalInfo": "General Information",
-    "address": "Address",
     "dateOfBirth": "Date of Birth",
     "gender": "Gender",
     "addUser": "Add User",
@@ -112,6 +114,9 @@
   "organization": {
     "jobTitle": "Job Title",
     "department": "Department",
-    "departmentType": "Department Type"
+    "departmentType": "Department Type",
+    "parentDepartment": "Parent Department",
+    "hideSubDepartmentsMembers": "Hide members of child departments",
+    "showSubDepartmentsMembers": "Show members of child departments"
   }
 }

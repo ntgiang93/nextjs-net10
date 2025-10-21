@@ -50,7 +50,10 @@
     "uploadBy": "Tải lên bởi: {userName}",
     "download": "Tải xuống",
     "management": "Quản lý",
-    "level": "Cấp độ"
+    "level": "Cấp độ",
+    "address": "Địa chỉ",
+    "memberManagement": "Quản lý thành viên",
+    "addMember": "Thêm thành viên"
   },
   "role": {
     "title": "Quản lý Vai trò",
@@ -89,7 +92,6 @@
     "changeAvatar": "Thay đổi ảnh đại diện",
     "changeAccountInfo": "Thay đổi thông tin tài khoản",
     "generalInfo": "Thông tin chung",
-    "address": "Địa chỉ",
     "dateOfBirth": "Ngày sinh",
     "gender": "Giới tính",
     "addUser": "Thêm người dùng",
@@ -114,6 +116,10 @@
   "organization": {
     "jobTitle": "Chức danh",
     "department": "Bộ phận",
-    "departmentType": "Phân loại bộ phận"
+    "departmentType": "Phân loại bộ phận",
+    "parentDepartment": "Bộ phận cha",
+    "assignMembers": "Gán thành viên",
+    "showSubDepartmentsMembers": "Hiển thị thành viên của các bộ phận con",
+    "hideSubDepartmentsMembers": "Ẩn thành viên của các bộ phận con"
   }
 }

@@ -1,4 +1,4 @@
-export interface JwtClaim {
+export type JwtClaim = {
   // JWT standard claims
   jti: string; // JWT ID (unique token identifier)
   exp: number; // Expiration time (Unix timestamp)
@@ -12,4 +12,4 @@ export interface JwtClaim {
   nameid: string; // User ID
   role: number[]; // User roles id
   RoleCode?: string; // User role codes (optional)
-}
+};

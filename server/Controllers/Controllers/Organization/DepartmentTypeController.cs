@@ -1,15 +1,13 @@
-using Mapster;
+using Common.Security.Policies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Common.Security.Policies;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
-using Model.Entities.Organization;
 using Service.Interfaces.Base;
 using Service.Interfaces.Organization;
 
-namespace NextDotNet.Api.Controllers.BusinessCategory;
+namespace Controllers.Controllers.Organization;
 
 [Route("api/organization/department-types")]
 [ApiController]
@@ -29,7 +27,7 @@ public class DepartmentTypeController : ControllerBase
 
     // GET methods
     [HttpGet]
-    [Policy(ESysModule.BusinessCategory, EPermission.View)]
+    [Policy(ESysModule.DepartmentType, EPermission.View)]
     public async Task<IActionResult> GetAll()
     {
         var types = await _departmentTypeService.FindAsync<DepartmentTypeDto>(x => x.IsDeleted == false);
@@ -38,7 +36,7 @@ public class DepartmentTypeController : ControllerBase
 
 
     [HttpGet("{id}")]
-    [Policy(ESysModule.BusinessCategory, EPermission.View)]
+    [Policy(ESysModule.DepartmentType, EPermission.View)]
     public async Task<IActionResult> GetById(int id)
     {
         var type = await _departmentTypeService.GetByIdAsync<DepartmentTypeDto>(id);
@@ -50,33 +48,33 @@ public class DepartmentTypeController : ControllerBase
 
     // POST methods
     [HttpPost]
-    [Policy(ESysModule.Menu, EPermission.Create)]
-    public async Task<IActionResult> CreateMenu([FromBody] CreateDepartmentTypeDto dto)
+    [Policy(ESysModule.DepartmentType, EPermission.Create)]
+    public async Task<IActionResult> Create([FromBody] CreateDepartmentTypeDto dto)
     {
-        var id = await _departmentTypeService.CreateAsync(dto.Adapt<DepartmentType>());
-        if (id < 1)
-            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+        var newDepartmentType = await _departmentTypeService.CreateDepartmentTypeAsync(dto);
+        if (newDepartmentType == null)
+            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<DepartmentTypeDto>.Succeed(id.Adapt<DepartmentTypeDto>(),
+        return Ok(ApiResponse<DepartmentTypeDto>.Succeed(newDepartmentType,
             _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // PUT methods
     [HttpPut]
-    [Policy(ESysModule.Menu, EPermission.Edit)]
-    public async Task<IActionResult> UpdateMenu([FromBody] UpdateDepartmentTypeDto dto)
+    [Policy(ESysModule.DepartmentType, EPermission.Edit)]
+    public async Task<IActionResult> Update([FromBody] UpdateDepartmentTypeDto dto)
     {
-        var success = await _departmentTypeService.UpdateAsync(dto.Adapt<DepartmentType>());
+        var success = await _departmentTypeService.UpdateDepartmentTypeAsync(dto);
         if (!success)
-            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+            return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(success,_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // DELETE methods
     [HttpDelete("{id}")]
-    [Policy(ESysModule.Menu, EPermission.Delete)]
-    public async Task<IActionResult> DeleteMenu(int id)
+    [Policy(ESysModule.DepartmentType, EPermission.Delete)]
+    public async Task<IActionResult> Delete(int id)
     {
         var success = await _departmentTypeService.SoftDeleteAsync(id);
         if (!success)

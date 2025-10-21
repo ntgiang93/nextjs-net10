@@ -8,114 +8,117 @@ using Repository.Interfaces.Organization;
 using Repository.Repositories.Base;
 using SqlKata;
 using System.Text;
+using Common.Extensions;
 
 namespace Repository.Repositories.Organization;
 
 public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, IUserDepartmentRepository
 {
-    private readonly StringBuilder _sqlBuilder;
+    private readonly string _tableName;
+    private readonly string _userTable;
+    private readonly string _departmemtTable;
 
     public UserDepartmentRepository(IDbConnectionFactory factory) : base(factory)
     {
-        _sqlBuilder = new StringBuilder();
+        _tableName = StringHelper.GetTableName<UserDepartment>();
+        _userTable = StringHelper.GetTableName<User>();
+        _departmemtTable = StringHelper.GetTableName<Department>();
     }
 
     public async Task<PaginatedResultDto<DepartmentMemberDto>> GetPaginatedAsync(UserDepartmentFilterDto filter)
     {
-        var parameters = new DynamicParameters();
-        var whereConditions = new List<string> 
-        { 
-            $"ud.{nameof(UserDepartment.DepartmentId)} = @departmentId", 
-            $"ud.{nameof(UserDepartment.IsDeleted)} = 0" 
-        };
-        
-        parameters.Add("departmentId", filter.DepartmentId);
-
-        // Apply search filter
-        if (!string.IsNullOrEmpty(filter.SearchTerm))
+        var departmentIds = new List<int>(){filter.DepartmentId};
+        using var connection = _dbFactory.Connection;
+        if (filter.IsShowSubMembers)
         {
-            whereConditions.Add($"LOWER(u.{nameof(User.FullName)}) LIKE @searchTerm");
-            parameters.Add("searchTerm", $"%{filter.SearchTerm.ToLower()}%");
+            var departmentQuery = new Query(_departmemtTable);
+            departmentQuery.Select(
+                    $"{nameof(Department.Id)}"
+                )
+                .Where($"{_tableName}.{nameof(Department.IsDeleted)}", false)
+                .WhereRaw($"CONCAT('.',{_tableName}.{nameof(Department.TreePath)},'.') LIKE CONCAT('%.',?,'.%')",
+                    filter.DepartmentId);
+            var compiledDepartmentQuery = _compiler.Compile(departmentQuery);
+            var result = await connection.QueryAsync<int>(compiledDepartmentQuery.Sql,
+                compiledDepartmentQuery.NamedBindings);
+            departmentIds.AddRange(result);
         }
-
-        var whereClause = string.Join(" AND ", whereConditions);
-
-        // Get total count
-        _sqlBuilder.Clear();
-        _sqlBuilder.Append($@"
-            SELECT COUNT(*)
-            FROM {nameof(UserDepartment)}s ud
-            INNER JOIN {nameof(User)}s u ON ud.{nameof(UserDepartment.UserId)} = u.{nameof(User.Id)}
-            WHERE ").Append(whereClause);
-
-        var connection = _dbFactory.Connection;
-        var totalCount = await connection.QuerySingleAsync<int>(_sqlBuilder.ToString(), parameters);
-
-        // Get paginated results
-        _sqlBuilder.Clear();
-        _sqlBuilder.Append($@"
-            SELECT 
-                ud.{nameof(UserDepartment.Id)},
-                ud.{nameof(UserDepartment.UserId)},
-                ud.{nameof(UserDepartment.IsPrimary)},
-                u.{nameof(User.FullName)} as UserFullName,
-                ud.{nameof(UserDepartment.JobTitleCode)}
-            FROM {nameof(UserDepartment)}s ud
-            INNER JOIN {nameof(User)}s u ON ud.{nameof(UserDepartment.UserId)} = u.{nameof(User.Id)}
-            WHERE ").Append(whereClause).Append($@"
-            ORDER BY ud.{nameof(UserDepartment.Id)} DESC
-            OFFSET @offset ROWS FETCH NEXT @pageSize ROWS ONLY");
-
-        parameters.Add("offset", (filter.PageNumber - 1) * filter.PageSize);
-        parameters.Add("pageSize", filter.PageSize);
-
-        var items = await connection.QueryAsync<DepartmentMemberDto>(_sqlBuilder.ToString(), parameters);
+        var query = new Query(_tableName);
+        query.Select([
+                    $"{_tableName}.{nameof(UserDepartment.Id)}",
+                    $"{_userTable}.{nameof(User.Id)} as UserId",
+                    $"{_userTable}.{nameof(User.FullName)}",
+                    $"{_userTable}.{nameof(User.UserName)}",
+                    $"{_userTable}.{nameof(User.Avatar)}"
+            ])
+            .Join(_userTable, $"{_tableName}.{nameof(UserDepartment.UserId)}", $"{_userTable}.{nameof(User.Id)}")
+            .WhereLike($"{_userTable}.{nameof(User.FullName)}", filter.SearchTerm)
+            .WhereLike($"{_userTable}.{nameof(User.UserName)}", filter.SearchTerm)
+            .WhereIn($"{_tableName}.{nameof(UserDepartment.Id)}", departmentIds);
+        
+        var countQuery = query.Clone().AsCount();
+        var compileCountQuery = _compiler.Compile(countQuery);
+        var totalCount = await connection.QuerySingleAsync<int>(compileCountQuery.Sql, compileCountQuery.NamedBindings);
+        query.OrderBy($"{_userTable}.{nameof(User.FullName)}")
+            .Offset((filter.Page - 1) * filter.PageSize)
+            .Limit(filter.PageSize);
+        var compileQuery = _compiler.Compile(query);
+        var data = await connection.QueryAsync<DepartmentMemberDto>(compileQuery.Sql, compileQuery.NamedBindings);
 
         return new PaginatedResultDto<DepartmentMemberDto>
         {
-            Items = items.ToList(),
+            Items = data.ToList(),
             TotalCount = totalCount,
-            PageIndex = filter.PageNumber,
+            PageIndex = filter.Page,
             PageSize = filter.PageSize
         };
     }
-
-    public async Task<UserDepartment?> GetUserPrimaryDepartmentAsync(long userId)
+    
+    public async Task<PaginatedResultDto<DepartmentMemberDto>> GetUserNotInDepartment(int id)
     {
-        var query = new Query($"{nameof(UserDepartment)}s")
-            .Where(nameof(UserDepartment.UserId), userId)
-            .Where(nameof(UserDepartment.IsPrimary), true)
-            .Where(nameof(UserDepartment.IsDeleted), false);
+        var departmentIds = new List<int>(){id};
+        using var connection = _dbFactory.Connection;
+        var departmentQuery = new Query(_departmemtTable);
+        departmentQuery.Select(
+                $"{nameof(Department.Id)}"
+            )
+            .Where($"{_departmemtTable}.{nameof(Department.IsDeleted)}", false)
+            .WhereRaw($"CONCAT('.',{_departmemtTable}.{nameof(Department.TreePath)},'.') LIKE CONCAT('%.',?,'.%')",
+                id);
+        var compiledDepartmentQuery = _compiler.Compile(departmentQuery);
+        var result = await connection.QueryAsync<int>(compiledDepartmentQuery.Sql,
+            compiledDepartmentQuery.NamedBindings);
+        departmentIds.AddRange(result);
+        var query = new Query(_userTable);
+        query.Select([
+                    $"0 as {nameof(UserDepartment.Id)}",
+                    $"{_userTable}.{nameof(User.Id)} as UserId",
+                    $"{_userTable}.{nameof(User.FullName)}",
+                    $"{_userTable}.{nameof(User.UserName)}",
+                    $"{_userTable}.{nameof(User.Avatar)}"
+            ])
+            .WhereNotExists(q => q
+                .From(_tableName)
+                .WhereColumns($"{_tableName}.{nameof(UserDepartment.UserId)}", "=", $"{_userTable}.{nameof(User.Id)}")
+                .WhereIn($"{_tableName}.{nameof(UserDepartment.DepartmentId)}", departmentIds)
+            );            
+            //.WhereLike($"{_userTable}.{nameof(User.FullName)}", filter.SearchTerm)
+            //.WhereLike($"{_userTable}.{nameof(User.UserName)}", filter.SearchTerm)
+        /*query.OrderBy($"{_userTable}.{nameof(User.FullName)}")
+            .Offset((filter.Page - 1) * filter.PageSize)
+            .Limit(filter.PageSize);*/
+        var compileQuery = _compiler.Compile(query);
+        var data = await connection.QueryAsync<DepartmentMemberDto>(compileQuery.Sql, compileQuery.NamedBindings);
 
-        var compiledQuery = _compiler.Compile(query);
-        
-        var connection = _dbFactory.Connection;
-        var result = await connection.QueryFirstOrDefaultAsync<UserDepartment>(compiledQuery.Sql, compiledQuery.NamedBindings);
-        
-        return result;
+        return new PaginatedResultDto<DepartmentMemberDto>
+        {
+            Items = data.ToList(),
+            TotalCount = 0,
+            PageIndex = 1,
+            PageSize = 100
+        };
     }
-
-    public async Task<List<UserDepartmentDto>> GetUserDepartmentAsync(long userId)
-    {
-        _sqlBuilder.Clear();
-        _sqlBuilder.Append($@"
-            SELECT 
-                ud.{nameof(UserDepartment.Id)},
-                ud.{nameof(UserDepartment.UserId)},
-                ud.{nameof(UserDepartment.DepartmentId)},
-                ud.{nameof(UserDepartment.IsPrimary)},
-                ud.{nameof(UserDepartment.JobTitleCode)},
-                d.{nameof(Department.Name)} as DepartmentName
-            FROM {nameof(UserDepartment)}s ud
-            INNER JOIN {nameof(Department)}s d ON ud.{nameof(UserDepartment.DepartmentId)} = d.{nameof(Department.Id)}
-            WHERE ud.{nameof(UserDepartment.UserId)} = @userId AND ud.{nameof(UserDepartment.IsDeleted)} = 0");
-
-        var connection = _dbFactory.Connection;
-        var result = await connection.QueryAsync<UserDepartmentDto>(_sqlBuilder.ToString(), new { userId });
-        
-        return result.ToList();
-    }
-
+    
     public async Task<List<UserDepartment>> GetByDepartmentAsync(int departmentId)
     {
         var query = new Query($"{nameof(UserDepartment)}s")
@@ -128,32 +131,5 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
         var result = await connection.QueryAsync<UserDepartment>(compiledQuery.Sql, compiledQuery.NamedBindings);
         
         return result.ToList();
-    }
-
-    public async Task<bool> SetPrimaryDepartmentAsync(long userId, int departmentId)
-    {
-        return await ExecuteInTransactionAsync(async (connection, transaction) =>
-        {
-            // First, remove primary flag from all user departments
-            _sqlBuilder.Clear();
-            _sqlBuilder.Append($@"
-                UPDATE {nameof(UserDepartment)}s 
-                SET {nameof(UserDepartment.IsPrimary)} = 0, {nameof(UserDepartment.UpdatedAt)} = @updatedAt 
-                WHERE {nameof(UserDepartment.UserId)} = @userId");
-            
-            await connection.ExecuteAsync(_sqlBuilder.ToString(), new { userId, updatedAt = DateTime.UtcNow }, transaction);
-
-            // Then, set the specified department as primary
-            _sqlBuilder.Clear();
-            _sqlBuilder.Append($@"
-                UPDATE {nameof(UserDepartment)}s 
-                SET {nameof(UserDepartment.IsPrimary)} = 1, {nameof(UserDepartment.UpdatedAt)} = @updatedAt 
-                WHERE {nameof(UserDepartment.UserId)} = @userId AND {nameof(UserDepartment.DepartmentId)} = @departmentId");
-            
-            var rowsAffected = await connection.ExecuteAsync(_sqlBuilder.ToString(), 
-                new { userId, departmentId, updatedAt = DateTime.UtcNow }, transaction);
-
-            return rowsAffected > 0;
-        });
     }
 }

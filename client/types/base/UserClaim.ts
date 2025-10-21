@@ -1,10 +1,10 @@
 import { defaultUserDto, UserDto } from '../sys/User';
 import { JwtClaim } from './JwtClaim';
 
-export interface UserClaim extends UserDto {
+export type UserClaim = UserDto & {
   language: string; // User language preference
   roleCode: string; // User role codes (optional)
-}
+};
 
 export const defaultUserClaim: UserClaim = {
   ...defaultUserDto,

@@ -1,4 +1,4 @@
-export interface MenuItem {
+export type MenuItem = {
   id: number;
   name: string;
   url: string;
@@ -8,7 +8,7 @@ export interface MenuItem {
   parentId?: number;
   sysmodule?: string;
   children?: MenuItem[];
-}
+};
 
 export const defaultMenuItem: MenuItem = {
   id: 0,
@@ -22,7 +22,7 @@ export const defaultMenuItem: MenuItem = {
   children: [],
 };
 
-export interface SaveMenuDto {
+export type SaveMenuDto = {
   id: number;
   name: string;
   url: string;
@@ -31,7 +31,7 @@ export interface SaveMenuDto {
   isActive: boolean;
   parentId?: number;
   sysmodule: string;
-}
+};
 
 export const defaultSaveMenuDto: SaveMenuDto = {
   id: 0,

@@ -11,16 +11,23 @@ import { ESysModule } from '@/types/constant/SysModule';
 import { DepartmentDto } from '@/types/sys/Department';
 import { Button, Tooltip, useDisclosure } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Add01Icon, Delete02Icon, Edit01Icon } from 'hugeicons-react';
+import { Add01Icon, Delete02Icon, Edit01Icon, UserGroupIcon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 import DetailModal from './components/DetailModal';
+import MemberModal from './components/MemberModal';
 
 export default function Departments() {
   const { data, refetch, isLoading } = DepartmentHook.useGetAll();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
+  const {
+    isOpen: isOpenAssign,
+    onOpen: onOpenAssign,
+    onOpenChange: onOpenAssignChange,
+  } = useDisclosure();
   const [selected, setSelected] = useState<DepartmentDto | undefined>(undefined);
+  const [selectedParent, setSelectedParent] = useState<DepartmentDto | undefined>(undefined);
   const { mutateAsync: del, isPending: isDelPending } = DepartmentHook.useDelete();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [tableData, setTableData] = useState<DepartmentDto[]>(data || []);
@@ -90,6 +97,25 @@ export default function Departments() {
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
+              {canCreate && (
+                <Tooltip content={msg('add')}>
+                  <Button
+                    isIconOnly
+                    aria-label="add-child-button"
+                    color="primary"
+                    variant="light"
+                    radius="full"
+                    size="sm"
+                    onPress={() => {
+                      setSelected(undefined);
+                      setSelectedParent(row.original);
+                      onOpen();
+                    }}
+                  >
+                    <Add01Icon size={16} />
+                  </Button>
+                </Tooltip>
+              )}
               {canEdit && (
                 <Tooltip content={msg('edit')}>
                   <Button
@@ -101,6 +127,7 @@ export default function Departments() {
                     size="sm"
                     onPress={() => {
                       setSelected(row.original);
+                      setSelectedParent(undefined);
                       onOpen();
                     }}
                   >
@@ -108,7 +135,25 @@ export default function Departments() {
                   </Button>
                 </Tooltip>
               )}
-              {canDelete && (
+              {canEdit && (
+                <Tooltip content={t('assignMembers')}>
+                  <Button
+                    isIconOnly
+                    aria-label="assign-member-button"
+                    color="primary"
+                    variant="light"
+                    radius="full"
+                    size="sm"
+                    onPress={() => {
+                      setSelected(row.original);
+                      onOpenAssign();
+                    }}
+                  >
+                    <UserGroupIcon size={16} />
+                  </Button>
+                </Tooltip>
+              )}
+              {(!row.original.children || row.original.children.length === 0) && canDelete && (
                 <Tooltip color="danger" content={msg('delete')}>
                   <Button
                     isIconOnly
@@ -119,6 +164,7 @@ export default function Departments() {
                     size="sm"
                     onPress={() => {
                       setSelected(row.original);
+                      setSelectedParent(undefined);
                       onOpenDel();
                     }}
                   >
@@ -134,7 +180,7 @@ export default function Departments() {
         },
       },
     ],
-    [canEdit, canDelete, msg, t],
+    [canCreate, canEdit, canDelete, msg, t, onOpen, onOpenAssign, onOpenDel],
   );
 
   const handleDelete = async () => {
@@ -148,6 +194,7 @@ export default function Departments() {
 
   const onResetSelected = () => {
     setSelected(undefined);
+    setSelectedParent(undefined);
   };
 
   useEffect(() => {
@@ -180,6 +227,7 @@ export default function Departments() {
                 variant="shadowSmall"
                 onPress={() => {
                   setSelected(undefined);
+                  setSelectedParent(undefined);
                   onOpen();
                 }}
               >
@@ -211,6 +259,13 @@ export default function Departments() {
         id={selected?.id || 0}
         onRefresh={refetch}
         onResetSelected={onResetSelected}
+        parent={selectedParent}
+      />
+      <MemberModal
+        department={selected}
+        isOpen={isOpenAssign}
+        onOpenChange={onOpenAssignChange}
+        onRefresh={refetch}
       />
       <ConfirmModal
         isOpen={IsOpenDel}

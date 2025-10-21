@@ -1,15 +1,13 @@
 using Common.Security.Policies;
-using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
-using Model.Entities.Organization;
 using Service.Interfaces.Base;
 using Service.Interfaces.Organization;
 
-namespace NextDotNet.Api.Controllers.Organization;
+namespace Controllers.Controllers.Organization;
 
 [Route("api/organization/job-titles")]
 [ApiController]
@@ -50,22 +48,22 @@ public class JobTitleController : ControllerBase
 
     // POST methods
     [HttpPost]
-    [Policy(ESysModule.Menu, EPermission.Create)]
+    [Policy(ESysModule.JobTitle, EPermission.Create)]
     public async Task<IActionResult> Create([FromBody] JobTitleDto jobTitle)
     {
-        var id = await _jobTitleService.CreateAsync(jobTitle.Adapt<JobTitle>());
-        if (id < 1)
+        var newJobTitle = await _jobTitleService.CreateJobTitleAsync(jobTitle);
+        if (newJobTitle == null)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<int>.Succeed(id, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<JobTitleDto>.Succeed(newJobTitle, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // PUT methods
     [HttpPut]
-    [Policy(ESysModule.Menu, EPermission.Edit)]
+    [Policy(ESysModule.JobTitle, EPermission.Edit)]
     public async Task<IActionResult> Update([FromBody] JobTitleDto jobTitle)
     {
-        var success = await _jobTitleService.UpdateAsync(jobTitle.Adapt<JobTitle>());
+        var success = await _jobTitleService.UpdateJobTitleAsync(jobTitle);
         if (!success)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
@@ -74,7 +72,7 @@ public class JobTitleController : ControllerBase
 
     // DELETE methods
     [HttpDelete("{id}")]
-    [Policy(ESysModule.Menu, EPermission.Delete)]
+    [Policy(ESysModule.JobTitle, EPermission.Delete)]
     public async Task<IActionResult> Delete(int id)
     {
         var success = await _jobTitleService.SoftDeleteAsync(id);

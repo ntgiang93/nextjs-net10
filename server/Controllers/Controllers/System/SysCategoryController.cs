@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Common.Security.Policies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Common.Security.Policies;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.System;
@@ -10,7 +8,7 @@ using Model.Models;
 using Service.Interfaces;
 using Service.Interfaces.Base;
 
-namespace NextDotNet.Api.Controllers.System;
+namespace Controllers.Controllers.System;
 
 [Route("api/categories")]
 [ApiController]

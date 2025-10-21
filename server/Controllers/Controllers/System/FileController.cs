@@ -1,15 +1,13 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Common.Security.Policies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Common.Security.Policies;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.System.File;
 using Service.Interfaces.Base;
 using Service.Interfaces.System;
 
-namespace NextDotNet.Api.Controllers.System;
+namespace Controllers.Controllers.System;
 
 [Route("api/[controller]")]
 [ApiController]

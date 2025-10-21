@@ -43,7 +43,7 @@ namespace Model.DTOs.Organization
         [StringLength(30)]
         public required string DepartmentTypeCode { get; set; }
 
-        public int? ParentId { get; set; }
+        public int ParentId { get; set; }
 
         [StringLength(200)]
         public string? Address { get; set; }

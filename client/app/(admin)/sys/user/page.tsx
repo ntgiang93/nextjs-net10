@@ -125,7 +125,6 @@ export default function Menu() {
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
-              {' '}
               <Tooltip content={t('userDetails')}>
                 <Button
                   isIconOnly

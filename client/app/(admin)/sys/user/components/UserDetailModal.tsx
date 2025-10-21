@@ -1,4 +1,4 @@
-import RoleSelect from '@/components/shared/sys/Select/RoleSelect';
+import RoleSelect from '@/components/shared/sys/select/RoleSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
 import { UserHook } from '@/hooks/user';
 import { defaultUserDto, SaveUserDto, UserDto } from '@/types/sys/User';

@@ -7,7 +7,7 @@ using Model.DTOs.Organization;
 using Service.Interfaces.Base;
 using Service.Interfaces.Organization;
 
-namespace NextDotNet.Api.Controllers.Department;
+namespace Controllers.Controllers.Organization;
 
 [Route("api/organization/departments")]
 [ApiController]
@@ -15,11 +15,13 @@ namespace NextDotNet.Api.Controllers.Department;
 public class DepartmentController : ControllerBase
 {
     private readonly IDepartmentService _departmentService;
+    private readonly IUserDepartmentService _userDepartmentService;
     private readonly ISysMessageService _sysMsg;
 
-    public DepartmentController(IDepartmentService departmentService, ISysMessageService sysMsg)
+    public DepartmentController(IDepartmentService departmentService, ISysMessageService sysMsg, IUserDepartmentService userDepartmentService)
     {
         _departmentService = departmentService;
+        _userDepartmentService = userDepartmentService;
         _sysMsg = sysMsg;
     }
 
@@ -29,6 +31,14 @@ public class DepartmentController : ControllerBase
     public async Task<IActionResult> GetDepartmentTree()
     {
         var departments = await _departmentService.GetDepartmentTreeAsync();
+        return Ok(ApiResponse<List<DepartmentDto>>.Succeed(departments, _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+    
+    [HttpGet("{id}/tree")]
+    [Policy(ESysModule.Department, EPermission.View)]
+    public async Task<IActionResult> GetSingleDepartmentTree(int id)
+    {
+        var departments = await _departmentService.GetSingleDepartmentTreeAsync(id);
         return Ok(ApiResponse<List<DepartmentDto>>.Succeed(departments, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
@@ -44,11 +54,29 @@ public class DepartmentController : ControllerBase
     [Policy(ESysModule.Department, EPermission.View)]
     public async Task<IActionResult> GetDepartmentById(int id)
     {
-        var department = await _departmentService.GetByIdAsync<DepartmentDto>(id);
+        var department = await _departmentService.GetByIdAsync<DetailDepartmentDto>(id);
         if (department == null)
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error404Msg)));
 
         return Ok(ApiResponse<object>.Succeed(department, _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+    
+    [HttpGet("get-members")]
+    [Policy(ESysModule.Department, EPermission.View)]
+    public async Task<IActionResult> GetDepartmentMembers([FromQuery] UserDepartmentFilterDto filter)
+    {
+        var members = await _userDepartmentService.GetDepartmentMembersPaginatedAsync(filter);
+        return Ok(ApiResponse<PaginatedResultDto<DepartmentMemberDto>>.Succeed(members,
+            _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+
+    [HttpGet("{id}/users-not-in-department")]
+    [Policy(ESysModule.Department, EPermission.View)]
+    public async Task<IActionResult> GetUserNotInDepartment(int id)
+    {
+        var users = await _userDepartmentService.GetUserNotInDepartmentAsync(id);
+        return Ok(ApiResponse<PaginatedResultDto<DepartmentMemberDto>>.Succeed(users,
+            _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // POST methods
@@ -72,7 +100,7 @@ public class DepartmentController : ControllerBase
         if (!success)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(success,_sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // DELETE methods
@@ -84,6 +112,6 @@ public class DepartmentController : ControllerBase
         if (!success)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(success,_sysMsg.Get(EMessage.SuccessMsg)));
     }
 }

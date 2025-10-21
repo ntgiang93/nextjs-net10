@@ -1,8 +1,8 @@
-export interface PaginationFilter {
+export type PaginationFilter = {
   page: number;
   pageSize: number;
   searchTerm?: string;
-}
+};
 
 export const defaultPaginationFilter: PaginationFilter = {
   page: 1,

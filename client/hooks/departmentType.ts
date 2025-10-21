@@ -7,11 +7,13 @@ import {
   DepartmentTypeDto,
   SaveDepartmentTypeDto,
 } from '@/types/sys/DepartmentType';
-import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const endpoint = 'organization/department-types';
 
 export const useGetAll = () => {
+  var queryClient = useQueryClient();
+  var cachedData = queryClient.getQueryData<DepartmentTypeDto[]>([endpoint, 'getAll']);
   return useQuery<DepartmentTypeDto[], Error>({
     queryKey: [endpoint, 'getAll'],
     queryFn: async () => {
@@ -21,6 +23,7 @@ export const useGetAll = () => {
       }
       return [];
     },
+    enabled: !cachedData || cachedData.length === 0,
     placeholderData: keepPreviousData || [],
   });
 };
