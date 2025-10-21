@@ -1,6 +1,6 @@
+using Common.Security.Policies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Common.Security.Policies;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
@@ -8,7 +8,7 @@ using Model.Entities.Organization;
 using Service.Interfaces.Base;
 using Service.Interfaces.Organization;
 
-namespace NextDotNet.Api.Controllers.Department;
+namespace Controllers.Controllers.Organization;
 
 [Route("api/organization/user-department")]
 [ApiController]
