@@ -55,7 +55,24 @@ export const defaultDepartmentMemberFilter: DepartmentMemberFilter = {
   isShowChildrenMembers: false,
 };
 
-export type AssignDepartmentMemberDto = {
+export type AddDepartmentMemberDto = {
   departmentId: number;
-  userId: string;
+  userIds: string[];
+};
+
+export type UserDepartmentCursorFilterDto = {
+  searchTerm: string;
+  departmentId: number;
+  limit: number;
+  /// <summary>
+  /// cursor by created time
+  /// </summary>
+  cursor: string | null;
+};
+
+export const defaultUserDepartmentCursorFilterDto: UserDepartmentCursorFilterDto = {
+  searchTerm: '',
+  departmentId: 0,
+  limit: 50,
+  cursor: null,
 };

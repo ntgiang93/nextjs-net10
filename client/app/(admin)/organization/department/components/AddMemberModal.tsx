@@ -1,8 +1,16 @@
+import { SearchInput } from '@/components/ui/input/SearchInput';
 import { DepartmentHook } from '@/hooks/department';
-import { DepartmentDto } from '@/types/sys/Department';
 import {
+  AddDepartmentMemberDto,
+  defaultUserDepartmentCursorFilterDto,
+  DepartmentDto,
+  UserDepartmentCursorFilterDto,
+} from '@/types/sys/Department';
+import { UserSelectDto } from '@/types/sys/User';
+import {
+  Avatar,
+  AvatarGroup,
   Button,
-  Input,
   Listbox,
   ListboxItem,
   Modal,
@@ -11,95 +19,93 @@ import {
   ModalFooter,
   ModalHeader,
   Spinner,
+  User,
 } from '@heroui/react';
 import { Selection } from '@react-types/shared';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 
 interface AddMemberModalProps {
   department?: DepartmentDto;
   isOpen: boolean;
   onOpenChange: () => void;
-  onAdded?: () => void;
 }
 
 export default function AddMemberModal(props: AddMemberModalProps) {
-  const { department, isOpen, onOpenChange, onAdded } = props;
-  const departmentId = department?.id ?? 0;
-  const [searchTerm, setSearchTerm] = useState('');
+  const { department, isOpen, onOpenChange } = props;
+  const [filter, setFilter] = useState<UserDepartmentCursorFilterDto>({
+    ...defaultUserDepartmentCursorFilterDto,
+  });
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
 
-  const { data: candidates = [], isFetching } = DepartmentHook.useGetUsersNotInDepartment(
-    departmentId,
-    searchTerm,
-    isOpen,
-  );
-  const { mutateAsync: assignMembers, isPending } = DepartmentHook.useAssignMember(departmentId);
+  const { data, isFetching } = DepartmentHook.useGetUsersNotInDepartment(filter);
+  const [users, setUsers] = useState<UserSelectDto[]>([]);
+  const { mutateAsync: addMembers, isPending } = DepartmentHook.useAddMember();
 
   const msg = useTranslations('msg');
   const t = useTranslations('organization');
+  const listboxRef = useRef<HTMLDivElement>(null);
+
+  const handleSubmit = async () => {
+    if (!department) return;
+    const body: AddDepartmentMemberDto = {
+      departmentId: department.id,
+      userIds: Array.from(selectedKeys) as string[],
+    };
+    const success = await addMembers(body);
+    if (success) {
+      onOpenChange();
+    }
+  };
+
+  const selectedCount = useMemo(() => {
+    if (selectedKeys === 'all') return users.length || 0;
+    else return selectedKeys instanceof Set ? selectedKeys.size : 0;
+  }, [selectedKeys]);
 
   useEffect(() => {
     if (!isOpen) {
       setSelectedKeys(new Set([]));
-      setSearchTerm('');
+      setFilter({ ...defaultUserDepartmentCursorFilterDto });
+      setUsers([]);
     }
   }, [isOpen]);
 
-  const selectedUserIds = useMemo(() => {
-    if (selectedKeys === 'all') {
-      return candidates.map((item) => item.id);
-    }
-    return Array.from(selectedKeys) as string[];
-  }, [selectedKeys, candidates]);
+  useEffect(() => {
+    const root = listboxRef.current;
+    const scroller = root?.querySelector<HTMLDivElement>('div[data-orientation="vertical"]');
+    if (!scroller) return;
+    if (!data?.hasMore) return;
+    const handleScroll = (event: Event) => {
+      const target = event.currentTarget as HTMLDivElement;
+      if (target.scrollTop + target.clientHeight >= target.scrollHeight) {
+        setFilter((prev) => ({
+          ...prev,
+          cursor: data?.nextCursor || null,
+        }));
+      }
+    };
 
-  const handleSubmit = async () => {
-    if (!departmentId || selectedUserIds.length === 0) return;
-    const success = await assignMembers(
-      selectedUserIds.map((userId) => ({ departmentId, userId })),
-    );
-    if (success) {
-      onOpenChange();
-      setSelectedKeys(new Set([]));
-      setSearchTerm('');
-      onAdded?.();
-    }
-  };
+    scroller.addEventListener('scroll', handleScroll);
+    return () => scroller.removeEventListener('scroll', handleScroll);
+  }, [data, isOpen]);
 
-  const renderListContent = () => {
-    if (isFetching) {
-      return (
-        <div className="flex items-center justify-center py-6">
-          <Spinner size="sm" />
-        </div>
-      );
+  useEffect(() => {
+    if (data) {
+      if (!filter.cursor || filter.cursor == null) {
+        setUsers([...data.items]);
+      } else setUsers((prev) => [...prev, ...data.items]);
     }
+  }, [data]);
 
-    if (!candidates.length) {
-      return <div className="py-6 text-center text-small text-default-500">{msg('noData')}</div>;
+  useEffect(() => {
+    if (department) {
+      setFilter((prev) => ({
+        ...prev,
+        departmentId: department.id,
+      }));
     }
-
-    return (
-      <Listbox
-        selectionMode="multiple"
-        aria-label="available-users"
-        variant="bordered"
-        className="max-h-72 overflow-auto"
-        selectedKeys={selectedKeys}
-        onSelectionChange={(keys) => setSelectedKeys(keys)}
-        emptyContent={msg('noData')}
-      >
-        {candidates.map((user) => (
-          <ListboxItem key={user.id} textValue={user.fullName || user.userName}>
-            <div className="flex flex-col">
-              <span className="text-sm font-medium">{user.fullName || user.userName}</span>
-              <span className="text-tiny text-default-500">{user.userName}</span>
-            </div>
-          </ListboxItem>
-        ))}
-      </Listbox>
-    );
-  };
+  }, [department]);
 
   return (
     <Modal
@@ -112,18 +118,73 @@ export default function AddMemberModal(props: AddMemberModalProps) {
       <ModalContent>
         <>
           <ModalHeader className="flex flex-col gap-1">
-            {t('assignMembers')} {department ? `- ${department.name}` : ''}
+            {msg('addMember')} {department ? `- ${department.name}` : ''}
           </ModalHeader>
           <ModalBody>
             <div className="flex flex-col gap-4">
-              <Input
-                autoFocus
-                value={searchTerm}
-                onValueChange={setSearchTerm}
-                placeholder={msg('search')}
-                variant="bordered"
+              <SearchInput
+                value={filter.searchTerm}
+                onValueChange={(value) => {
+                  setFilter((prev) => ({
+                    ...prev,
+                    cursor: null,
+                    searchTerm: value,
+                  }));
+                }}
               />
-              {renderListContent()}
+              <Listbox
+                ref={listboxRef}
+                isVirtualized
+                virtualization={{
+                  maxListboxHeight: 400,
+                  itemHeight: 50,
+                }}
+                classNames={{
+                  base: 'w-full',
+                  list: 'mt-2 p-2 border border-default rounded-md',
+                }}
+                items={users || []}
+                label="Assigned to"
+                selectionMode="multiple"
+                variant="flat"
+                selectedKeys={selectedKeys}
+                onSelectionChange={setSelectedKeys}
+                topContent={
+                  <AvatarGroup
+                    isBordered
+                    max={3}
+                    total={selectedCount - 3}
+                    renderCount={(count) => (
+                      <p className="text-small text-foreground font-medium ms-2">+{count}</p>
+                    )}
+                  >
+                    {Array.from(selectedKeys)
+                      .slice(0, 3)
+                      .map((key) => {
+                        const user = users.find((u) => u.id === key);
+                        return user ? <Avatar key={user.id} src={user.avatar} size="sm" /> : null;
+                      })}
+                  </AvatarGroup>
+                }
+                bottomContent={isFetching ? <Spinner></Spinner> : null}
+              >
+                {(item) => (
+                  <ListboxItem key={item.id} textValue={item.fullName} className="my-1">
+                    <User
+                      className="justify-start"
+                      avatarProps={{
+                        src: item.avatar || `https://ui-avatars.com/api/?name=${item.fullName}`,
+                        alt: 'Avatar',
+                        size: 'sm',
+                        isBordered: true,
+                        color: 'primary',
+                      }}
+                      description={`${item.userName}`}
+                      name={<span className="font-semibold">{item.fullName || 'Unknow User'}</span>}
+                    />
+                  </ListboxItem>
+                )}
+              </Listbox>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -132,7 +193,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
             </Button>
             <Button
               color="primary"
-              isDisabled={!departmentId || selectedUserIds.length === 0}
+              isDisabled={!department || selectedCount === 0}
               isLoading={isPending}
               onPress={handleSubmit}
             >

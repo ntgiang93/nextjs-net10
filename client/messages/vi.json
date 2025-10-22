@@ -53,7 +53,8 @@
     "level": "Cấp độ",
     "address": "Địa chỉ",
     "memberManagement": "Quản lý thành viên",
-    "addMember": "Thêm thành viên"
+    "addMember": "Thêm thành viên",
+    "selectedCount": "Đã chọn {count}"
   },
   "role": {
     "title": "Quản lý Vai trò",
@@ -120,6 +121,7 @@
     "parentDepartment": "Bộ phận cha",
     "assignMembers": "Gán thành viên",
     "showSubDepartmentsMembers": "Hiển thị thành viên của các bộ phận con",
-    "hideSubDepartmentsMembers": "Ẩn thành viên của các bộ phận con"
+    "hideSubDepartmentsMembers": "Ẩn thành viên của các bộ phận con",
+    "organizationChart": "Sơ đồ tổ chức"
   }
 }

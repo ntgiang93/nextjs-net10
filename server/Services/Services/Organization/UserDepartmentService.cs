@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Common.Security;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
+using Model.DTOs.System.User;
 using Model.Entities.Organization;
 using Repository.Interfaces.Organization;
 using Repository.Interfaces.System;
@@ -31,11 +33,18 @@ public class UserDepartmentService : GenericService<UserDepartment, int>, IUserD
         return cachedResult;
     }
 
-    public async Task<PaginatedResultDto<DepartmentMemberDto>> GetUserNotInDepartmentAsync(int id)
+    public async Task<CursorPaginatedResultDto<UserSelectDto, DateTime>> GetUserNotInDepartmentAsync(UserDeparmentCursorFilterDto filter)
     {
-        var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetUserNotInDepartment", id);
+        var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetUserNotInDepartment", filter);
         var cachedResult = await CacheManager.GetOrCreateAsync(cacheKey,
-            async () => { return await _userDepartmentRepository.GetUserNotInDepartment(id); });
+            async () => { return await _userDepartmentRepository.GetUserNotInDepartment(filter); });
         return cachedResult;
+    }
+    public async Task<bool> AddMemberToDepartmentAsync(AddMemberDepartmentDto dto)
+    {
+        var currentUser = UserContext.Current;
+        var result =  await _userDepartmentRepository.AddMemberAsync(dto, currentUser.UserName);
+        if(result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
+        return result;
     }
 }

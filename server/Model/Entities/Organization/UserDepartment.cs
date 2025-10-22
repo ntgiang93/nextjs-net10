@@ -7,7 +7,7 @@ namespace Model.Entities.Organization;
 [Table("UserDepartments")]
 public class UserDepartment : BaseEntity<int>
 {
-    [Required] public long UserId { get; set; }
+    [Required] public required string UserId { get; set; }
 
     [Required] public int DepartmentId { get; set; }
 }

@@ -28,6 +28,8 @@ public class UserSelectDto
     public string Avatar { get; set; }
     public string Email { get; set; }
     public string FullName { get; set; }
+    [JsonIgnore]
+    public DateTime CreatedAt { get; set; }
 }
 
 public class UserTableRequestDto : PaginationRequest

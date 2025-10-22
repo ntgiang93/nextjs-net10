@@ -53,7 +53,8 @@
     "level": "Level",
     "address": "Address",
     "memberManagement": "Member Management",
-    "addMember": "Add member"
+    "addMember": "Add member",
+    "selectedCount": "Selected {count}"
   },
   "role": {
     "title": "Role management",
@@ -117,6 +118,7 @@
     "departmentType": "Department Type",
     "parentDepartment": "Parent Department",
     "hideSubDepartmentsMembers": "Hide members of child departments",
-    "showSubDepartmentsMembers": "Show members of child departments"
+    "showSubDepartmentsMembers": "Show members of child departments",
+    "organizationChart": "Organization Chart"
   }
 }

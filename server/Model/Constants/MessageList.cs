@@ -34,6 +34,11 @@ public static class MessageList
             },
             { EMessage.EmailExisted, new Translations("Email already exists.", "Email này đã tồn tại.") },
             {
+                EMessage.Error400Msg,
+                new Translations("Invalid request. Please check the request payload and try again.",
+                    "Dữ liệu yêu cầu (body) không hợp lệ. Vui lòng kiểm tra payload và thử lại.")
+            },
+            {
                 EMessage.Error403Msg,
                 new Translations("You do not have permission to access this resource.",
                     "Bạn không có quyền truy cập tài nguyên này.")

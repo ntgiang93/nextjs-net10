@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
+using Model.DTOs.System.User;
 using Service.Interfaces.Base;
 using Service.Interfaces.Organization;
 
@@ -70,12 +71,12 @@ public class DepartmentController : ControllerBase
             _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
-    [HttpGet("{id}/users-not-in-department")]
+    [HttpGet("users-not-in-department")]
     [Policy(ESysModule.Department, EPermission.View)]
-    public async Task<IActionResult> GetUserNotInDepartment(int id)
+    public async Task<IActionResult> GetUserNotInDepartment([FromQuery] UserDeparmentCursorFilterDto filter)
     {
-        var users = await _userDepartmentService.GetUserNotInDepartmentAsync(id);
-        return Ok(ApiResponse<PaginatedResultDto<DepartmentMemberDto>>.Succeed(users,
+        var users = await _userDepartmentService.GetUserNotInDepartmentAsync(filter);
+        return Ok(ApiResponse<CursorPaginatedResultDto<UserSelectDto, DateTime>>.Succeed(users,
             _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
@@ -89,6 +90,19 @@ public class DepartmentController : ControllerBase
             return  Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
         return Ok(ApiResponse<DepartmentDto>.Succeed(department, _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+    
+    // POST methods
+    [HttpPost("add-members")]
+    [Policy(ESysModule.Department, EPermission.Edit)]
+    public async Task<IActionResult> AddMember([FromBody] AddMemberDepartmentDto dto)
+    {
+        if (dto.DepartmentId <= 0) return BadRequest(_sysMsg.Get(EMessage.Error400Msg));
+        var success = await _userDepartmentService.AddMemberToDepartmentAsync(dto);
+        if (!success)
+            return  Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+
+        return Ok(ApiResponse<bool>.Succeed(success, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // PUT methods

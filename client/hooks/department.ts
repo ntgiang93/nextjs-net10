@@ -3,15 +3,21 @@
 import { StringHelper } from '@/libs/StringHelper';
 import { apiService } from '@/services/api';
 import { ApiResponse } from '@/types/base/ApiResponse';
+import {
+  CursorPaginatedResultDto,
+  defaultCursorPaginatedResult,
+} from '@/types/base/CursorPaginatedResultDto';
 import { defualtPaginatedResult, PaginatedResultDto } from '@/types/base/PaginatedResultDto';
 import {
-  AssignDepartmentMemberDto,
+  AddDepartmentMemberDto,
   defaultDetailDepartmentDto,
   DepartmentDto,
   DepartmentMemberDto,
   DepartmentMemberFilter,
   DetailDepartmentDto,
+  UserDepartmentCursorFilterDto,
 } from '@/types/sys/Department';
+import { UserSelectDto } from '@/types/sys/User';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 const endpoint = 'organization/departments';
@@ -101,11 +107,11 @@ export const useGetMembers = (filter: DepartmentMemberFilter) => {
   });
 };
 
-export const useAssignMember = (departmentId: number) => {
+export const useAddMember = () => {
   return useMutation({
-    mutationFn: async (payload: AssignDepartmentMemberDto[]) => {
+    mutationFn: async (payload: AddDepartmentMemberDto) => {
       const response = await apiService.post<ApiResponse<boolean>>(
-        `${endpoint}/${departmentId}/assign-members`,
+        `${endpoint}/add-members`,
         payload,
       );
       return response.success;
@@ -113,26 +119,23 @@ export const useAssignMember = (departmentId: number) => {
   });
 };
 
-export const useGetUsersNotInDepartment = (
-  departmentId: number,
-  searchTerm: string,
-  enabled: boolean = true,
-) => {
-  return useQuery<DepartmentMemberDto[], Error>({
-    queryKey: [endpoint, 'usersNotInDepartment', departmentId, searchTerm],
+export const useGetUsersNotInDepartment = (filter: UserDepartmentCursorFilterDto) => {
+  return useQuery<CursorPaginatedResultDto<UserSelectDto, string>, Error>({
+    queryKey: [endpoint, 'usersNotInDepartment', filter],
     queryFn: async () => {
-      const query = StringHelper.objectToUrlParams({ searchTerm });
+      const query = StringHelper.objectToUrlParams({ ...filter });
       const url = query
-        ? `${endpoint}/${departmentId}/users-not-in-department?${query}`
-        : `${endpoint}/${departmentId}/users-not-in-department`;
-      const response = await apiService.get<ApiResponse<DepartmentMemberDto[]>>(url);
+        ? `${endpoint}/users-not-in-department?${query}`
+        : `${endpoint}/users-not-in-department`;
+      const response =
+        await apiService.get<ApiResponse<CursorPaginatedResultDto<UserSelectDto, string>>>(url);
       if (response.success && response.data) {
         return response.data;
       }
-      return [];
+      return { ...defaultCursorPaginatedResult };
     },
-    enabled: enabled && departmentId > 0,
-    placeholderData: [],
+    enabled: filter.departmentId > 0,
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -142,6 +145,6 @@ export const DepartmentHook = {
   useSave,
   useDelete,
   useGetMembers,
-  useAssignMember,
+  useAddMember,
   useGetUsersNotInDepartment,
 };

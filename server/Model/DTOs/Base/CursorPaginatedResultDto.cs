@@ -1,9 +1,9 @@
 // server/Model/DTOs/Base/CursorPaginatedResultDto.cs
 namespace Model.DTOs.Base;
 
-public class CursorPaginatedResultDto<T>
+public class CursorPaginatedResultDto<T,TCursor>
 {
     public List<T> Items { get; set; } = new();
-    public int? NextCursor { get; set; }
+    public TCursor? NextCursor { get; set; }
     public bool HasMore { get; set; }
 }

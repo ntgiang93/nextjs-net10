@@ -1,4 +1,6 @@
 import AsyncDataTable from '@/components/ui/data-table/AsyncDataTable';
+import { ListBoxTree } from '@/components/ui/hierarchy/ListBoxTree';
+import { TreeItemType } from '@/components/ui/hierarchy/TreeItem';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { ConfirmModal } from '@/components/ui/overlay/ConfirmModal';
@@ -14,6 +16,9 @@ import {
 } from '@/types/sys/Department';
 import {
   Button,
+  Card,
+  CardBody,
+  CardHeader,
   Modal,
   ModalBody,
   ModalContent,
@@ -53,7 +58,7 @@ export default function MemberModal(props: MemberModalProps) {
   } = useDisclosure();
 
   const { data, isFetching, refetch } = DepartmentHook.useGetMembers(filter);
-  const { mutateAsync: assignMembers, isPending } = DepartmentHook.useAssignMember(departmentId);
+  const { mutateAsync: addMember, isPending } = DepartmentHook.useAddMember();
   const canEdit = hasPermission(ESysModule.Department, EPermission.Edit);
 
   const { navigate } = useAuth();
@@ -149,6 +154,19 @@ export default function MemberModal(props: MemberModalProps) {
     // }
   };
 
+  const mapDepartmentToTreeItem = (dept: DepartmentDto): TreeItemType => {
+    return {
+      value: dept.id,
+      label: dept.name,
+      children: dept.children?.map(mapDepartmentToTreeItem) || [],
+    };
+  };
+
+  const departmentTree = useMemo(() => {
+    if (!department) return [] as TreeItemType[];
+    else return [mapDepartmentToTreeItem(department)];
+  }, [department]);
+
   useEffect(() => {
     if (isOpen && department) {
       setFilter((prev) => ({ ...prev, departmentId: department.id, page: 1 }));
@@ -163,19 +181,19 @@ export default function MemberModal(props: MemberModalProps) {
 
   const handleSubmit = async () => {
     if (!departmentId) return;
-    const success = await assignMembers(
-      selectedUserIds.map((userId) => ({ departmentId, userId })),
-    );
-    if (success) {
-      onOpenChange();
-      onRefresh();
-    }
+    // const success = await assignMembers(
+    //   selectedUserIds.map((userId) => ({ departmentId, userId })),
+    // );
+    // if (success) {
+    //   onOpenChange();
+    //   onRefresh();
+    // }
   };
 
   return (
     <Modal
       isOpen={isOpen}
-      size="3xl"
+      size={departmentTree.length > 0 ? '5xl' : '3xl'}
       onOpenChange={onOpenChange}
       scrollBehavior="inside"
       onClose={() => setSelectedUserIds([])}
@@ -188,84 +206,99 @@ export default function MemberModal(props: MemberModalProps) {
             {msg('memberManagement') + ' ' + department?.name}
           </ModalHeader>
           <ModalBody>
-            <div className="w-full h-full flex flex-col gap-2">
-              <AsyncDataTable
-                columns={columns}
-                data={data?.items || []}
-                isLoading={isFetching}
-                fetch={refetch}
-                removeWrapper={true}
-                pagination={{
-                  page: filter.page,
-                  pageSize: filter.pageSize,
-                  totalCount: data?.totalCount || 0,
-                  totalPages: pages,
-                  onPageChange: (page) => {
-                    setFilter((prev) => ({ ...prev, page }));
-                  },
-                  onPageSizeChange: (pageSize) => {
-                    setFilter((prev) => ({ ...prev, pageSize }));
-                  },
-                }}
-                selection={{
-                  selectedKeys: selectedUserIds,
-                  onChangeSelection(value) {
-                    setSelectedUserIds(value);
-                  },
-                }}
-                leftContent={
-                  <>
-                    <SearchInput
-                      className="w-64"
-                      value={filter.searchTerm}
-                      onValueChange={(value) => {
-                        setFilter((prev) => ({
-                          ...prev,
-                          searchTerm: value,
-                        }));
-                      }}
-                    />
-                  </>
-                }
-                rightContent={
-                  <>
-                    <Tooltip content={msg('addMember')}>
-                      <Button
-                        isIconOnly
-                        color="primary"
-                        size="sm"
-                        isDisabled={!departmentId}
-                        onPress={() => {
-                          if (!departmentId) return;
-                          onOpenAddMember();
-                        }}
-                      >
-                        <AddTeamIcon size={18} />
-                      </Button>
-                    </Tooltip>
-                    <Tooltip
-                      content={
-                        filter.isShowChildrenMembers
-                          ? t('hideSubDepartmentsMembers')
-                          : t('showSubDepartmentsMembers')
-                      }
-                    >
-                      <Button
-                        isIconOnly
-                        variant="light"
-                        size="sm"
-                        onPress={() => {
-                          setFilter((prev) => ({
-                            ...prev,
-                          }));
-                        }}
-                      >
-                        {filter.isShowChildrenMembers ? <ViewOffIcon /> : <ViewIcon />}
-                      </Button>
-                    </Tooltip>
-                  </>
-                }
-              />
+            <div className="w-full h-full flex gap-2">
+              <Card shadow="sm" className="w-fit">
+                <CardHeader className="font-semibold">{t('organizationChart')}</CardHeader>
+                <CardBody>
+                  <ListBoxTree
+                    items={departmentTree}
+                    selectedValues={[]}
+                    onSelectedChange={(value) => console.log(value)}
+                  />{' '}
+                </CardBody>
+              </Card>
+              <Card shadow="sm" className="w-full">
+                <CardHeader className="font-semibold">{t('organizationChart')}</CardHeader>
+                <CardBody>
+                  <AsyncDataTable
+                    columns={columns}
+                    data={data?.items || []}
+                    isLoading={isFetching}
+                    fetch={refetch}
+                    removeWrapper={true}
+                    pagination={{
+                      page: filter.page,
+                      pageSize: filter.pageSize,
+                      totalCount: data?.totalCount || 0,
+                      totalPages: pages,
+                      onPageChange: (page) => {
+                        setFilter((prev) => ({ ...prev, page }));
+                      },
+                      onPageSizeChange: (pageSize) => {
+                        setFilter((prev) => ({ ...prev, pageSize }));
+                      },
+                    }}
+                    selection={{
+                      selectedKeys: selectedUserIds,
+                      onChangeSelection(value) {
+                        setSelectedUserIds(value);
+                      },
+                    }}
+                    leftContent={
+                      <>
+                        <SearchInput
+                          className="w-64"
+                          value={filter.searchTerm}
+                          onValueChange={(value) => {
+                            setFilter((prev) => ({
+                              ...prev,
+                              searchTerm: value,
+                            }));
+                          }}
+                        />
+                      </>
+                    }
+                    rightContent={
+                      <>
+                        <Tooltip content={msg('addMember')}>
+                          <Button
+                            isIconOnly
+                            color="primary"
+                            size="sm"
+                            isDisabled={!departmentId}
+                            onPress={() => {
+                              if (!departmentId) return;
+                              onOpenAddMember();
+                            }}
+                          >
+                            <AddTeamIcon size={18} />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip
+                          content={
+                            filter.isShowChildrenMembers
+                              ? t('hideSubDepartmentsMembers')
+                              : t('showSubDepartmentsMembers')
+                          }
+                        >
+                          <Button
+                            isIconOnly
+                            variant="light"
+                            size="sm"
+                            onPress={() => {
+                              setFilter((prev) => ({
+                                ...prev,
+                              }));
+                            }}
+                          >
+                            {filter.isShowChildrenMembers ? <ViewOffIcon /> : <ViewIcon />}
+                          </Button>
+                        </Tooltip>
+                      </>
+                    }
+                  />
+                </CardBody>
+              </Card>
             </div>
           </ModalBody>
           <ModalFooter>
@@ -291,15 +324,13 @@ export default function MemberModal(props: MemberModalProps) {
             objectName={selectedUserIds}
             loading={isFetching}
           />
-          <AddMemberModal
-            department={department}
-            isOpen={isOpenAddMember}
-            onOpenChange={onOpenAddMemberChange}
-            onAdded={() => {
-              refetch();
-              onRefresh();
-            }}
-          />
+          {isOpenAddMember && (
+            <AddMemberModal
+              department={department}
+              isOpen={isOpenAddMember}
+              onOpenChange={onOpenAddMemberChange}
+            />
+          )}
         </>
       </ModalContent>
     </Modal>

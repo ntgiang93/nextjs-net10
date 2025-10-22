@@ -29,16 +29,6 @@ namespace Model.DTOs.Base
         public int TotalPages => (TotalCount + PageSize - 1) / PageSize;
 
         /// <summary>
-        /// Whether there is a previous page
-        /// </summary>
-        public bool HasPreviousPage => PageIndex > 1;
-
-        /// <summary>
-        /// Whether there is a next page
-        /// </summary>
-        public bool HasNextPage => PageIndex < TotalPages;
-
-        /// <summary>
         /// The items on the current page
         /// </summary>
         public IEnumerable<T> Items { get; set; }

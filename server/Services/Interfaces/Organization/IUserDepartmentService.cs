@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
+using Model.DTOs.System.User;
 using Model.Entities.Organization;
 using Service.Interfaces.Base;
 
@@ -15,7 +16,11 @@ public interface IUserDepartmentService : IGenericService<UserDepartment, int>
     Task<PaginatedResultDto<DepartmentMemberDto>> GetDepartmentMembersPaginatedAsync(UserDepartmentFilterDto filter);
     
     /// <summary>
-    ///     Gets paginated list of users that are not assigned to the specified department
+    ///     Gets cursor-paginated list of users that are not assigned to the specified department
     /// </summary>
-    Task<PaginatedResultDto<DepartmentMemberDto>> GetUserNotInDepartmentAsync(int id);
+    Task<CursorPaginatedResultDto<UserSelectDto, DateTime>> GetUserNotInDepartmentAsync(UserDeparmentCursorFilterDto filter);
+    /// <summary>
+    ///     Adds members to a department
+    /// </summary>
+    Task<bool> AddMemberToDepartmentAsync(AddMemberDepartmentDto dto);
 }

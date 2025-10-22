@@ -1,5 +1,6 @@
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
+using Model.DTOs.System.User;
 using Model.Entities.Organization;
 using Repository.Interfaces.Base;
 
@@ -11,8 +12,13 @@ public interface IUserDepartmentRepository : IGenericRepository<UserDepartment, 
     ///     Gets paginated list of user department assignments
     /// </summary>
     Task<PaginatedResultDto<DepartmentMemberDto>> GetPaginatedAsync(UserDepartmentFilterDto filter);
+
     /// <summary>
     ///     Gets paginated list of users that are not assigned to the specified department
     /// </summary>
-    Task<PaginatedResultDto<DepartmentMemberDto>> GetUserNotInDepartment(int id);
+    Task<CursorPaginatedResultDto<UserSelectDto, DateTime>> GetUserNotInDepartment(UserDeparmentCursorFilterDto filter);
+    /// <summary>
+    ///     Adds members to a department
+    /// </summary>
+    Task<bool> AddMemberAsync(AddMemberDepartmentDto dto, string createdBy);
 }

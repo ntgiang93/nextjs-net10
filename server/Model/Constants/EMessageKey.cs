@@ -7,6 +7,7 @@ public enum EMessage
     ChangeEmailSubject,
     CodeIsInUse,
     EmailExisted,
+    Error400Msg,
     Error403Msg,
     Error404Msg,
     Error409Msg,
