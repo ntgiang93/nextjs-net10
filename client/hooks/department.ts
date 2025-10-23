@@ -139,6 +139,18 @@ export const useGetUsersNotInDepartment = (filter: UserDepartmentCursorFilterDto
   });
 };
 
+export const useRemoveMember = () => {
+  return useMutation({
+    mutationFn: async (payload: number[]) => {
+      const response = await apiService.delete<ApiResponse<boolean>>(
+        `${endpoint}/remove-member`,
+        payload,
+      );
+      return response.success;
+    },
+  });
+};
+
 export const DepartmentHook = {
   useGetAll,
   useGet,
@@ -147,4 +159,5 @@ export const DepartmentHook = {
   useGetMembers,
   useAddMember,
   useGetUsersNotInDepartment,
+  useRemoveMember,
 };

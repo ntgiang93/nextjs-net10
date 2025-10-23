@@ -18,7 +18,13 @@ public interface IUserDepartmentRepository : IGenericRepository<UserDepartment, 
     /// </summary>
     Task<CursorPaginatedResultDto<UserSelectDto, DateTime>> GetUserNotInDepartment(UserDeparmentCursorFilterDto filter);
     /// <summary>
-    ///     Adds members to a department
+    ///     Adds members to a department use transaction
     /// </summary>
     Task<bool> AddMemberAsync(AddMemberDepartmentDto dto, string createdBy);
+    /// <summary>
+    ///     Removes members from a department use transaction
+    /// </summary>
+    Task<bool> RemoveMemberAsync(List<int> ids, string updatedBy);
+
+    
 }

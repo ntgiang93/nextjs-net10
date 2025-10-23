@@ -58,7 +58,10 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
         entity.IsDeleted = false;        
         if (typeof(TKey) == typeof(string))
         {
-            entity.Id = (TKey)(object)Ulid.NewUlid().ToString();
+            if(string.IsNullOrEmpty(entity.Id?.ToString()))
+            {
+                entity.Id = (TKey)(object)Ulid.NewUlid().ToString();
+            }
             await _dbFactory.Connection.InsertAsync(entity);
             return entity.Id;
         }

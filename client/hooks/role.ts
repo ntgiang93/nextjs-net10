@@ -1,14 +1,24 @@
 'use client';
 
+import { StringHelper } from '@/libs/StringHelper';
 import { ApiResponse } from '@/types/base/ApiResponse';
+import {
+  CursorPaginatedResultDto,
+  defaultCursorPaginatedResult,
+} from '@/types/base/CursorPaginatedResultDto';
+import { defualtPaginatedResult, PaginatedResultDto } from '@/types/base/PaginatedResultDto';
 import { MenuItem } from '@/types/sys/Menu';
 import {
+  AddRoleMemberDto,
   defaultRoleDto,
+  RemoveRoleMemberDto,
   RoleDto,
+  RoleMemberFilter,
   RoleMembersDto,
   RolePermissionDto,
-  UserRoleDto,
+  UserRoleCursorFilterDto,
 } from '@/types/sys/Role';
+import { UserSelectDto } from '@/types/sys/User';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiService } from '../services/api';
 
@@ -46,20 +56,20 @@ export const useGet = (id: number) => {
   });
 };
 
-export const useGetMember = (roleId: number) => {
-  return useQuery<RoleMembersDto[], Error>({
-    queryKey: [endpoint, 'useGetMember', roleId],
+export const useGetMembers = (filter: RoleMemberFilter) => {
+  return useQuery<PaginatedResultDto<RoleMembersDto>, Error>({
+    queryKey: [endpoint, 'getMembers', filter],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<RoleMembersDto[]>>(
-        `${endpoint}/${roleId}/get-members`,
+      const response = await apiService.get<ApiResponse<PaginatedResultDto<RoleMembersDto>>>(
+        `${endpoint}/get-members?${StringHelper.objectToUrlParams(filter)}`,
       );
       if (response.success && response.data) {
         return response.data;
       }
-      return [];
+      return { ...defualtPaginatedResult };
     },
-    placeholderData: [],
-    enabled: roleId > 0,
+    enabled: filter.roleId > 0,
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -104,12 +114,12 @@ export const useAssignPermission = (roleId: number) => {
   });
 };
 
-export const useAssignMember = (roleId: number) => {
+export const useAddMember = () => {
   return useMutation({
-    mutationFn: async (userRole: UserRoleDto[]) => {
-      var response = await apiService.post<ApiResponse<any>>(
-        `${endpoint}/${roleId}/assign-members`,
-        userRole,
+    mutationFn: async (payload: AddRoleMemberDto) => {
+      const response = await apiService.post<ApiResponse<boolean>>(
+        `${endpoint}/add-members`,
+        payload,
       );
       return response.success;
     },
@@ -125,24 +135,47 @@ export const useDelete = (id: number) => {
   });
 };
 
-export const useRemoveMember = (roleId: number, userId: string) => {
+export const useRemoveMember = () => {
   return useMutation({
-    mutationFn: async () => {
-      await apiService.delete<ApiResponse<MenuItem>>(
-        `${endpoint}/${roleId}/remove-member/${userId}`,
+    mutationFn: async (payload: RemoveRoleMemberDto) => {
+      const response = await apiService.delete<ApiResponse<boolean>>(
+        `${endpoint}/remove-member`,
+        payload,
       );
+      return response.success;
     },
+  });
+};
+
+export const useGetUsersNotInRole = (filter: UserRoleCursorFilterDto) => {
+  return useQuery<CursorPaginatedResultDto<UserSelectDto, string>, Error>({
+    queryKey: [endpoint, 'usersNotInRole', filter],
+    queryFn: async () => {
+      const query = StringHelper.objectToUrlParams(filter as Record<string, unknown>);
+      const url = query
+        ? `${endpoint}/users-not-in-role?${query}`
+        : `${endpoint}/users-not-in-role`;
+      const response =
+        await apiService.get<ApiResponse<CursorPaginatedResultDto<UserSelectDto, string>>>(url);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return { ...defaultCursorPaginatedResult };
+    },
+    enabled: filter.roleId > 0,
+    placeholderData: keepPreviousData,
   });
 };
 
 export const RoleHook = {
   useGetAll,
   useGet,
+  useGetMembers,
   useSave,
   useDelete,
-  useGetMember,
   useGetPermission,
   useAssignPermission,
+  useAddMember,
   useRemoveMember,
-  useAssignMember,
+  useGetUsersNotInRole,
 };

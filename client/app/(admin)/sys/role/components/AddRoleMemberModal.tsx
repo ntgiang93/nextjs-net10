@@ -1,11 +1,11 @@
 import { SearchInput } from '@/components/ui/input/SearchInput';
-import { DepartmentHook } from '@/hooks/department';
+import { RoleHook } from '@/hooks/role';
 import {
-  AddDepartmentMemberDto,
-  defaultUserDepartmentCursorFilterDto,
-  DepartmentDto,
-  UserDepartmentCursorFilterDto,
-} from '@/types/sys/Department';
+  AddRoleMemberDto,
+  defaultUserRoleCursorFilterDto,
+  RoleDto,
+  UserRoleCursorFilterDto,
+} from '@/types/sys/Role';
 import { UserSelectDto } from '@/types/sys/User';
 import {
   Avatar,
@@ -25,51 +25,52 @@ import { Selection } from '@react-types/shared';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 
-interface AddMemberModalProps {
-  department?: DepartmentDto;
+interface AddRoleMemberModalProps {
+  role?: RoleDto;
   isOpen: boolean;
   onOpenChange: () => void;
-  refetch: () => void;
+  refetch: () => void | Promise<unknown>;
+  onRefresh: () => void | Promise<unknown>;
 }
 
-export default function AddMemberModal(props: AddMemberModalProps) {
-  const { department, isOpen, onOpenChange, refetch } = props;
-  const [filter, setFilter] = useState<UserDepartmentCursorFilterDto>({
-    ...defaultUserDepartmentCursorFilterDto,
+export default function AddRoleMemberModal(props: AddRoleMemberModalProps) {
+  const { role, isOpen, onOpenChange, refetch, onRefresh } = props;
+  const [filter, setFilter] = useState<UserRoleCursorFilterDto>({
+    ...defaultUserRoleCursorFilterDto,
   });
   const [selectedKeys, setSelectedKeys] = useState<Selection>(new Set([]));
 
-  const { data, isFetching } = DepartmentHook.useGetUsersNotInDepartment(filter);
+  const { data, isFetching } = RoleHook.useGetUsersNotInRole(filter);
   const [users, setUsers] = useState<UserSelectDto[]>([]);
-  const { mutateAsync: addMembers, isPending } = DepartmentHook.useAddMember();
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  const msg = useTranslations('msg');
-  const t = useTranslations('organization');
+  const { mutateAsync: addMembers, isPending } = RoleHook.useAddMember();
   const listboxRef = useRef<HTMLDivElement>(null);
 
+  const msg = useTranslations('msg');
+  const t = useTranslations('role');
+
   const handleSubmit = async () => {
-    if (!department) return;
-    const body: AddDepartmentMemberDto = {
-      departmentId: department.id,
+    if (!role) return;
+    const body: AddRoleMemberDto = {
+      roleId: role.id,
       userIds: Array.from(selectedKeys) as string[],
     };
     const success = await addMembers(body);
     if (success) {
       onOpenChange();
-      refetch();
+      await Promise.resolve(refetch());
+      await Promise.resolve(onRefresh());
     }
   };
 
   const selectedCount = useMemo(() => {
     if (selectedKeys === 'all') return users.length || 0;
     else return selectedKeys instanceof Set ? selectedKeys.size : 0;
-  }, [selectedKeys]);
+  }, [selectedKeys, users]);
 
   useEffect(() => {
     if (!isOpen) {
       setSelectedKeys(new Set([]));
-      setFilter({ ...defaultUserDepartmentCursorFilterDto });
+      setFilter({ ...defaultUserRoleCursorFilterDto });
       setUsers([]);
     }
   }, [isOpen]);
@@ -95,20 +96,22 @@ export default function AddMemberModal(props: AddMemberModalProps) {
 
   useEffect(() => {
     if (data) {
-      if (!filter.cursor || filter.cursor == null) {
+      if (!filter.cursor || filter.cursor === null) {
         setUsers([...data.items]);
-      } else setUsers((prev) => [...prev, ...data.items]);
+      } else {
+        setUsers((prev) => [...prev, ...data.items]);
+      }
     }
   }, [data]);
 
   useEffect(() => {
-    if (department) {
+    if (role && isOpen) {
       setFilter((prev) => ({
         ...prev,
-        departmentId: department.id,
+        roleId: role.id,
       }));
     }
-  }, [department]);
+  }, [role, isOpen]);
 
   return (
     <Modal
@@ -117,12 +120,11 @@ export default function AddMemberModal(props: AddMemberModalProps) {
       scrollBehavior="inside"
       isDismissable={false}
       isKeyboardDismissDisabled
-      ref={containerRef}
     >
       <ModalContent>
         <>
           <ModalHeader className="flex flex-col gap-1">
-            {msg('addMember')} {department ? `- ${department.name}` : ''}
+            {msg('addMember')} {role ? `- ${role.name}` : ''}
           </ModalHeader>
           <ModalBody>
             <div className="flex flex-col gap-4">
@@ -148,7 +150,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
                   list: 'mt-2 p-2 border border-default rounded-md',
                 }}
                 items={users || []}
-                label="Assigned to"
+                label={t('assignMembers')}
                 selectionMode="multiple"
                 variant="flat"
                 selectedKeys={selectedKeys}
@@ -185,7 +187,9 @@ export default function AddMemberModal(props: AddMemberModalProps) {
                         color: 'primary',
                       }}
                       description={`${item.userName}`}
-                      name={<span className="font-semibold">{item.fullName || 'Unknow User'}</span>}
+                      name={
+                        <span className="font-semibold">{item.fullName || t('roleMembers')}</span>
+                      }
                     />
                   </ListboxItem>
                 )}
@@ -198,7 +202,7 @@ export default function AddMemberModal(props: AddMemberModalProps) {
             </Button>
             <Button
               color="primary"
-              isDisabled={!department || selectedCount === 0}
+              isDisabled={!role || selectedCount === 0}
               isLoading={isPending}
               onPress={handleSubmit}
             >

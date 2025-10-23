@@ -16,7 +16,7 @@ interface AuthContextType {
   login: (body: LoginDto) => Promise<ApiResponse<TokenDto>>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
-  navigate: (url: string) => void;
+  navigate: (url: string, target?: '_self' | '_blank') => void;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -129,7 +129,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     resetAuthContext();
   };
 
-  const navigate = (url: string) => {
+  const navigate = (url: string, target: '_self' | '_blank' = '_self') => {
+    if (target === '_blank') {
+      window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
     setNavigating(true);
     router.push(url);
   };

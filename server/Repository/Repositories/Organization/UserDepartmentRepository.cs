@@ -35,8 +35,8 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
             departmentQuery.Select(
                     $"{nameof(Department.Id)}"
                 )
-                .Where($"{_tableName}.{nameof(Department.IsDeleted)}", false)
-                .WhereRaw($"CONCAT('.',{_tableName}.{nameof(Department.TreePath)},'.') LIKE CONCAT('%.',?,'.%')",
+                .Where($"{_departmemtTable}.{nameof(Department.IsDeleted)}", false)
+                .WhereRaw($"CONCAT('.',{_departmemtTable}.{nameof(Department.TreePath)},'.') LIKE CONCAT('%.',?,'.%')",
                     filter.DepartmentId);
             var compiledDepartmentQuery = _compiler.Compile(departmentQuery);
             var result = await connection.QueryAsync<int>(compiledDepartmentQuery.Sql,
@@ -53,7 +53,9 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
                 $"{_userTable}.{nameof(User.Avatar)}"
             ])
             .Join(_userTable, $"{_tableName}.{nameof(UserDepartment.UserId)}", $"{_userTable}.{nameof(User.Id)}")
-            .WhereIn($"{_tableName}.{nameof(UserDepartment.DepartmentId)}", departmentIds);
+            .WhereIn($"{_tableName}.{nameof(UserDepartment.DepartmentId)}", departmentIds)
+            .Where($"{_tableName}.{nameof(UserDepartment.IsDeleted)}", false)
+            .Where($"{_userTable}.{nameof(User.IsDeleted)}", false);
         
         if (!string.IsNullOrWhiteSpace(filter.SearchTerm))
 
@@ -185,4 +187,37 @@ public class UserDepartmentRepository : GenericRepository<UserDepartment, int>, 
             return false;
         }
     }
+    
+    public async Task<bool> RemoveMemberAsync(List<int> ids, string updatedBy)
+    {
+        using var connection = _dbFactory.Connection;
+        using var transaction = connection.BeginTransaction();
+        try
+        {
+            var query = new Query(_tableName)
+                .WhereIn(nameof(UserDepartment.Id), ids)
+                .AsUpdate(new
+                {
+                    IsDeleted = true,
+                    UpdatedAt = DateTime.Now,
+                    UpdatedBy = updatedBy
+                });
+
+            var compiledQuery = _compiler.Compile(query);
+
+            // Execute the query
+            await connection.ExecuteAsync(compiledQuery.Sql, compiledQuery.NamedBindings, transaction);
+
+            transaction.Commit();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            // Use a proper logging framework
+            Console.WriteLine($"Exception in AddMemberAsync: {ex}");
+            transaction.Rollback();
+            return false;
+        }
+    }
+
 }

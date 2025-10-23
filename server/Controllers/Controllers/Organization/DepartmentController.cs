@@ -128,4 +128,15 @@ public class DepartmentController : ControllerBase
 
         return Ok(ApiResponse<object>.Succeed(success,_sysMsg.Get(EMessage.SuccessMsg)));
     }
+    
+    [HttpDelete("remove-member")]
+    [Policy(ESysModule.Department, EPermission.Edit)]
+    public async Task<IActionResult> RemoveMember([FromBody] List<int> ids)
+    {
+        var success = await _userDepartmentService.RemoveDepartmentMemberAsync(ids);
+        if (!success)
+            return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+
+        return Ok(ApiResponse<object>.Succeed(success,_sysMsg.Get(EMessage.SuccessMsg)));
+    }
 }

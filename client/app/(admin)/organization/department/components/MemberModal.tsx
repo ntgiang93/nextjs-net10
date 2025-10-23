@@ -29,9 +29,10 @@ import {
   User,
 } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
-import { AddTeamIcon, Delete01Icon, UserAccountIcon, ViewIcon, ViewOffIcon } from 'hugeicons-react';
+import clsx from 'clsx';
+import { AddTeamIcon, Delete02Icon, UserAccountIcon, ViewIcon, ViewOffIcon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import AddMemberModal from './AddMemberModal';
 
 interface MemberModalProps {
@@ -44,9 +45,11 @@ interface MemberModalProps {
 export default function MemberModal(props: MemberModalProps) {
   const { department, isOpen, onOpenChange, onRefresh } = props;
   const t = useTranslations('organization');
+  const ut = useTranslations('user');
   const msg = useTranslations('msg');
   const departmentId = department?.id || 0;
-  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [selectedRow, setSelectedRow] = useState<number[]>([]);
+  const [selectedDepartment, setSelectedDepartment] = useState<number[]>([]);
   const [filter, setFilter] = useState<DepartmentMemberFilter>({
     ...defaultDepartmentMemberFilter,
   });
@@ -58,7 +61,7 @@ export default function MemberModal(props: MemberModalProps) {
   } = useDisclosure();
 
   const { data, isFetching, refetch } = DepartmentHook.useGetMembers(filter);
-  const { mutateAsync: addMember, isPending } = DepartmentHook.useAddMember();
+  const { mutateAsync: remove, isPending } = DepartmentHook.useRemoveMember();
   const canEdit = hasPermission(ESysModule.Department, EPermission.Edit);
 
   const { navigate } = useAuth();
@@ -96,7 +99,7 @@ export default function MemberModal(props: MemberModalProps) {
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
-              <Tooltip content={t('userDetails')}>
+              <Tooltip content={ut('userDetails')}>
                 <Button
                   isIconOnly
                   aria-label="user-details-button"
@@ -105,14 +108,14 @@ export default function MemberModal(props: MemberModalProps) {
                   radius="full"
                   size="sm"
                   onPress={() => {
-                    navigate(`/sys/user/${row.original.id}`);
+                    navigate(`/sys/user/${row.original.userId}`, '_blank');
                   }}
                 >
                   <UserAccountIcon size={16} />
                 </Button>
               </Tooltip>
               {canEdit && (
-                <Tooltip color="danger" content={msg('remove')}>
+                <Tooltip color="danger" content={msg('delete')}>
                   <Button
                     isIconOnly
                     aria-label="remove-button"
@@ -121,11 +124,11 @@ export default function MemberModal(props: MemberModalProps) {
                     radius="full"
                     size="sm"
                     onPress={() => {
-                      setSelectedUserIds([row.original.id]);
+                      setSelectedRow([row.original.id]);
                       onOpenDel();
                     }}
                   >
-                    <Delete01Icon size={16} />
+                    <Delete02Icon size={16} />
                   </Button>
                 </Tooltip>
               )}
@@ -145,14 +148,38 @@ export default function MemberModal(props: MemberModalProps) {
     else return Math.ceil(data.totalCount / filter.pageSize) || 1;
   }, [data?.totalCount, filter.pageSize]);
 
-  const handleDelete = async () => {
-    // const success = await del(selected?.id || 0);
-    // if (success) {
-    //   refetch();
-    //   OnOpenDelChange();
-    //   onResetSelected();
-    // }
+  const selectedUserName = useMemo(() => {
+    if (!data) return [];
+    return data.items
+      .filter((item) => selectedRow.includes(item.id))
+      .map((item) => item.fullName || item.userName);
+  }, [selectedRow]);
+
+  const findDept = (id: number, depts: DepartmentDto[]): DepartmentDto | undefined => {
+    for (const dept of depts) {
+      if (dept.id === id) return dept;
+      const found = findDept(id, dept.children || []);
+      if (found) return found;
+    }
   };
+
+  const currentDepartment = useMemo(() => {
+    if (!department?.children || department.children.length === 0) {
+      return department;
+    } else {
+      return findDept(selectedDepartment[0], department.children) || department;
+    }
+  }, [selectedDepartment, department]);
+
+  const handleDelete = useCallback(async () => {
+    if (selectedRow.length === 0) return;
+    const success = await remove(selectedRow);
+    if (success) {
+      refetch();
+      OnOpenDelChange();
+      setSelectedRow([]);
+    }
+  }, [selectedRow, department]);
 
   const mapDepartmentToTreeItem = (dept: DepartmentDto): TreeItemType => {
     return {
@@ -167,6 +194,11 @@ export default function MemberModal(props: MemberModalProps) {
     else return [mapDepartmentToTreeItem(department)];
   }, [department]);
 
+  const hasChildren = useMemo(() => {
+    if (!department) return false;
+    return department.children && department.children.length > 0;
+  }, [department]);
+
   useEffect(() => {
     if (isOpen && department) {
       setFilter((prev) => ({ ...prev, departmentId: department.id, page: 1 }));
@@ -175,50 +207,48 @@ export default function MemberModal(props: MemberModalProps) {
 
   useEffect(() => {
     if (!isOpen) {
-      setSelectedUserIds([]);
+      setSelectedRow([]);
+      setSelectedDepartment([]);
     }
   }, [isOpen]);
-
-  const handleSubmit = async () => {
-    if (!departmentId) return;
-    // const success = await assignMembers(
-    //   selectedUserIds.map((userId) => ({ departmentId, userId })),
-    // );
-    // if (success) {
-    //   onOpenChange();
-    //   onRefresh();
-    // }
-  };
 
   return (
     <Modal
       isOpen={isOpen}
-      size={departmentTree.length > 0 ? '5xl' : '3xl'}
+      size={hasChildren ? '5xl' : '3xl'}
       onOpenChange={onOpenChange}
       scrollBehavior="inside"
-      onClose={() => setSelectedUserIds([])}
       isDismissable={false}
       isKeyboardDismissDisabled
     >
       <ModalContent>
         <>
-          <ModalHeader className="flex flex-col gap-1">
-            {msg('memberManagement') + ' ' + department?.name}
-          </ModalHeader>
+          <ModalHeader>{msg('memberManagement') + ' ' + department?.name}</ModalHeader>
           <ModalBody>
-            <div className="w-full h-full flex gap-2">
-              <Card shadow="sm" className="w-fit">
-                <CardHeader className="font-semibold">{t('organizationChart')}</CardHeader>
-                <CardBody>
-                  <ListBoxTree
-                    items={departmentTree}
-                    selectedValues={[]}
-                    onSelectedChange={(value) => console.log(value)}
-                  />{' '}
-                </CardBody>
-              </Card>
-              <Card shadow="sm" className="w-full">
-                <CardHeader className="font-semibold">{t('organizationChart')}</CardHeader>
+            <div className={clsx('w-full h-full gap-2', hasChildren ? 'grid grid-cols-3' : '')}>
+              {hasChildren && (
+                <Card>
+                  <CardHeader className="font-semibold">{t('organizationChart')}</CardHeader>
+                  <CardBody>
+                    <ListBoxTree
+                      anyLevel={true}
+                      items={departmentTree}
+                      selectedValues={selectedDepartment}
+                      onSelectedChange={(value) => {
+                        const selected = value as number[];
+                        setSelectedDepartment(selected);
+                        setFilter((prev) => ({
+                          ...prev,
+                          departmentId: selected.length > 0 ? selected[0] : department?.id || 0,
+                          page: 1,
+                        }));
+                      }}
+                    />
+                  </CardBody>
+                </Card>
+              )}
+              <Card shadow="sm" className="w-full col-span-2">
+                <CardHeader className="font-semibold">{currentDepartment?.name}</CardHeader>
                 <CardBody>
                   <AsyncDataTable
                     columns={columns}
@@ -239,9 +269,9 @@ export default function MemberModal(props: MemberModalProps) {
                       },
                     }}
                     selection={{
-                      selectedKeys: selectedUserIds,
+                      selectedKeys: selectedRow,
                       onChangeSelection(value) {
-                        setSelectedUserIds(value);
+                        setSelectedRow(value);
                       },
                     }}
                     leftContent={
@@ -260,23 +290,41 @@ export default function MemberModal(props: MemberModalProps) {
                     }
                     rightContent={
                       <>
-                        <Tooltip content={msg('addMember')}>
-                          <Button
-                            isIconOnly
-                            color="primary"
-                            size="sm"
-                            isDisabled={!departmentId}
-                            onPress={() => {
-                              if (!departmentId) return;
-                              onOpenAddMember();
-                            }}
-                          >
-                            <AddTeamIcon size={18} />
-                          </Button>
-                        </Tooltip>
+                        {canEdit && (
+                          <Tooltip content={msg('addMember')}>
+                            <Button
+                              isIconOnly
+                              color="primary"
+                              size="sm"
+                              isDisabled={!departmentId}
+                              onPress={() => {
+                                if (!departmentId) return;
+                                onOpenAddMember();
+                              }}
+                            >
+                              <AddTeamIcon size={16} />
+                            </Button>
+                          </Tooltip>
+                        )}
+                        {canEdit && (
+                          <Tooltip color="danger" content={msg('delete')}>
+                            <Button
+                              isIconOnly
+                              aria-label="remove-button"
+                              color="danger"
+                              size="sm"
+                              onPress={() => {
+                                onOpenDel();
+                              }}
+                              isDisabled={selectedRow.length === 0}
+                            >
+                              <Delete02Icon size={16} />
+                            </Button>
+                          </Tooltip>
+                        )}
                         <Tooltip
                           content={
-                            filter.isShowChildrenMembers
+                            filter.isShowSubMembers
                               ? t('hideSubDepartmentsMembers')
                               : t('showSubDepartmentsMembers')
                           }
@@ -288,10 +336,11 @@ export default function MemberModal(props: MemberModalProps) {
                             onPress={() => {
                               setFilter((prev) => ({
                                 ...prev,
+                                isShowSubMembers: !prev.isShowSubMembers,
                               }));
                             }}
                           >
-                            {filter.isShowChildrenMembers ? <ViewOffIcon /> : <ViewIcon />}
+                            {filter.isShowSubMembers ? <ViewOffIcon /> : <ViewIcon />}
                           </Button>
                         </Tooltip>
                       </>
@@ -305,14 +354,6 @@ export default function MemberModal(props: MemberModalProps) {
             <Button color="danger" variant="light" onPress={onOpenChange}>
               {msg('close')}
             </Button>
-            <Button
-              color="primary"
-              isLoading={isPending}
-              isDisabled={!departmentId}
-              onPress={handleSubmit}
-            >
-              {msg('submit')}
-            </Button>
           </ModalFooter>
           <ConfirmModal
             isOpen={IsOpenDel}
@@ -321,12 +362,13 @@ export default function MemberModal(props: MemberModalProps) {
             confirmColor="danger"
             onOpenChange={OnOpenDelChange}
             onConfirm={handleDelete}
-            objectName={selectedUserIds}
+            objectName={selectedUserName}
             loading={isFetching}
           />
           {isOpenAddMember && (
             <AddMemberModal
-              department={department}
+              refetch={refetch}
+              department={currentDepartment}
               isOpen={isOpenAddMember}
               onOpenChange={onOpenAddMemberChange}
             />

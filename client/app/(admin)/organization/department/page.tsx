@@ -43,7 +43,6 @@ export default function Departments() {
         accessorFn: (row) => row.name,
         id: 'name',
         header: () => msg('name'),
-        footer: (props) => props.column.id,
         minSize: 300,
         meta: {
           pinned: 'left',
@@ -53,13 +52,11 @@ export default function Departments() {
         id: 'code',
         accessorKey: 'code',
         header: () => msg('code'),
-        footer: (props) => props.column.id,
         size: 80,
       },
       {
         accessorKey: 'description',
         header: () => msg('description'),
-        footer: (props) => props.column.id,
         minSize: 300,
         meta: {
           align: 'center',
@@ -69,14 +66,12 @@ export default function Departments() {
         id: 'departmentTypeName',
         accessorKey: 'departmentTypeName',
         header: () => t('departmentType'),
-        footer: (props) => props.column.id,
         minSize: 220,
       },
       {
         id: 'departmentTypeLevel',
         accessorKey: 'departmentTypeLevel',
         header: () => msg('level'),
-        footer: (props) => props.column.id,
         size: 80,
         meta: {
           align: 'center',
@@ -86,13 +81,11 @@ export default function Departments() {
         id: 'address',
         accessorKey: 'address',
         header: () => msg('address'),
-        footer: (props) => props.column.id,
         minSize: 220,
       },
       {
         accessorKey: 'actions',
         header: () => msg('actions'),
-        footer: (props) => props.column.id,
         size: 100,
         cell: ({ row }) => {
           return (
@@ -136,7 +129,7 @@ export default function Departments() {
                 </Tooltip>
               )}
               {canEdit && (
-                <Tooltip content={t('assignMembers')}>
+                <Tooltip content={msg('memberManagement')}>
                   <Button
                     isIconOnly
                     aria-label="assign-member-button"

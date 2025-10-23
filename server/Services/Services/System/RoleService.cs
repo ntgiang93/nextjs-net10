@@ -2,7 +2,9 @@ using Common.Exceptions;
 using Common.Security;
 using Mapster;
 using Model.Constants;
+using Model.DTOs.Base;
 using Model.DTOs.System;
+using Model.DTOs.System.User;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.System;
@@ -16,18 +18,18 @@ public class RoleService : GenericService<Role, int>, IRoleService
 {
     private readonly IPermissionService _permissionService;
     private readonly IRoleRepository _roleRepository;
-    private readonly IUserRoleService _userRoleService;
+    private readonly IUserRoleRepository _userRoleRepository;
 
     public RoleService(
         IRoleRepository repository,
         IServiceProvider serviceProvider,
         IPermissionService permissionService,
-        IUserRoleService userRoleService)
+        IUserRoleRepository userRoleRepository)
         : base(repository, serviceProvider)
     {
         _roleRepository = repository;
         _permissionService = permissionService;
-        _userRoleService = userRoleService;
+        _userRoleRepository = userRoleRepository;
     }
 
     public async Task<RoleDto?> CreateRoleAsync(RoleDto model)
@@ -120,24 +122,6 @@ public class RoleService : GenericService<Role, int>, IRoleService
         return result;
     }
 
-    public async Task<bool> AssignRoleMembers(int roleId, List<UserRole> userRoles)
-    {
-        var role = await GetByIdAsync<Role>(roleId);
-        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
-        var user = UserContext.Current;
-        if (!user.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
-            throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
-
-        // Clear existing permissions
-        var existingUsers = await _userRoleService.GetAllByRoleAsync(roleId);
-        var delList = existingUsers.Where(ur => !userRoles.Any(u => u.UserId == ur.UserId)).ToList();
-        if (delList.Any()) await _userRoleService.DeleteUserRoleAsync(delList);
-        var newList = userRoles.Where(ur => !existingUsers.Any(eu => eu.UserId == ur.UserId)).ToList();
-        var result = await _userRoleService.AddUserRoleAsync(newList);
-        CacheManager.RemoveCacheByPrefix(_cachePrefix);
-        return result;
-    }
-
     public async Task<List<RoleMembersDto>> GetRoleMembers(int roleId)
     {
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetRoleMembers", roleId);
@@ -149,15 +133,40 @@ public class RoleService : GenericService<Role, int>, IRoleService
         });
     }
     
-    public async Task<bool> RemoveRoleMember(int roleId, string userId)
+    public async Task<bool> AddMemberToRole(AddMemberRoleDto dto)
     {
+        var role = await GetByIdAsync<Role>(dto.RoleId);
+        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
+        
         var user = UserContext.Current;
-        var userRoles = user.RoleCodes.Split(';', StringSplitOptions.RemoveEmptyEntries);
-        if (!userRoles.Contains(DefaultRoles.SuperAdmin))
+        if (!user.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
             throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
 
-        var result =  await _userRoleService.DeleteAsync(roleId, userId);
-        if(result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
+        var result = await _userRoleRepository.AddMemberAsync(dto, user.UserName);
+        if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return result;
+    }
+
+    public async Task<bool> RemoveRoleMembers(int roleId, List<string> userIds)
+    {
+        var role = await GetByIdAsync<Role>(roleId);
+        if (role == null) throw new NotFoundException(SysMsg.Get(EMessage.RoleNotFound), "ROLE_NOT_FOUND");
+        
+        var user = UserContext.Current;
+        if (!user.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
+            throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
+
+        var result = await _userRoleRepository.RemoveMemberAsync(roleId, userIds, user.UserName);
+        if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
+        return result;
+    }
+
+    public async Task<CursorPaginatedResultDto<UserSelectDto, DateTime>> GetUserNotInRole(UserRoleCursorFilterDto filter)
+    {
+        var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetUserNotInRole", filter);
+        return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
+        {
+            return await _userRoleRepository.GetUserNotInRole(filter);
+        });
     }
 }

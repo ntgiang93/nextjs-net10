@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.System;
+using Model.DTOs.System.User;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Service.Interfaces;
@@ -55,6 +56,15 @@ public class RoleController : ControllerBase
         return Ok(ApiResponse<List<RoleMembersDto>>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
+    [HttpGet("users-not-in-role")]
+    [Policy(ESysModule.Roles, EPermission.View)]
+    public async Task<IActionResult> GetUserNotInRole([FromQuery] UserRoleCursorFilterDto filter)
+    {
+        var users = await _roleService.GetUserNotInRole(filter);
+        return Ok(ApiResponse<CursorPaginatedResultDto<UserSelectDto, DateTime>>.Succeed(users,
+            _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+
     [HttpGet("{roleId}/permissions")]
     [Policy(ESysModule.Roles, EPermission.View)]
     public async Task<IActionResult> GetRolePermissions(int roleId)
@@ -85,15 +95,18 @@ public class RoleController : ControllerBase
         return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
-    [HttpPost("{roleId}/assign-members")]
-    [Policy(ESysModule.Roles, EPermission.View)]
-    public async Task<IActionResult> AssignRoleMembers(int roleId, [FromBody] List<UserRole> userRoles)
+    [HttpPost("add-members")]
+    [Policy(ESysModule.Roles, EPermission.Edit)]
+    public async Task<IActionResult> AddRoleMembers([FromBody] AddMemberRoleDto dto)
     {
-        var success = await _roleService.AssignRoleMembers(roleId, userRoles);
+        if (dto.RoleId <= 0) 
+            return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error400Msg)));
+            
+        var success = await _roleService.AddMemberToRole(dto);
         if (!success)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<bool>.Succeed(success, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpPut]
@@ -117,14 +130,18 @@ public class RoleController : ControllerBase
 
         return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
     }
-    [HttpDelete("{id}/remove-member/{userId}")]
-    [Policy(ESysModule.Roles, EPermission.Delete)]
-    public async Task<IActionResult> DeleteRole(int id, string userId)
+    
+    [HttpDelete("{roleId}/remove-members")]
+    [Policy(ESysModule.Roles, EPermission.Edit)]
+    public async Task<IActionResult> RemoveRoleMembers(int roleId, [FromBody] List<string> userIds)
     {
-        var success = await _roleService.RemoveRoleMember(id, userId);
+        if (roleId <= 0 || userIds == null || !userIds.Any())
+            return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error400Msg)));
+            
+        var success = await _roleService.RemoveRoleMembers(roleId, userIds);
         if (!success)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<bool>.Succeed(success, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 }

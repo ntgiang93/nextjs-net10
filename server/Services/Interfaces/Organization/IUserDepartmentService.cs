@@ -23,4 +23,8 @@ public interface IUserDepartmentService : IGenericService<UserDepartment, int>
     ///     Adds members to a department
     /// </summary>
     Task<bool> AddMemberToDepartmentAsync(AddMemberDepartmentDto dto);
+    /// <summary>
+    ///   Removes members from a department
+    /// </summary>
+    Task<bool> RemoveDepartmentMemberAsync(List<int> ids);
 }

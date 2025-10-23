@@ -1,5 +1,5 @@
+import JobTitleSelect from '@/components/shared/sys/select/JobTitleSelect';
 import { UserProfileHook } from '@/hooks/userProfile';
-import { UserDto } from '@/types/sys/User';
 import { defaultUserProfileDto, UserProfileDto } from '@/types/sys/UserProfile';
 import {
   Button,
@@ -12,25 +12,26 @@ import {
   Select,
   SelectItem,
 } from '@heroui/react';
-import { parseDateTime } from '@internationalized/date';
+import { getLocalTimeZone, parseDateTime, today } from '@internationalized/date';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
 interface IUserProfileFormProps {
-  user: UserDto;
+  id: string;
 }
 
 export default function UserProfileForm(props: IUserProfileFormProps) {
-  const { user } = props;
+  const { id } = props;
   const t = useTranslations('user');
   const msg = useTranslations('msg');
+  const org = useTranslations('organization');
   const [form, setForm] = useState<UserProfileDto>({ ...defaultUserProfileDto });
-  const { data, isFetching, refetch } = UserProfileHook.useGetUserProfile(user.id);
+  const { data, isFetching, refetch } = UserProfileHook.useGetUserProfile(id);
   const { mutateAsync: save, isPending } = UserProfileHook.useSave();
 
   const onSubmit = async (e: any) => {
     e.preventDefault();
-    const response = await save({ ...form, userId: user.id });
+    const response = await save({ ...form, id });
     if (response && response.success) {
       refetch();
     }
@@ -56,34 +57,54 @@ export default function UserProfileForm(props: IUserProfileFormProps) {
             <Input
               label={msg('address')}
               name="address"
+              variant="bordered"
               placeholder={msg('address')}
               value={form.address}
-              onValueChange={(value) => setForm({ ...form, address: value })}
+              onValueChange={(value) => setForm((prev) => ({ ...prev, address: value }))}
             />
             <div className="flex gap-4">
               <DatePicker
                 showMonthAndYearPickers
                 aria-label="Date of Birth"
+                variant="bordered"
                 className=""
                 label={t('dateOfBirth')}
                 value={form.dateOfBirth ? parseDateTime(form.dateOfBirth) : null}
-                onChange={(date) => setForm({ ...form, dateOfBirth: date?.toString() })}
+                onChange={(date) => setForm((prev) => ({ ...prev, dateOfBirth: date?.toString() }))}
                 granularity="day"
+                maxValue={today(getLocalTimeZone())}
               />
               <Select
                 label={t('gender')}
                 name="gender"
                 placeholder={t('gender')}
+                variant="bordered"
                 value={form.gender}
                 onChange={(e) => {
-                  setForm({ ...form, gender: e.target.value });
+                  console.log(e);
+                  setForm((prev) => ({ ...prev, gender: e.target.value }));
                 }}
               >
                 <SelectItem key="01">Nam</SelectItem>
                 <SelectItem key="02">Nữ</SelectItem>
               </Select>
             </div>
-            <div className="flex gap-4"></div>
+            <div className="flex gap-4">
+              <JobTitleSelect
+                value={form.jobTitleId && form.jobTitleId > 0 ? form.jobTitleId : undefined}
+                onChange={(value) => setForm((prev) => ({ ...prev, jobTitleId: value ?? 0 }))}
+                variant="bordered"
+                labelPlacement="outside"
+              />
+              <Input
+                label={org('department')}
+                name="department"
+                variant="bordered"
+                placeholder={org('department')}
+                value={form.departmentName}
+                readOnly
+              />
+            </div>
           </div>
         </Form>
       </CardBody>

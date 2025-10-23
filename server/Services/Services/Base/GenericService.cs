@@ -117,8 +117,6 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
     {
         entity.CreatedBy = UserContext.Current?.UserName ?? username;
         entity.CreatedAt = DateTime.UtcNow;
-        if (typeof(TKey) == typeof(string) && string.IsNullOrEmpty(entity.Id?.ToString()))
-            entity.Id = (TKey)(object)Ulid.NewUlid().ToString();
         var id = await _repository.InsertAsync(entity);
         CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return id;

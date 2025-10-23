@@ -1,15 +1,18 @@
 export type UserProfileDto = {
-  id: number;
-  userId: string;
+  id: string;
   address?: string;
   dateOfBirth?: string;
   gender?: string;
+  jobTitleId?: number;
+  departmentId?: number;
+  departmentName?: string;
 };
 
 export const defaultUserProfileDto: UserProfileDto = {
-  id: 0,
-  userId: '0',
+  id: '',
   address: '',
   dateOfBirth: '',
   gender: '',
+  jobTitleId: 0,
+  departmentId: 0,
 };

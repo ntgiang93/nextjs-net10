@@ -63,7 +63,7 @@ const DataTable = (props: DataTableProps) => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(
     getRowSelection(selection?.selectedKeys || []),
   );
-  const [tableHeight, setTableHeight] = useState(200);
+  const [tableHeight, setTableHeight] = useState(240);
   const cardRef = useRef<HTMLDivElement>(null);
   const msg = useTranslations('msg');
 
@@ -146,7 +146,7 @@ const DataTable = (props: DataTableProps) => {
     const cardHeight = cardRef.current.clientHeight;
     // Calculate the remaining space for the table
     const newTableHeight = cardHeight - 152;
-    setTableHeight(Math.max(newTableHeight, 350));
+    setTableHeight(Math.max(newTableHeight, 240));
   }, []);
 
   const table = useReactTable({

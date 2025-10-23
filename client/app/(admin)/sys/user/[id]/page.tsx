@@ -49,7 +49,7 @@ export default function Page({ params }: IUserDetailPageProps) {
           <CardBody>
             <Tabs aria-label="Options">
               <Tab key="generalInfo" title={t('generalInfo')} className="h-full">
-                <UserProfileForm user={user || { ...defaultUserDto }} />
+                <UserProfileForm id={id} />
               </Tab>
             </Tabs>
           </CardBody>

@@ -1,3 +1,6 @@
+using Model.DTOs.Base;
+using Model.DTOs.System.User;
+using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.Base;
 
@@ -27,4 +30,19 @@ public interface IUserRoleRepository : IGenericRepository<User, string>
 
     Task<UserRole> GetSingleAsync(int roleId, string userId);
     Task<bool> DeleteAsync(int roleId, string userId);
+    
+    /// <summary>
+    ///     Adds members to a role using SqlKata
+    /// </summary>
+    Task<bool> AddMemberAsync(AddMemberRoleDto dto, string createdBy);
+    
+    /// <summary>
+    ///     Removes members from a role using SqlKata
+    /// </summary>
+    Task<bool> RemoveMemberAsync(int roleId, List<string> userIds, string updatedBy);
+    
+    /// <summary>
+    ///     Gets users not in the specified role with cursor pagination
+    /// </summary>
+    Task<CursorPaginatedResultDto<UserSelectDto, DateTime>> GetUserNotInRole(UserRoleCursorFilterDto filter);
 }

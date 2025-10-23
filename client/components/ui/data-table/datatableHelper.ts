@@ -1,25 +1,29 @@
 import { Column, ColumnDef } from '@tanstack/react-table';
 import { CSSProperties } from 'react';
 
-export const getSelectedItemsFromRowSelection = (selectedRows: Record<string, boolean>): any[] => {
-  const selectedItems: any[] = [];
+export const getSelectedItemsFromRowSelection = (
+  selectedRows: Record<string, boolean>,
+): Array<string | number> => {
+  const selectedItems: Array<string | number> = [];
 
-  const getItemByIndices = (indices: string[]): any | undefined => {
-    if (indices.length === 0) return undefined;
+  const resolveKey = (indices: string[]): string | number | undefined => {
+    if (!indices.length) return undefined;
 
-    const rowKey = indices[0];
-    if (indices.length === 1) return rowKey;
-    return getItemByIndices(indices.slice(1));
+    const raw = indices[indices.length - 1]?.trim();
+    if (!raw) return undefined;
+
+    const numeric = Number(raw);
+    return Number.isNaN(numeric) ? raw : numeric;
   };
 
-  Object.keys(selectedRows).forEach((path) => {
-    if (selectedRows[path]) {
-      const indices = path.split('.').map((i) => i.trim());
-      const selectedItem = getItemByIndices(indices);
+  Object.entries(selectedRows).forEach(([path, isSelected]) => {
+    if (!isSelected) return;
 
-      if (selectedItem) {
-        selectedItems.push(selectedItem);
-      }
+    const indices = path.split('.').map((i) => i.trim());
+    const selectedItem = resolveKey(indices);
+
+    if (selectedItem !== undefined) {
+      selectedItems.push(selectedItem);
     }
   });
 
@@ -58,8 +62,8 @@ export const getCommonPinningStyles = (column: Column<any>): CSSProperties => {
     boxShadow: isLastLeftPinnedColumn
       ? '-4px 0 4px -4px rgb(0 0 0 / 0.1) inset'
       : isFirstRightPinnedColumn
-      ? '4px 0 4px -4px rgb(0 0 0 / 0.1) inset'
-      : undefined,
+        ? '4px 0 4px -4px rgb(0 0 0 / 0.1) inset'
+        : undefined,
     left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
     right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
     position: isPinned ? 'sticky' : 'relative',

@@ -5,10 +5,14 @@ using Service.Interfaces.Base;
 
 namespace Service.Interfaces.System;
 
-public interface IUserProfileService : IGenericService<UserProfile, long>
+public interface IUserProfileService : IGenericService<UserProfile, string>
 {
     /// <summary>
     ///     Gets user profile
     /// </summary>
     Task<UserProfileDto?> GetUserProfileAsync(string userId);
+    /// <summary>
+    ///     Creates or updates user profile
+    /// </summary>
+    Task<bool> SaveUserProfile(SaveUserProfileDto dto);
 }

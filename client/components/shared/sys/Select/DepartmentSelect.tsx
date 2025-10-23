@@ -15,6 +15,7 @@ interface DepartmentSelectProps {
   isRequired?: boolean;
   labelPlacement: 'outside' | 'inside' | 'outside-left';
   anyLevel?: boolean;
+  isDisabled?: boolean;
 }
 
 export default function DepartmentSelect({
@@ -25,6 +26,7 @@ export default function DepartmentSelect({
   isRequired,
   labelPlacement,
   anyLevel = true,
+  isDisabled = false,
 }: DepartmentSelectProps) {
   const { data } = DepartmentHook.useGetAll();
   const msg = useTranslations('msg');
@@ -54,6 +56,7 @@ export default function DepartmentSelect({
       isRequired={isRequired}
       labelPlacement={labelPlacement}
       anyLevel={anyLevel}
+      isDisabled={isDisabled}
       onSelectedChange={(selected) => {
         onChange(selected as number[]);
       }}

@@ -47,4 +47,12 @@ public class UserDepartmentService : GenericService<UserDepartment, int>, IUserD
         if(result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return result;
     }
+    
+    public async Task<bool> RemoveDepartmentMemberAsync(List<int> ids)
+    {
+        var currentUser = UserContext.Current;
+        var result =  await _userDepartmentRepository.RemoveMemberAsync(ids, currentUser.UserName);
+        if(result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
+        return result;
+    }
 }

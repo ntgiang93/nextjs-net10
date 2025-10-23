@@ -209,6 +209,11 @@ export const apiService = {
       isPublic,
     ),
 
-  delete: <T>(endpoint: string, options?: RequestInit, notiOff?: boolean, isPublic?: boolean) =>
-    fetchApi<T>(endpoint, { ...options, method: 'DELETE' }, notiOff, isPublic),
+  delete: <T>(
+    endpoint: string,
+    data?: any,
+    options?: RequestInit,
+    notiOff?: boolean,
+    isPublic?: boolean,
+  ) => fetchApi<T>(endpoint, { ...options, method: 'DELETE', body: data }, notiOff, isPublic),
 };

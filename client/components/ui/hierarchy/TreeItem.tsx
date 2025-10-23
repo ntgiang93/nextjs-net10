@@ -1,9 +1,9 @@
+import { SelectedIcon } from '@/components/ui//icon/SelectedIcon';
 import { Button } from '@heroui/react';
+import clsx from 'clsx';
 import { motion } from 'framer-motion';
 import { ArrowRight01Icon } from 'hugeicons-react';
-import React, { useMemo, useState, useCallback } from 'react';
-import clsx from 'clsx';
-import { SelectedIcon } from '@/components/ui//icon/SelectedIcon';
+import React, { useCallback, useMemo, useState } from 'react';
 
 export interface TreeItemType {
   value: string | number;
@@ -22,18 +22,10 @@ interface ITreeItemProps {
 }
 
 export const TreeItem: React.FC<ITreeItemProps> = (props) => {
-  const {
-    item,
-    heightUpdate,
-    itemRenderer,
-    selectedItem,
-    onSelected,
-    anyLevel,
-    multiple,
-  } = props;
+  const { item, heightUpdate, itemRenderer, selectedItem, onSelected, anyLevel, multiple } = props;
   const [isExpanded, setIsExpanded] = useState(false);
   const childrenCount = item.children.length;
-  const [height, setHeight] = useState(36 * childrenCount);
+  const [height, setHeight] = useState(40 * childrenCount);
 
   const handleExpand = useCallback(() => {
     if (heightUpdate) {
@@ -43,14 +35,11 @@ export const TreeItem: React.FC<ITreeItemProps> = (props) => {
         heightUpdate(-height);
       }
     }
-    setHeight(36 * childrenCount);
+    setHeight(40 * childrenCount);
     setIsExpanded(!isExpanded);
   }, [childrenCount, height, heightUpdate, isExpanded]);
 
-  const isSelected = useMemo(
-    () => selectedItem.has(item.value),
-    [selectedItem, item.value],
-  );
+  const isSelected = useMemo(() => selectedItem.has(item.value), [selectedItem, item.value]);
   const canSelect = useMemo(
     () => anyLevel || item.children.length === 0,
     [anyLevel, item.children.length],
@@ -79,9 +68,7 @@ export const TreeItem: React.FC<ITreeItemProps> = (props) => {
   return (
     <li className={'flex flex-col justify-start min-w-full w-fit my-0.5'}>
       <div
-        className={
-          'bg-content1 flex flex-row gap-1 justify-start min-w-full items-center'
-        }
+        className={'bg-content1 flex flex-row gap-1 justify-start min-w-full items-center'}
         key={item.value}
       >
         <motion.div
@@ -107,7 +94,7 @@ export const TreeItem: React.FC<ITreeItemProps> = (props) => {
           className={clsx(
             'hover:cursor-pointer rounded-md w-full px-2 py-1.5 text-nowrap flex flex-row justify-between items-center',
             canSelect ? 'hover:bg-default hover:text-foreground' : '',
-            isSelected ? 'bg-default text-foreground' : '',
+            isSelected ? 'bg-primary text-background' : '',
           )}
         >
           <span>{itemRenderer ? itemRenderer(item) : item.label}</span>
@@ -123,11 +110,7 @@ export const TreeItem: React.FC<ITreeItemProps> = (props) => {
       <motion.ul
         className={'ml-4 relative overflow-hidden border-l pl-1'}
         initial={{ height: 0, opacity: 0 }}
-        animate={
-          isExpanded
-            ? { height: height, opacity: 1 }
-            : { height: 0, opacity: 0 }
-        }
+        animate={isExpanded ? { height: height, opacity: 1 } : { height: 0, opacity: 0 }}
         transition={{ duration: 0.4, ease: [0, 0.71, 0.2, 1.01] }}
       >
         {isExpanded &&

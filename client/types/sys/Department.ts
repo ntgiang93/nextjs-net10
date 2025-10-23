@@ -36,7 +36,8 @@ export const defaultDetailDepartmentDto: DetailDepartmentDto = {
 };
 
 export type DepartmentMemberDto = {
-  id: string;
+  id: number;
+  userId: string;
   userName: string;
   fullName?: string;
   avatar?: string;
@@ -46,16 +47,21 @@ export type DepartmentMemberDto = {
 
 export type DepartmentMemberFilter = PaginationFilter & {
   departmentId: number;
-  isShowChildrenMembers: boolean;
+  isShowSubMembers: boolean;
 };
 
 export const defaultDepartmentMemberFilter: DepartmentMemberFilter = {
   ...defaultPaginationFilter,
   departmentId: 0,
-  isShowChildrenMembers: false,
+  isShowSubMembers: true,
 };
 
 export type AddDepartmentMemberDto = {
+  departmentId: number;
+  userIds: string[];
+};
+
+export type RemoveDepartmentMemberDto = {
   departmentId: number;
   userIds: string[];
 };

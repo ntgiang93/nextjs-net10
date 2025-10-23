@@ -1,5 +1,7 @@
+using Model.DTOs.Base;
 using Model.DTOs.System;
 using Model.DTOs.System.Module;
+using Model.DTOs.System.User;
 using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Service.Interfaces.Base;
@@ -69,10 +71,9 @@ public interface IRoleService : IGenericService<Role, int>
     /// <summary>
     ///     Adds users to a specified role
     /// </summary>
-    /// <param name="roleId">ID of the role</param>
-    /// <param name="userRoles">List of user-role relationships to add</param>
+    /// <param name="dto">DTO containing role ID and list of user IDs to add</param>
     /// <returns>True if successful, false otherwise</returns>
-    Task<bool> AssignRoleMembers(int roleId, List<UserRole> userRoles);
+    Task<bool> AddMemberToRole(AddMemberRoleDto dto);
 
     /// <summary>
     ///     Gets all users assigned to a specific role
@@ -82,11 +83,18 @@ public interface IRoleService : IGenericService<Role, int>
     Task<List<RoleMembersDto>> GetRoleMembers(int roleId);
     
     /// <summary>
-    ///     Removes a user from a specific role
+    ///     Removes multiple users from a specific role
     /// </summary>
     /// <param name="roleId">ID of the role</param>
-    /// <param name="userId">ID of the user to remove from the role</param>
+    /// <param name="userIds">List of user IDs to remove from the role</param>
     /// <returns>True if removal was successful, false otherwise</returns>
-    Task<bool> RemoveRoleMember(int roleId, string userId);
+    Task<bool> RemoveRoleMembers(int roleId, List<string> userIds);
+
+    /// <summary>
+    ///     Gets users not in the specified role with cursor pagination
+    /// </summary>
+    /// <param name="filter">Filter containing roleId, search term, cursor and limit</param>
+    /// <returns>Cursor paginated list of users not in the role</returns>
+    Task<CursorPaginatedResultDto<UserSelectDto, DateTime>> GetUserNotInRole(UserRoleCursorFilterDto filter);
 
 }

@@ -1,4 +1,5 @@
-import { EPermission } from "../base/Permission";
+import { defaultPaginationFilter, PaginationFilter } from '../base/PaginationFilter';
+import { EPermission } from '../base/Permission';
 
 export type RoleDto = {
   id: number;
@@ -30,7 +31,35 @@ export type RolePermissionDto = {
   permission: EPermission;
 };
 
-export type UserRoleDto = {
-  userId: string;
+export type RoleMemberFilter = PaginationFilter & {
   roleId: number;
+};
+
+export const defaultRoleMemberFilter: RoleMemberFilter = {
+  ...defaultPaginationFilter,
+  roleId: 0,
+};
+
+export type AddRoleMemberDto = {
+  roleId: number;
+  userIds: string[];
+};
+
+export type RemoveRoleMemberDto = {
+  roleId: number;
+  userIds: string[];
+};
+
+export type UserRoleCursorFilterDto = {
+  searchTerm: string;
+  roleId: number;
+  limit: number;
+  cursor: string | null;
+};
+
+export const defaultUserRoleCursorFilterDto: UserRoleCursorFilterDto = {
+  searchTerm: '',
+  roleId: 0,
+  limit: 50,
+  cursor: null,
 };

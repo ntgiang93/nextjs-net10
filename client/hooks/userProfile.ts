@@ -12,18 +12,18 @@ import { apiService } from '../services/api';
 
 const endpoint = 'user-profile';
 
-export const useGetUserProfile = (userId: string) => {
+export const useGetUserProfile = (id: string) => {
   return useQuery<UserProfileDto, Error>({
-    queryKey: [endpoint, 'useGetUserProfile', userId],
+    queryKey: [endpoint, 'useGetUserProfile', id],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<UserProfileDto>>(`${endpoint}/${userId}`);
+      const response = await apiService.get<ApiResponse<UserProfileDto>>(`${endpoint}/${id}`);
       if (response.success && response.data) {
         return response.data;
       }
       return { ...defaultUserProfileDto };
     },
     initialData: { ...defaultUserProfileDto },
-    enabled: userId != undefined && userId !== '' && userId !== '0',
+    enabled: id != undefined && id !== '',
   });
 };
 
@@ -62,7 +62,9 @@ export const useGetPermissions = () => {
   return useQuery<string[], Error>({
     queryKey: [endpoint, 'get'],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<string[]>>(`${endpoint}/current/permissions"`);
+      const response = await apiService.get<ApiResponse<string[]>>(
+        `${endpoint}/current/permissions"`,
+      );
       if (response.success && response.data) {
         return response.data;
       }
@@ -75,11 +77,7 @@ export const useGetPermissions = () => {
 export const useSave = () => {
   return useMutation({
     mutationFn: async (user: UserProfileDto) => {
-      if (user.id > 0) {
-        return await apiService.put<ApiResponse<MenuItem>>(`${endpoint}`, user);
-      } else {
-        return await apiService.post<ApiResponse<MenuItem>>(`${endpoint}`, user);
-      }
+      return await apiService.post<ApiResponse<MenuItem>>(`${endpoint}`, user);
     },
   });
 };

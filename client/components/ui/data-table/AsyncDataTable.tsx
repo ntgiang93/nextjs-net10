@@ -60,7 +60,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
   const [rowSelection, setRowSelection] = useState<RowSelectionState>(
     getRowSelection(selection?.selectedKeys || []),
   );
-  const [tableHeight, setTableHeight] = useState(320);
+  const [tableHeight, setTableHeight] = useState(240);
   const cardRef = useRef<HTMLDivElement>(null);
   const msg = useTranslations('msg');
 
@@ -143,7 +143,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
     const cardHeight = cardRef.current.clientHeight;
     // Calculate the remaining space for the table
     const newTableHeight = cardHeight - 152;
-    setTableHeight(Math.max(newTableHeight, 320));
+    setTableHeight(Math.max(newTableHeight, 240));
   }, []);
 
   const table = useReactTable({

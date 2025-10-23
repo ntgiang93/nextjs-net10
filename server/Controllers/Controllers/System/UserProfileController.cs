@@ -53,35 +53,18 @@ public class UserProfileController : ControllerBase
     // PUT methods
     [HttpPost]
     [Policy(ESysModule.Users, EPermission.Create)]
-    public async Task<IActionResult> CreateUserProfile([FromBody] SaveUserProfileDto createProfileDto)
+    public async Task<IActionResult> CreateUserProfile([FromBody] SaveUserProfileDto dto)
     {
         var currentUser = UserContext.Current;
         if (!currentUser.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) &&
             !currentUser.RoleCodes.Split(';').Contains(DefaultRoles.Admin) &&
-            currentUser.UserId != createProfileDto.UserId)
+            currentUser.UserId != dto.Id)
             return Forbid();
-        var newProfile = createProfileDto.Adapt<UserProfile>();
-        var result = await _userProfileService.CreateAsync(newProfile);
-        if (result != null)
-            return Ok(ApiResponse<UserProfileDto>.Succeed(result.Adapt<UserProfileDto>(),
+        var result = await _userProfileService.SaveUserProfile(dto);
+        if (result)
+            return Ok(ApiResponse<bool>.Succeed(result,
                 _sysMsg.Get(EMessage.SuccessMsg)));
         return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
-
-    // PUT methods
-    [HttpPut]
-    [Policy(ESysModule.Users, EPermission.Edit)]
-    public async Task<IActionResult> UpdateUserProfile([FromBody] SaveUserProfileDto updateProfileDto)
-    {
-        var currentUser = UserContext.Current;
-        if (!currentUser.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) &&
-            !currentUser.RoleCodes.Split(';').Contains(DefaultRoles.Admin) &&
-            currentUser.UserId != updateProfileDto.UserId)
-            return Forbid();
-        var profile = updateProfileDto.Adapt<UserProfile>();
-        var success = await _userProfileService.UpdateAsync(profile);
-        if (success)
-            return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
-        return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
-    }
+    
 }
