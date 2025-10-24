@@ -1,6 +1,6 @@
 using Model.DTOs.Base;
+using Model.DTOs.System.Role;
 using Model.DTOs.System.User;
-using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.Base;
 
@@ -39,7 +39,7 @@ public interface IUserRoleRepository : IGenericRepository<User, string>
     /// <summary>
     ///     Removes members from a role using SqlKata
     /// </summary>
-    Task<bool> RemoveMemberAsync(int roleId, List<string> userIds, string updatedBy);
+    Task<bool> RemoveMemberAsync(int roleId, List<string> userIds);
     
     /// <summary>
     ///     Gets users not in the specified role with cursor pagination

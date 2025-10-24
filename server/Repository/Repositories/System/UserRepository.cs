@@ -9,6 +9,7 @@ using Repository.Repositories.Base;
 using Repository.Interfaces.Base;
 using Common.Extensions;
 using Model.DTOs.System;
+using Model.DTOs.System.Role;
 
 namespace Repository.Repositories.System;
 

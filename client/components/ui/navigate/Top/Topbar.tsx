@@ -18,9 +18,9 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft03Icon,
   ArrowRight03Icon,
-  Logout05Icon,
+  Logout03Icon,
   Search01Icon,
-  UserAccountIcon,
+  UserAccountIcon
 } from 'hugeicons-react';
 import { useTranslations } from 'use-intl';
 import { ThemeSwitch } from '../../button/theme-switch';
@@ -134,7 +134,7 @@ export const Topbar = (props: ITopbarProps) => {
             <DropdownItem
               key="logout"
               color="danger"
-              startContent={<Logout05Icon />}
+              startContent={<Logout03Icon />}
               onPress={logout}
             >
               {msg('logout')}

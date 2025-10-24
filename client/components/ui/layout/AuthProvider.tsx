@@ -63,6 +63,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (response.success && response.data) {
         const accessToken = response.data.accessToken;
         if (accessToken) {
+          router.push('/');
           const jwtClaim = JwtHelper.decodeToken(accessToken);
           if (jwtClaim) {
             setExpiredAt(jwtClaim?.exp);
@@ -71,16 +72,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setIsAuthenticated(true);
             markSessionActive(jwtClaim);
           }
-          router.push('/');
           setIsLoading(false);
           return response;
         }
       }
       setIsLoading(false);
       return response;
-    } catch (error: any) {
-      console.log('Login error:', error);
-    }
+    } catch (error: any) {}
     setIsLoading(false);
     return { ...defaultApiResponse };
   };
@@ -89,9 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       apiService.post<ApiResponse<TokenDto>>(endpoint + 'logout', undefined, undefined, true);
-    } catch (error: any) {
-      console.log('Logout error:', error);
-    }
+    } catch (error: any) {}
     resetAuthContext();
     router.push('/login');
   };
@@ -123,7 +119,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push('/login');
       }
     } catch (error: any) {
-      console.log('Refresh token error:', error);
       router.push('/login');
     }
     resetAuthContext();
@@ -142,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useLayoutEffect(() => {
     const checkSession = async () => {
       if (hasActiveSession()) {
+        setIsLoading(true);
         await refreshToken();
       } else {
         router.push('/login');

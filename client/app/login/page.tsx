@@ -1,17 +1,26 @@
 'use client';
 
+import ForgotPasswordModal from '@/app/(admin)/sys/user/components/ForgotPasswordModal';
 import { useAuth } from '@/components/ui//layout/AuthProvider';
 import { defaultLogin, LoginDto } from '@/types/sys/Auth';
 import { CardBody, CardFooter, CardHeader } from '@heroui/card';
 import { Input } from '@heroui/input';
-import { Button, Card, Form, Link, Spacer } from '@heroui/react';
+import { Button, Card, Form, Link, useDisclosure } from '@heroui/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useTranslations } from 'use-intl';
 
 const LoginPage = () => {
   const [form, setForm] = useState<LoginDto>({ ...defaultLogin });
   const { isLoading, login, isAuthenticated } = useAuth();
   const router = useRouter();
+  const msg = useTranslations('msg');
+  const userMsg = useTranslations('user');
+  const {
+    isOpen: isForgotPasswordOpen,
+    onOpen: onOpenForgotPassword,
+    onOpenChange: onForgotPasswordOpenChange,
+  } = useDisclosure();
 
   // Chuyển hướng nếu đã đăng nhập
   useEffect(() => {
@@ -21,14 +30,15 @@ const LoginPage = () => {
   }, [isAuthenticated, router]);
 
   const validatePassword = (password: string): string => {
-    if (password.length === 0) return 'This field is required';
-    else if (password.length < 4) {
-      return 'Password must be 4 characters or more.';
-    } else if ((password.match(/[A-Z]/g) || []).length < 1) {
-      return 'Password must include at least 1 upper case letter';
-    } else if ((password.match(/[^a-z]/gi) || []).length < 1) {
-      return 'Password must include at least 1 symbol.';
-    } else return '';
+    if (password.length === 0) return msg('required');
+    // else if (password.length < 4) {
+    //   return 'Password must be 4 characters or more.';
+    // } else if ((password.match(/[A-Z]/g) || []).length < 1) {
+    //   return 'Password must include at least 1 upper case letter';
+    // } else if ((password.match(/[^a-z]/gi) || []).length < 1) {
+    //   return 'Password must include at least 1 symbol.';
+    // }
+    else return '';
   };
 
   const onSubmit = async (e: any) => {
@@ -37,43 +47,32 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="grid lg:grid-cols-2 gap-40 h-screen md:p-32 max-sm:p-8 bg-gradient-to-tr from-transparent via-primary-100 to-primary-500">
-      <div className="flex items-center max-lg:hidden">
-        <div className={'flex flex-col'}>
-          <h3 className="font-bold text-2xl">Your website name</h3>
-          <p>
-            It is a long established fact that a reader will be distracted by
-            the readable content of a page when looking at its layout.
-          </p>
-        </div>
-      </div>
-      <div className={'flex items-center justify-center h-full'}>
-        <Card className="p-8 w-full max-w-[500]">
+    <div className="flex justify-center gap-40 h-screen md:p-32 max-sm:p-8 bg-cover bg-center bg-no-repeat bg-[url('/loginbg2.jpg')]">
+      <div className={'flex items-center justify-center h-full w-full'}>
+        <Card className="p-8 bg-background/5 backdrop-blur-md border-background/40 border-1 w-full max-w-[500px]">
           <CardHeader className="flex flex-col gap-3">
-            <h3 className="font-bold text-2xl">Welcome back</h3>
-            <p>Log in to your account to continue.</p>
+            <h3 className="font-bold text-2xl">{msg('welcome')}</h3>
+            <p>{msg('welcomeMessage')}</p>
           </CardHeader>
           <CardBody className={'flex flex-col gap-4'}>
-            <Form onSubmit={onSubmit} className={'flex flex-col gap-6'}>
+            <Form id="loginForm" onSubmit={onSubmit} className={'flex flex-col gap-6'}>
               <Input
                 isRequired
-                label="Username"
+                label={userMsg('username')}
                 name="username"
                 value={form.username}
                 onValueChange={(value) => setForm({ ...form, username: value })}
-                placeholder="Enter your username"
+                placeholder={`${msg('enter')} ${userMsg('username').toLowerCase()}`}
                 validate={(value) => {
-                  return value === '' || !value
-                    ? 'This field is required'
-                    : null;
+                  return value === '' || !value ? msg('required') : null;
                 }}
                 type="text"
                 variant={'bordered'}
               />
               <Input
                 isRequired
-                label="Password"
-                placeholder="Enter your password"
+                label={userMsg('password')}
+                placeholder={`${msg('enter')} ${userMsg('password').toLowerCase()}`}
                 value={form.password}
                 onValueChange={(value) => setForm({ ...form, password: value })}
                 variant="bordered"
@@ -84,27 +83,32 @@ const LoginPage = () => {
                 type={'password'}
               />
               <div className={'flex justify-end w-full'}>
-                <Link className={'text-sm'}>forgot password</Link>
+                <Link className="hover:cursor-pointer" onPress={onOpenForgotPassword}>
+                  {userMsg('forgotPassword')}
+                </Link>
               </div>
               <Button
+                form="loginForm"
                 type="submit"
                 color={'primary'}
                 className={'w-full'}
                 isLoading={isLoading}
               >
-                Submit
+                {msg('login')}
               </Button>
             </Form>
             <CardFooter className="flex justify-center">
               <p className={'text-default-700 text-sm'}>
-                {"Don't have account? Please contact"}
+                {msg('haventAccount', { admin: 'Admin' })}
               </p>{' '}
-              <Spacer x={1} />
-              <Link className={'font-semibold text-sm'}>Admin</Link>
             </CardFooter>
           </CardBody>
         </Card>
       </div>
+      <ForgotPasswordModal
+        isOpen={isForgotPasswordOpen}
+        onOpenChange={onForgotPasswordOpenChange}
+      />
     </div>
   );
 };

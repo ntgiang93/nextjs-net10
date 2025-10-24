@@ -4,8 +4,8 @@ using Mapster;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.System;
+using Model.DTOs.System.Role;
 using Model.DTOs.System.User;
-using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.System;
 using Service.Interfaces;
@@ -122,12 +122,12 @@ public class RoleService : GenericService<Role, int>, IRoleService
         return result;
     }
 
-    public async Task<List<RoleMembersDto>> GetRoleMembers(int roleId)
+    public async Task<PaginatedResultDto<RoleMembersDto>> GetRoleMembers(GetRoleMembersDto filter)
     {
-        var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetRoleMembers", roleId);
+        var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetRoleMembers", filter);
         return await CacheManager.GetOrCreateAsync(cacheKey, async () =>
         {
-            var result = await _roleRepository.GetRoleMembersAsync(roleId);
+            var result = await _roleRepository.GetRoleMembersAsync(filter);
 
             return result;
         });
@@ -156,7 +156,7 @@ public class RoleService : GenericService<Role, int>, IRoleService
         if (!user.RoleCodes.Split(';').Contains(DefaultRoles.SuperAdmin) && role.Code == DefaultRoles.SuperAdmin)
             throw new BusinessException(SysMsg.Get(EMessage.NotPermissionModifyRole), "CANNOT_MODIFY_ROLE");
 
-        var result = await _userRoleRepository.RemoveMemberAsync(roleId, userIds, user.UserName);
+        var result = await _userRoleRepository.RemoveMemberAsync(roleId, userIds);
         if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return result;
     }

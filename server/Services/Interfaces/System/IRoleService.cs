@@ -1,8 +1,8 @@
 using Model.DTOs.Base;
 using Model.DTOs.System;
 using Model.DTOs.System.Module;
+using Model.DTOs.System.Role;
 using Model.DTOs.System.User;
-using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Service.Interfaces.Base;
 
@@ -80,7 +80,7 @@ public interface IRoleService : IGenericService<Role, int>
     /// </summary>
     /// <param name="roleId">ID of the role</param>
     /// <returns>List of role members with their details</returns>
-    Task<List<RoleMembersDto>> GetRoleMembers(int roleId);
+    Task<PaginatedResultDto<RoleMembersDto>> GetRoleMembers(GetRoleMembersDto filter);
     
     /// <summary>
     ///     Removes multiple users from a specific role

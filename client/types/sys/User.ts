@@ -106,3 +106,11 @@ export const defaultChangePasswordDto: ChangePasswordDto = {
   newPassword: '',
   confirmPassword: '',
 };
+
+export type ForgotPasswordDto = {
+  email: string;
+};
+
+export const defaultForgotPasswordDto: ForgotPasswordDto = {
+  email: '',
+};

@@ -7,7 +7,7 @@ namespace Service.Services.Base;
 
 public class SysMessageService : ISysMessageService
 {
-    private readonly List<string> _supportLanguage = new() { "vi-VN", "en-US" };
+    private readonly List<string> _supportLanguage = new() { "vi", "en" };
 
     public string Get(EMessage key)
     {
@@ -17,9 +17,9 @@ public class SysMessageService : ISysMessageService
         if (MessageList.MessageDictionary.TryGetValue(key, out var translations))
             switch (languageCode)
             {
-                case "en-US":
+                case "en":
                     return translations.English;
-                case "vi-VN":
+                case "vi":
                     return translations.Vietnamese;
                 default:
                     return translations.Vietnamese;

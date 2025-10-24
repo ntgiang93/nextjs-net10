@@ -17,11 +17,10 @@ import {
   Modal,
   ModalBody,
   ModalContent,
-  ModalFooter,
   ModalHeader,
   Tooltip,
   useDisclosure,
-  User,
+  User
 } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { AddTeamIcon, Delete02Icon, UserAccountIcon } from 'hugeicons-react';
@@ -47,8 +46,8 @@ export default function AssignRoleUserModal(props: AssignRoleUserModalProps) {
     ...defaultRoleMemberFilter,
   });
 
-  const { data, isFetching, refetch } = RoleHook.useGetMembers(filter);
-  const { mutateAsync: removeMembers, isPending } = RoleHook.useRemoveMember();
+  const { data, isFetching, refetch } = RoleHook.useGetMembers(filter, isOpen);
+  const { mutateAsync: removeMembers, isPending } = RoleHook.useRemoveMember(role.id);
 
   const {
     isOpen: isOpenDelete,
@@ -163,10 +162,7 @@ export default function AssignRoleUserModal(props: AssignRoleUserModalProps) {
 
   const handleDelete = useCallback(async () => {
     if (selectedRow.length === 0 || !roleId) return;
-    const success = await removeMembers({
-      roleId,
-      userIds: selectedRow,
-    });
+    const success = await removeMembers(selectedRow);
     if (success) {
       await refetch();
       onOpenDeleteChange();
@@ -215,7 +211,7 @@ export default function AssignRoleUserModal(props: AssignRoleUserModalProps) {
                   page: filter.page,
                   pageSize: filter.pageSize,
                   totalCount: data?.totalCount || 0,
-                  totalPages: pages,
+                  totalPages: data?.totalPages || 1,
                   onPageChange: (page) => {
                     setFilter((prev) => ({ ...prev, page }));
                   },
@@ -279,11 +275,6 @@ export default function AssignRoleUserModal(props: AssignRoleUserModalProps) {
               />
             </div>
           </ModalBody>
-          <ModalFooter>
-            <Button color="danger" variant="light" onPress={onOpenChange}>
-              {msg('close')}
-            </Button>
-          </ModalFooter>
           <ConfirmModal
             isOpen={isOpenDelete}
             title={t('removeMember')}

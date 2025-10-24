@@ -54,7 +54,10 @@
     "address": "Địa chỉ",
     "memberManagement": "Quản lý thành viên",
     "addMember": "Thêm thành viên",
-    "selectedCount": "Đã chọn {count}"
+    "selectedCount": "Đã chọn {count}",
+    "welcome": "Chào mừng bạn trở lại",
+    "welcomeMessage": "Đăng nhập vào tài khoản của bạn để tiếp tục.",
+    "haventAccount": "Chưa có tài khoản? Vui lòng liên hệ {admin}"
   },
   "role": {
     "title": "Quản lý Vai trò",
@@ -105,7 +108,9 @@
     "userNameDesc": "Hệ thống sẽ tự động tạo tên đăng nhập nếu để trống.",
     "activeUser": "Kích hoạt người dùng",
     "inactiveUser": "Vô hiệu hóa người dùng",
-    "resetPasswordWarning": "Thao tác này sẽ đặt lại mật khẩu của người dùng. Bạn chắc chắn muốn tiếp tục?"
+    "resetPasswordWarning": "Thao tác này sẽ đặt lại mật khẩu của người dùng. Bạn chắc chắn muốn tiếp tục?",
+    "forgotPassword": "Quên mật khẩu",
+    "forgotPasswordDescription": "Nhập email tài khoản để nhận liên kết đặt lại mật khẩu."
   },
   "menu": {
     "title": "Quản lý Menu",

@@ -129,4 +129,12 @@ public class AuthController : ControllerBase
         if (result) return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
+    
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ForgotPasswordDto dto)
+    {
+        var result = await _authService.ForgotPasswordAsync(dto);
+        if (result) return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+    }
 }

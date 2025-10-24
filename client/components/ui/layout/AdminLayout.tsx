@@ -18,7 +18,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
   const pathName = usePathname();
   const { isLoading } = useAuth();
   const { navigating } = useNavivationStore();
-  const {} = UserHook.useGetMe();
+  const {} = UserHook.useGetMe(!isLoading);
 
   useEffect(() => {
     onClose();
@@ -38,7 +38,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       {/* SidebarMenu */}
       <aside
         className={clsx(
-          'transition-all duration-400 ease-in-out flex flex-col hover:w-64 h-screen',
+          'transition-all duration-400 ease-in-out flex flex-col hover:w-64 h-screen flex-shrink-0',
           'max-md:hidden',
           `${isCompact ? 'w-16' : 'w-64'}`,
         )}

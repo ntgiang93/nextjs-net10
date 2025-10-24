@@ -11,12 +11,11 @@ import { MenuItem } from '@/types/sys/Menu';
 import {
   AddRoleMemberDto,
   defaultRoleDto,
-  RemoveRoleMemberDto,
   RoleDto,
   RoleMemberFilter,
   RoleMembersDto,
   RolePermissionDto,
-  UserRoleCursorFilterDto,
+  UserRoleCursorFilterDto
 } from '@/types/sys/Role';
 import { UserSelectDto } from '@/types/sys/User';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -56,7 +55,7 @@ export const useGet = (id: number) => {
   });
 };
 
-export const useGetMembers = (filter: RoleMemberFilter) => {
+export const useGetMembers = (filter: RoleMemberFilter, enabled: boolean) => {
   return useQuery<PaginatedResultDto<RoleMembersDto>, Error>({
     queryKey: [endpoint, 'getMembers', filter],
     queryFn: async () => {
@@ -68,7 +67,7 @@ export const useGetMembers = (filter: RoleMemberFilter) => {
       }
       return { ...defualtPaginatedResult };
     },
-    enabled: filter.roleId > 0,
+    enabled: filter.roleId > 0 && enabled,
     placeholderData: keepPreviousData,
   });
 };
@@ -135,12 +134,12 @@ export const useDelete = (id: number) => {
   });
 };
 
-export const useRemoveMember = () => {
+export const useRemoveMember = (roleId: number) => {
   return useMutation({
-    mutationFn: async (payload: RemoveRoleMemberDto) => {
+    mutationFn: async (userIds: string[]) => {
       const response = await apiService.delete<ApiResponse<boolean>>(
-        `${endpoint}/remove-member`,
-        payload,
+        `${endpoint}/${roleId}/remove-members`,
+        userIds,
       );
       return response.success;
     },

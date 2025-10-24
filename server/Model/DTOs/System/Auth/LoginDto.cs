@@ -9,3 +9,8 @@ public class LoginDto
     public string? DeviceToken { get; set; }
     public string? IpAddress { get; set; }
 }
+
+public class ForgotPasswordDto
+{
+    public required string Email { get; set; }
+}

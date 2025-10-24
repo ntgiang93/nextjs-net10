@@ -46,7 +46,7 @@ export const Menu = (props: ISidebarMenuProps) => {
             isActive && 'bg-primary',
           ),
           title: clsx(
-            'transition-opacity duration-300 text-sm',
+            'transition-opacity duration-300',
             !isActive && 'group-hover:cursor-pointer',
             isActive ? 'text-white' : '',
             isCompact ? 'opacity-0' : 'opacity-100',
@@ -112,7 +112,7 @@ export const Menu = (props: ISidebarMenuProps) => {
   const menu = useMemo(() => GenerateMenu(data), [data, GenerateMenu]);
 
   return (
-    <ScrollShadow hideScrollBar className="h-[calc(100vh-11rem)]">
+    <ScrollShadow hideScrollBar className="h-[calc(100vh-11rem)] max-w-[calc(256-24px)] w-full" >
       {menu}
     </ScrollShadow>
   );

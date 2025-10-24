@@ -54,7 +54,10 @@
     "address": "Address",
     "memberManagement": "Member Management",
     "addMember": "Add member",
-    "selectedCount": "Selected {count}"
+    "selectedCount": "Selected {count}",
+    "welcome": "Welcome back",
+    "welcomeMessage": "Log in to your account to continue.",
+    "haventAccount": "Don't have account? Please contact {admin}"
   },
   "role": {
     "title": "Role management",
@@ -104,7 +107,9 @@
     "userNameDesc": "System will auto generate username if left empty.",
     "activeUser": "Active user",
     "inactiveUser": "Inactive user",
-    "resetPasswordWarning": "This action will reset the user's password. Are you sure you want to continue?"
+    "resetPasswordWarning": "This action will reset the user's password. Are you sure you want to continue?",
+    "forgotPassword": "Forgot Password",
+    "forgotPasswordDescription": "Enter the email associated with your account and we'll send you a reset link."
   },
   "menu": {
     "title": "Menu management",

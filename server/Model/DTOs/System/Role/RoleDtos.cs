@@ -1,4 +1,4 @@
-namespace Model.DTOs.System;
+namespace Model.DTOs.System.Role;
 
 public class RoleDto
 {

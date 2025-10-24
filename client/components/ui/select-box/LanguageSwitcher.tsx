@@ -1,7 +1,7 @@
 'use client';
 
-import { useAuthStore } from '@/store/auth-store';
 import { locales } from '@/i18n/locale-support';
+import { useAuthStore } from '@/store/auth-store';
 import { Select, SelectItem } from '@heroui/react';
 
 export default function LanguageSwitcher() {
@@ -18,14 +18,15 @@ export default function LanguageSwitcher() {
   return (
     <Select
       className="max-w-xs"
-      items={locales}
       aria-label="Select language"
       classNames={{ base: 'w-16', popoverContent: 'w-20' }}
       size="sm"
-      selectedKeys={user?.language || 'vi'}
+      selectedKeys={user ? new Set([user.language]) : new Set(['vi'])}
       onChange={handleSelectionChange}
     >
-      {(lang) => <SelectItem key={lang.key}>{lang.label}</SelectItem>}
+      {locales.map((lang) => (
+        <SelectItem key={lang.key}>{lang.label}</SelectItem>
+      ))}
     </Select>
   );
 }

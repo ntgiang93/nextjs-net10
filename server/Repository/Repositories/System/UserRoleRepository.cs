@@ -3,13 +3,13 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using Model.DTOs.Base;
 using Model.DTOs.System.User;
-using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Repository.Interfaces.Base;
 using Repository.Interfaces.System;
 using Repository.Repositories.Base;
 using SqlKata;
 using System.Text;
+using Model.DTOs.System.Role;
 
 namespace Repository.Repositories.System;
 
@@ -168,7 +168,7 @@ public class UserRoleRepository : GenericRepository<User, string>, IUserRoleRepo
         }
     }
 
-    public async Task<bool> RemoveMemberAsync(int roleId, List<string> userIds, string updatedBy)
+    public async Task<bool> RemoveMemberAsync(int roleId, List<string> userIds)
     {
         using var connection = _dbFactory.Connection;
         using var transaction = connection.BeginTransaction();

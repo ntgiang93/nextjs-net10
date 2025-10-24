@@ -6,5 +6,5 @@ public class CurrentUser
     public required string UserName { get; set; }
     public required List<int> Roles { get; set; }
     public required string RoleCodes { get; set; }
-    public string? Language { get; set; } = "vi-VN";
+    public string? Language { get; set; } = "vi";
 }

@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
+using Model.DTOs.Base;
+using Model.Models;
 
-namespace Model.DTOs.System.UserRole;
+namespace Model.DTOs.System.Role;
 
 public class UserRoleDto
 {
@@ -36,5 +38,10 @@ public class UserRoleCursorFilterDto
     /// cursor by created time
     /// </summary>
     public DateTime? Cursor { get; set; }
+}
+
+public class GetRoleMembersDto: PaginationRequest
+{
+    public int RoleId { get; set; }
 }
 

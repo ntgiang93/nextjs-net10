@@ -216,6 +216,25 @@ public class AuthService : IAuthService
         return success;
     }
 
+    public async Task<bool> ForgotPasswordAsync(ForgotPasswordDto dto)
+    {
+        var user = await _userService.GetSingleAsync<User>(x => x.Email == dto.Email && x.IsActive == true && x.IsDeleted == false);
+        if (user == null) return true;
+        else
+        {
+            string newPassword = StringHelper.GenerateRandomString(8);
+
+            // Update password
+            user.PasswordHash = PasswordHelper.HashPassword(newPassword);
+            var success = await _userService.UpdateAsync(user);
+            if (success)
+                // Revoke all tokens for this user
+                await RevokeAllUserTokenAsync(user.Id);
+            SendPasswordChangeEmail(newPassword, user.Email);
+            return success;
+        }
+    }
+
     private async Task SendPasswordChangeEmail(string password, string toEmail)
     {
         var template = await _emailSmsService.GetEmailTemplate("ResetPassword.html");

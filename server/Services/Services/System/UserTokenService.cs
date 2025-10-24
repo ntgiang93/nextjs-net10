@@ -108,7 +108,7 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
     {
         if (string.IsNullOrEmpty(user.Language))
         {
-            var currentCulture = "vi-VN";
+            var currentCulture = "vi";
             return currentCulture;
         }
 

@@ -35,7 +35,7 @@ export default function Menu() {
     onOpenChange: OnOpenActiveChange,
   } = useDisclosure();
   const [selectUser, setSelectUser] = useState<UserTableDto | undefined>(undefined);
-  const { mutateAsync: changeActive, isSuccess: changeActiveSuccess } = UserHook.useChangeActive(
+  const { mutateAsync: changeActive } = UserHook.useChangeActive(
     selectUser?.id || '',
   );
   const { navigate } = useAuth();
@@ -203,11 +203,6 @@ export default function Menu() {
     [navigate, onOpenActive],
   );
 
-  const pages = useMemo(() => {
-    if (!data) return 1;
-    else return Math.ceil(data.totalCount / filter.pageSize) || 1;
-  }, [data?.totalCount, filter.pageSize]);
-
   const handleChangeActive = () => {
     changeActive(undefined, {
       onSuccess: () => {
@@ -246,8 +241,8 @@ export default function Menu() {
         pagination={{
           page: filter.page,
           pageSize: filter.pageSize,
-          totalCount: data?.totalCount || 1,
-          totalPages: pages,
+          totalCount: data?.totalCount || 0,
+          totalPages: data?.totalPages || 1,
           onPageChange: (page) => {
             setFilter((prev) => ({ ...prev, page }));
           },

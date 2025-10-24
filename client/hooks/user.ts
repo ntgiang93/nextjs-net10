@@ -7,6 +7,7 @@ import { defualtPaginatedResult, PaginatedResultDto } from '@/types/base/Paginat
 import { PaginationFilter } from '@/types/base/PaginationFilter';
 import { defaultUserClaim, UserClaim } from '@/types/base/UserClaim';
 import { MenuItem } from '@/types/sys/Menu';
+import { RolePermissionDto } from '@/types/sys/Role';
 import {
   defaultUserDto,
   SaveUserDto,
@@ -66,7 +67,7 @@ export const useGet = (id: string) => {
   });
 };
 
-export const useGetMe = () => {
+export const useGetMe = (enabled: boolean) => {
   const { user, setUser } = useAuthStore((state) => state);
   return useQuery<UserClaim, Error>({
     queryKey: [endpoint, 'getme'],
@@ -89,14 +90,15 @@ export const useGetMe = () => {
       }
       return { ...defaultUserClaim };
     },
+    enabled: enabled,
   });
 };
 
 export const useGetPermissions = () => {
-  return useQuery<string[], Error>({
+  return useQuery<RolePermissionDto[], Error>({
     queryKey: [endpoint, 'get'],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<string[]>>(
+      const response = await apiService.get<ApiResponse<RolePermissionDto[]>>(
         `${endpoint}/current/permissions`,
       );
       if (response.success && response.data) {

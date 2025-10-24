@@ -21,4 +21,5 @@ public interface IAuthService
     Task ResendVerificationAsync(string verificationId);
     Task<bool> ChangePasswordAsync(string oldPassword, string newpPassword);
     Task<bool> ResetPasswordAsync(string userId);
+    Task<bool> ForgotPasswordAsync(ForgotPasswordDto dto );
 }

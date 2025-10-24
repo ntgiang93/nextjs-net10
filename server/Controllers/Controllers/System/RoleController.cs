@@ -4,8 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Model.Constants;
 using Model.DTOs.Base;
 using Model.DTOs.System;
+using Model.DTOs.System.Role;
 using Model.DTOs.System.User;
-using Model.DTOs.System.UserRole;
 using Model.Entities.System;
 using Service.Interfaces;
 using Service.Interfaces.Base;
@@ -45,15 +45,15 @@ public class RoleController : ControllerBase
         return Ok(ApiResponse<RoleViewDto>.Succeed(role, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
-    [HttpGet("{roleId}/get-members")]
+    [HttpGet("get-members")]
     [Policy(ESysModule.Roles, EPermission.View)]
-    public async Task<IActionResult> GetRoleMembers(int roleId)
+    public async Task<IActionResult> GetRoleMembers([FromQuery] GetRoleMembersDto request)
     {
-        var result = await _roleService.GetRoleMembers(roleId);
+        var result = await _roleService.GetRoleMembers(request);
         if (result == null)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<List<RoleMembersDto>>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<PaginatedResultDto<RoleMembersDto>>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpGet("users-not-in-role")]
@@ -135,7 +135,7 @@ public class RoleController : ControllerBase
     [Policy(ESysModule.Roles, EPermission.Edit)]
     public async Task<IActionResult> RemoveRoleMembers(int roleId, [FromBody] List<string> userIds)
     {
-        if (roleId <= 0 || userIds == null || !userIds.Any())
+        if (roleId <= 0 || !userIds.Any())
             return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error400Msg)));
             
         var success = await _roleService.RemoveRoleMembers(roleId, userIds);
