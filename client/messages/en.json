@@ -40,6 +40,10 @@
     "login": "Login",
     "logout": "Logout",
     "profile": "Profile",
+    "selectLoginMethod": "Select login method",
+    "loginMedworking": "Login with Medworking",
+    "userMedworking": "Account is Medworking account",
+    "loginSystem": "Login with system account",
     "uploadFile": "Upload file",
     "dropzoneDescription": "Drag & drop or browse to upload files",
     "dropzoneLimitDescription": "(Max {limitFiles} file(s), up to {limitSize} MB each)",
@@ -57,7 +61,9 @@
     "selectedCount": "Selected {count}",
     "welcome": "Welcome back",
     "welcomeMessage": "Log in to your account to continue.",
-    "haventAccount": "Don't have account? Please contact {admin}"
+    "haventAccount": "Don't have account? Please contact {admin}",
+    "or": "or",
+    "back": "Back"
   },
   "role": {
     "title": "Role management",

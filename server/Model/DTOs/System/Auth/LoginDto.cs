@@ -14,3 +14,9 @@ public class ForgotPasswordDto
 {
     public required string Email { get; set; }
 }
+
+public class MedWorkingLoginDto
+{
+    public required string userName { get; set; }
+    public required string password { get; set; }
+}

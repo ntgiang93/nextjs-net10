@@ -13,7 +13,7 @@ import { clearSessionFlag, getDeviceId, hasActiveSession, markSessionActive } fr
 interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (body: LoginDto) => Promise<ApiResponse<TokenDto>>;
+  login: (body: LoginDto, loginPath?: string) => Promise<ApiResponse<TokenDto>>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<void>;
   navigate: (url: string, target?: '_self' | '_blank') => void;
@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { setNavigating } = useNavivationStore();
   const pathName = usePathname();
+  const LOGIN_PATH = process.env.NEXT_PUBLIC_LOGIN_PATH || 'login';
 
   const resetAuthContext = () => {
     clearSessionFlag();
@@ -52,13 +53,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const endpoint = 'auth/';
 
-  const login = async (body: LoginDto): Promise<ApiResponse<TokenDto>> => {
+  const login = async (body: LoginDto, loginPath?: string): Promise<ApiResponse<TokenDto>> => {
     try {
       setIsLoading(true);
-      const response = await apiService.post<ApiResponse<TokenDto>>(endpoint + 'login', {
-        ...body,
-        deviceId: await getDeviceId(),
-      });
+      const response = await apiService.post<ApiResponse<TokenDto>>(
+        endpoint + (loginPath || LOGIN_PATH),
+        {
+          ...body,
+          deviceId: await getDeviceId(),
+        },
+      );
 
       if (response.success && response.data) {
         const accessToken = response.data.accessToken;

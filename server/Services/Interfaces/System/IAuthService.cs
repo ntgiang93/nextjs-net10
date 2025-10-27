@@ -22,4 +22,5 @@ public interface IAuthService
     Task<bool> ChangePasswordAsync(string oldPassword, string newpPassword);
     Task<bool> ResetPasswordAsync(string userId);
     Task<bool> ForgotPasswordAsync(ForgotPasswordDto dto );
+    Task<TokenDto?> LoginProxyAsync(LoginDto loginDto);
 }

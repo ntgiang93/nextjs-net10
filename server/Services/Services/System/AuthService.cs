@@ -10,6 +10,8 @@ using Service.DTOs.System.Auth;
 using Service.Interfaces;
 using Service.Interfaces.Base;
 using System.IdentityModel.Tokens.Jwt;
+using Newtonsoft.Json;
+using RestSharp;
 
 namespace Service.Services;
 
@@ -36,6 +38,31 @@ public class AuthService : IAuthService
         _appSettings = appSettings;
         _emailSmsService = emailSmsService;
         _sysMsg = sysMsg;
+    }
+    
+    public async Task<TokenDto?> LoginProxyAsync(LoginDto loginDto)
+    {
+        var dto = new MedWorkingLoginDto()
+        {
+            userName = loginDto.UserName,
+            password = loginDto.Password
+        };
+        var tokenString = await LoginMedWorking(dto);
+        if (!string.IsNullOrEmpty(tokenString))
+        {
+            var user = await _userService.GetSingleAsync<User>(u => u.UserName == loginDto.UserName);
+            if (user == null) return null;
+            var token = new TokenDto();
+            var result = await _userTokenService.GenerateToken(user);
+            token.AccessToken = result.Value;
+            var refreshToken =
+                await _userTokenService.GenerateRefreshToken(user, loginDto.DeviceId, loginDto.IpAddress ?? "", result.Key,
+                    loginDto.Device, loginDto.DeviceToken);
+            token.RefreshToken = refreshToken.Key;
+            token.Expiration = refreshToken.Value;
+            return token;
+        }
+        return null;
     }
 
     public async Task<TokenDto> LoginAsync(User user, LoginDto loginDto)
@@ -300,5 +327,33 @@ public class AuthService : IAuthService
     {
         var sessions = await _userTokenService.FindAsync<UserToken>(x => x.UserId == userId && x.IsDeleted == false);
         await RevokeTokenAssync(sessions.Select(x => x.Device).ToList());
+    }
+
+    private async Task<string> LoginMedWorking(MedWorkingLoginDto loginDto)
+    {
+        var options = new RestClientOptions("https://api-medworking.medlatec.vn");
+        var client = new RestClient(options);
+        var request = new RestRequest("/api/account/login-web", Method.Post);
+        request.AddHeader("Content-Type", "application/json");
+        var body = JsonConvert.SerializeObject(loginDto);
+        request.AddStringBody(body, DataFormat.Json);
+        RestResponse response = await client.ExecuteAsync(request);
+    
+        if (response.IsSuccessful && !string.IsNullOrEmpty(response.Content))
+        {
+            try
+            {
+                var j = Newtonsoft.Json.Linq.JObject.Parse(response.Content);
+                // Try common paths for tokens or return a specific field if known
+                var token = j.SelectToken("tokenString")?.ToString() ?? string.Empty;
+                return token;
+            }
+            catch
+            {
+                // If parsing fails, return raw content
+                return string.Empty;
+            }
+        }
+        return string.Empty;
     }
 }

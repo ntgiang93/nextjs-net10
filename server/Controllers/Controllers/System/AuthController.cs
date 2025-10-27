@@ -28,6 +28,15 @@ public class AuthController : ControllerBase
         _sysMsg = sysMsg;
         _authService = authService;
     }
+    
+    [HttpPost("login-proxy")]
+    public async Task<IActionResult> LoginProxy([FromBody] LoginDto loginDto)
+    {
+        var token = await _authService.LoginProxyAsync(loginDto);
+        if (token == null) return Unauthorized();
+        setRefreshTokenCookie(token);
+        return Ok(ApiResponse<TokenDto>.Succeed(token, _sysMsg.Get(EMessage.SuccessMsg)));
+    }
 
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginDto loginDto)
@@ -40,7 +49,6 @@ public class AuthController : ControllerBase
         if (!passwordIsCorrect)
             return Ok(ApiResponse<TokenDto>.Fail(_sysMsg.Get(EMessage.AuthenticationFailed)));
         loginDto.IpAddress = HttpContext.GetClientIpAddress();
-        //loginDto.Device = HttpContext.GetDevice();
         var token = await _authService.LoginAsync(user, loginDto);
         if (token == null) return Unauthorized();
         setRefreshTokenCookie(token);

@@ -40,6 +40,10 @@
     "login": "Đăng nhập",
     "logout": "Đăng xuất",
     "profile": "Hồ sơ",
+    "selectLoginMethod": "Chọn phương thức đăng nhập",
+    "loginMedworking": "Đăng nhập với Medworking",
+    "userMedworking": "Tài khoản là tài khoản Medworking",
+    "loginSystem": "Đăng nhập với tài khoản hệ thống",
     "uploadFile": "Tải lên tệp",
     "dropzoneDescription": "Kéo thả hoặc chọn tệp để tải lên",
     "dropzoneLimitDescription": "(Tối đa {limitFiles} tệp, dung lượng mỗi tệp đến {limitSize} MB)",
@@ -57,7 +61,9 @@
     "selectedCount": "Đã chọn {count}",
     "welcome": "Chào mừng bạn trở lại",
     "welcomeMessage": "Đăng nhập vào tài khoản của bạn để tiếp tục.",
-    "haventAccount": "Chưa có tài khoản? Vui lòng liên hệ {admin}"
+    "haventAccount": "Chưa có tài khoản? Vui lòng liên hệ {admin}",
+    "or": "hoặc",
+    "back": "Quay lại"
   },
   "role": {
     "title": "Quản lý Vai trò",
