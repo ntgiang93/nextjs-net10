@@ -37,9 +37,9 @@ export default function Menu() {
         id: 'name',
         header: () => msg('name'),
         footer: (props) => props.column.id,
-        minSize: 300,
+        size: 300,
         meta: {
-          pinned: 'left',
+          autoSize: true,
         },
       },
       {
@@ -55,14 +55,15 @@ export default function Menu() {
         footer: (props) => props.column.id,
         minSize: 300,
         meta: {
-          align: 'center',
+          align: 'start',
+          autoSize: true,
         },
       },
       {
         accessorKey: 'actions',
         header: () => msg('actions'),
         footer: (props) => props.column.id,
-        size: 100,
+        size: 120,
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
@@ -166,7 +167,6 @@ export default function Menu() {
       <DataTable
         columns={columns}
         data={tableData || []}
-        childrenProperty="children"
         isLoading={isLoading}
         fetch={refetch}
         leftContent={

@@ -35,9 +35,7 @@ export default function Menu() {
     onOpenChange: OnOpenActiveChange,
   } = useDisclosure();
   const [selectUser, setSelectUser] = useState<UserTableDto | undefined>(undefined);
-  const { mutateAsync: changeActive } = UserHook.useChangeActive(
-    selectUser?.id || '',
-  );
+  const { mutateAsync: changeActive } = UserHook.useChangeActive(selectUser?.id || '');
   const { navigate } = useAuth();
 
   const columns = useMemo<ColumnDef<UserTableDto>[]>(
@@ -60,7 +58,7 @@ export default function Menu() {
             />
           );
         },
-        minSize: 200,
+        size: 250,
         meta: {
           pinned: 'left',
         },
@@ -71,6 +69,9 @@ export default function Menu() {
         header: () => t('account'),
         footer: (props) => props.column.id,
         minSize: 150,
+        meta: {
+          pinned: 'left',
+        },
       },
       {
         id: 'email',
@@ -79,7 +80,8 @@ export default function Menu() {
         footer: (props) => props.column.id,
         size: 150,
         meta: {
-          align: 'center',
+          align: 'start',
+          autoSize: true,
         },
       },
       {
@@ -93,6 +95,7 @@ export default function Menu() {
         },
         meta: {
           align: 'center',
+          autoSize: true,
         },
       },
       {
@@ -118,10 +121,11 @@ export default function Menu() {
         size: 100,
       },
       {
+        id: 'actions',
         accessorKey: 'actions',
         header: msg('actions'),
         footer: (props) => props.column.id,
-        size: 100,
+        size: 150,
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">

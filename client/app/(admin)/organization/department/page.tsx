@@ -52,14 +52,14 @@ export default function Departments() {
         id: 'code',
         accessorKey: 'code',
         header: () => msg('code'),
-        size: 80,
+        size: 100,
       },
       {
         accessorKey: 'description',
         header: () => msg('description'),
         minSize: 300,
         meta: {
-          align: 'center',
+          align: 'start',
         },
       },
       {
@@ -69,24 +69,16 @@ export default function Departments() {
         minSize: 220,
       },
       {
-        id: 'departmentTypeLevel',
-        accessorKey: 'departmentTypeLevel',
-        header: () => msg('level'),
-        size: 80,
-        meta: {
-          align: 'center',
-        },
-      },
-      {
         id: 'address',
         accessorKey: 'address',
         header: () => msg('address'),
         minSize: 220,
       },
       {
+        id: 'actions',
         accessorKey: 'actions',
         header: () => msg('actions'),
-        size: 100,
+        size: 180,
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
@@ -170,6 +162,7 @@ export default function Departments() {
         },
         meta: {
           align: 'center',
+          pinned: 'right',
         },
       },
     ],

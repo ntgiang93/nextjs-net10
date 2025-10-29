@@ -24,6 +24,7 @@ public class MenuController : ControllerBase
     }
 
     // GET methods
+    
     [HttpGet]
     [Policy(ESysModule.Menu, EPermission.View)]
     public async Task<IActionResult> GetMenuTree()

@@ -57,17 +57,16 @@ export const getCommonPinningStyles = (column: Column<any>): CSSProperties => {
   const isPinned = column.getIsPinned();
   const isLastLeftPinnedColumn = isPinned === 'left' && column.getIsLastColumn('left');
   const isFirstRightPinnedColumn = isPinned === 'right' && column.getIsFirstColumn('right');
-
   return {
     boxShadow: isLastLeftPinnedColumn
-      ? '-4px 0 4px -4px rgb(0 0 0 / 0.1) inset'
+      ? '1.95px 0 2.6px 0px rgba(0,0,0,0.15)'
       : isFirstRightPinnedColumn
-        ? '4px 0 4px -4px rgb(0 0 0 / 0.1) inset'
+        ? '-1.95px 0 2.6px 0px rgba(0,0,0,0.15)'
         : undefined,
     left: isPinned === 'left' ? `${column.getStart('left')}px` : undefined,
     right: isPinned === 'right' ? `${column.getAfter('right')}px` : undefined,
     position: isPinned ? 'sticky' : 'relative',
     width: column.getSize(),
-    zIndex: isPinned ? 1 : 0,
+    zIndex: isPinned ? 2 : 0,
   };
 };

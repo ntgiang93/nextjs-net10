@@ -35,6 +35,7 @@ export interface DataTableProps {
   leftContent?: React.ReactNode;
   onRowAction?: (key: number | string | bigint) => void;
   removeWrapper?: boolean;
+  height?: number;
 }
 
 export interface AsyncDataTableProps {
@@ -52,6 +53,7 @@ export interface AsyncDataTableProps {
   leftContent?: React.ReactNode;
   pagination: PaginationState;
   removeWrapper?: boolean;
+  height?: number;
 }
 
 import '@tanstack/react-table'; //or vue, svelte, solid, qwik, etc.
@@ -61,6 +63,7 @@ declare module '@tanstack/react-table' {
   interface ColumnMeta<TData extends RowData, TValue> {
     align?: 'start' | 'center' | 'end' | undefined;
     pinned?: 'left' | 'right' | undefined;
+    autoSize?: boolean;
   }
 }
 

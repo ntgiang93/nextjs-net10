@@ -3,6 +3,7 @@ import DataTable from '@/components/ui//data-table/Datatable';
 import { HugeIcons } from '@/components/ui//icon/HugeIcons';
 import { ConfirmModal } from '@/components/ui//overlay/ConfirmModal';
 import { ExtButton } from '@/components/ui/button/ExtButton';
+import { SearchInput } from '@/components/ui/input/SearchInput';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
 import { MenuHook } from '@/hooks/menu';
 import { hasPermission } from '@/libs/AuthHelper';
@@ -17,11 +18,12 @@ import { useMemo, useState } from 'react';
 import MenuDetail from './components/MenuDetailModal';
 
 export default function Menu() {
-  const { data, refetch, isLoading } = MenuHook.useGetMenuTree();
+  const { data, refetch, isFetching } = MenuHook.useGetMenuTree();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | undefined>(undefined);
   const [selectedParent, setSelectedParent] = useState<MenuItem | undefined>(undefined);
+  const [searchTerm, setSearchTerm] = useState('');
   const { mutateAsync: del, isPending: isDelPending } = MenuHook.useDelete(selectedMenu?.id || 0);
   const canCreate = hasPermission(ESysModule.Menu, EPermission.Create);
   const canEdit = hasPermission(ESysModule.Menu, EPermission.Edit);
@@ -35,23 +37,23 @@ export default function Menu() {
         accessorFn: (row) => row.name,
         id: 'name',
         header: () => msg('name'),
-        footer: (props) => props.column.id,
         size: 300,
         meta: {
-          pinned: 'left',
+          autoSize: true,
         },
       },
       {
         id: 'url',
         accessorKey: 'url',
         header: () => msg('path'),
-        footer: (props) => props.column.id,
-        minSize: 200,
+        size: 200,
+        meta: {
+          autoSize: true,
+        },
       },
       {
         accessorKey: 'icon',
         header: () => 'Icon',
-        footer: (props) => props.column.id,
         size: 80,
         cell: ({ cell }) => {
           return <HugeIcons name={(cell.getValue() as string) || ''} />;
@@ -61,16 +63,10 @@ export default function Menu() {
         },
       },
       {
-        accessorKey: 'status',
-        header: () => msg('status'),
-        footer: (props) => props.column.id,
-        size: 100,
-      },
-      {
+        id: 'actions',
         accessorKey: 'actions',
         header: () => msg('actions'),
-        footer: (props) => props.column.id,
-        size: 100,
+        size: 150,
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
@@ -136,8 +132,51 @@ export default function Menu() {
         },
       },
     ],
-    [canEdit, canDelete],
+    [canCreate, canEdit, canDelete, msg],
   );
+
+  const filteredData = useMemo(() => {
+    if (!data) {
+      return [] as MenuItem[];
+    }
+
+    const keyword = searchTerm.trim().toLowerCase();
+    if (!keyword) {
+      return data;
+    }
+
+    const filterNodes = (nodes: MenuItem[]): MenuItem[] => {
+      return nodes.reduce<MenuItem[]>((acc, node) => {
+        const filteredChildren = node.children ? filterNodes(node.children) : [];
+        const nodeMatches = [node.name, node.url, node.sysmodule].some((field) =>
+          field ? field.toLowerCase().includes(keyword) : false,
+        );
+
+        if (nodeMatches) {
+          acc.push({
+            ...node,
+            ...(node.children
+              ? {
+                  children: filteredChildren.length > 0 ? filteredChildren : node.children,
+                }
+              : {}),
+          });
+          return acc;
+        }
+
+        if (filteredChildren.length > 0) {
+          acc.push({
+            ...node,
+            children: filteredChildren,
+          });
+        }
+
+        return acc;
+      }, []);
+    };
+
+    return filterNodes(data);
+  }, [data, searchTerm]);
 
   const handleDelete = async () => {
     var success = await del();
@@ -177,10 +216,19 @@ export default function Menu() {
       ></PageHeader>
       <DataTable
         columns={columns}
-        data={data || []}
+        data={filteredData}
         childrenProperty="children"
-        isLoading={isLoading}
+        isLoading={isFetching}
         fetch={refetch}
+        leftContent={
+          <>
+            <SearchInput
+              className="w-64"
+              value={searchTerm}
+              onValueChange={(value) => setSearchTerm(value)}
+            />
+          </>
+        }
       />
       <MenuDetail
         isOpen={isOpen}

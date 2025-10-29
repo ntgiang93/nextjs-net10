@@ -89,6 +89,7 @@ export default function RolePermissonModal(props: IRoleUserProps) {
         minSize: 200,
         meta: {
           pinned: 'left',
+          autoSize: true,
         },
       },
     ];

@@ -20,7 +20,7 @@ import {
   ModalHeader,
   Tooltip,
   useDisclosure,
-  User
+  User,
 } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { AddTeamIcon, Delete02Icon, UserAccountIcon } from 'hugeicons-react';
@@ -84,9 +84,9 @@ export default function AssignRoleUserModal(props: AssignRoleUserModalProps) {
             />
           );
         },
-        minSize: 150,
+        size: 200,
         meta: {
-          pinned: 'left',
+          autoSize: true,
         },
       },
       {

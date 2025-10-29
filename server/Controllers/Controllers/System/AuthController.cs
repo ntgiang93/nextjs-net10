@@ -33,7 +33,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> LoginProxy([FromBody] LoginDto loginDto)
     {
         var token = await _authService.LoginProxyAsync(loginDto);
-        if (token == null) return Unauthorized();
+        if (token == null) return Ok(ApiResponse<TokenDto>.Fail(_sysMsg.Get(EMessage.AuthenticationFailed)));;
         setRefreshTokenCookie(token);
         return Ok(ApiResponse<TokenDto>.Succeed(token, _sysMsg.Get(EMessage.SuccessMsg)));
     }
@@ -50,7 +50,7 @@ public class AuthController : ControllerBase
             return Ok(ApiResponse<TokenDto>.Fail(_sysMsg.Get(EMessage.AuthenticationFailed)));
         loginDto.IpAddress = HttpContext.GetClientIpAddress();
         var token = await _authService.LoginAsync(user, loginDto);
-        if (token == null) return Unauthorized();
+        if (token == null) return Ok(ApiResponse<TokenDto>.Fail(_sysMsg.Get(EMessage.AuthenticationFailed)));
         setRefreshTokenCookie(token);
         return Ok(ApiResponse<TokenDto>.Succeed(token, _sysMsg.Get(EMessage.SuccessMsg)));
     }

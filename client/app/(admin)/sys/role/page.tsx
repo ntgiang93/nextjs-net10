@@ -28,7 +28,7 @@ import RolePermissonModal from './components/RolePermissonModal';
 export default function Roles() {
   const t = useTranslations('role');
   const msg = useTranslations('msg');
-  const { data: roles, refetch, isLoading } = RoleHook.useGetAll();
+  const { data: roles, refetch, isFetching } = RoleHook.useGetAll();
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [selectedRole, setSelectedRole] = useState<RoleDto | undefined>(undefined);
   const { isOpen: IsOpenDel, onOpen: onOpenDel, onOpenChange: OnOpenDelChange } = useDisclosure();
@@ -66,14 +66,16 @@ export default function Roles() {
         accessorKey: 'name',
         header: () => t('roleName'),
         footer: (props) => props.column.id,
-        minSize: 150,
+        size: 150,
+        meta: { autoSize: true },
       },
       {
         id: 'description',
         accessorKey: 'description',
         header: () => msg('description'),
         footer: (props) => props.column.id,
-        minSize: 150,
+        size: 150,
+        meta: { autoSize: true },
       },
       {
         id: 'isProtected',
@@ -91,10 +93,11 @@ export default function Roles() {
         },
       },
       {
+        id: 'actions',
         accessorKey: 'actions',
         header: msg('actions'),
         footer: (props) => props.column.id,
-        size: 100,
+        size: 180,
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
@@ -232,7 +235,7 @@ export default function Roles() {
       <DataTable
         columns={columns}
         data={tableData}
-        isLoading={isLoading}
+        isLoading={isFetching}
         fetch={refetch}
         leftContent={
           <>

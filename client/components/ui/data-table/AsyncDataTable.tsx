@@ -5,19 +5,10 @@ import {
   CardFooter,
   CardHeader,
   Checkbox,
-  Dropdown,
-  DropdownItem,
-  DropdownMenu,
-  DropdownTrigger,
   Pagination,
   Select,
   SelectItem,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
+  Spinner,
 } from '@heroui/react';
 import {
   ColumnDef,
@@ -27,14 +18,16 @@ import {
   getExpandedRowModel,
   getFilteredRowModel,
   RowSelectionState,
+  Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { ArrowRight01Icon, ReloadIcon, Settings04Icon } from 'hugeicons-react';
+import clsx from 'clsx';
+import { ArrowRight01Icon, ReloadIcon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { ExtButton } from '../button/ExtButton';
-import Loading from '../overlay/Loading';
 import {
+  getCommonPinningStyles,
   getfirstColumn,
   getRowSelection,
   getSelectedItemsFromRowSelection,
@@ -55,20 +48,22 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
     leftContent,
     pagination,
     removeWrapper,
+    height,
   } = props;
   const [expanded, setExpanded] = useState<ExpandedState>({});
-  const [rowSelection, setRowSelection] = useState<RowSelectionState>(
-    getRowSelection(selection?.selectedKeys || []),
-  );
   const [tableHeight, setTableHeight] = useState(240);
   const cardRef = useRef<HTMLDivElement>(null);
   const msg = useTranslations('msg');
 
-  useEffect(() => {
-    const selectedItems = getSelectedItemsFromRowSelection(rowSelection);
+  const rowSelection = useMemo(() => {
+    return getRowSelection(selection?.selectedKeys || []);
+  }, [selection?.selectedKeys]);
+
+  const handleSelectedKeysChange = (updater: Updater<RowSelectionState>) => {
+    var result = typeof updater === 'function' ? updater(rowSelection) : updater;
+    const selectedItems = getSelectedItemsFromRowSelection(result);
     selection?.onChangeSelection(selectedItems);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [rowSelection]);
+  };
 
   //* Handler column before render
   const cols = useMemo(() => {
@@ -77,7 +72,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
       const firstCol = getfirstColumn(cloneColumns);
       firstCol.cell = ({ row, cell }) => {
         return (
-          <div className="flex items-center gap-2" style={{ paddingLeft: row.depth * 16 }}>
+          <div className="flex items-center gap-2">
             {row.getCanExpand() ? (
               <Button
                 isIconOnly
@@ -87,7 +82,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
                 radius="full"
                 size="sm"
                 onPress={() => row.toggleExpanded()}
-                style={row.depth > 0 ? { marginLeft: row.depth * 20 } : {}}
+                style={row.depth > 0 ? { marginLeft: row.depth * 32 } : {}}
               >
                 <ArrowRight01Icon
                   size={16}
@@ -95,7 +90,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
                 />
               </Button>
             ) : (
-              <div style={{ width: row.depth * 32 }}></div>
+              <div style={{ width: row.depth * 32 + 32 }}></div>
             )}
             <span>{String(cell.getValue())}</span>
           </div>
@@ -140,6 +135,10 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
 
   useEffect(() => {
     if (!cardRef.current) return;
+    if (height) {
+      setTableHeight(height);
+      return;
+    }
     const cardHeight = cardRef.current.clientHeight;
     // Calculate the remaining space for the table
     const newTableHeight = cardHeight - 152;
@@ -165,7 +164,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
     },
     enableRowSelection: true,
     manualPagination: true,
-    onRowSelectionChange: setRowSelection,
+    onRowSelectionChange: (updater) => handleSelectedKeysChange(updater),
     onExpandedChange: setExpanded,
     getSubRows: (row) => row[childrenProperty || 'children'],
     getRowId: (row) => row[keyColumn || 'id'],
@@ -176,16 +175,7 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
   });
 
   return (
-    <Card
-      className="h-full overflow-auto"
-      ref={cardRef}
-      shadow={removeWrapper ? 'none' : 'md'}
-      classNames={{
-        header: removeWrapper ? 'px-0' : 'px-3',
-        body: removeWrapper ? 'px-0' : 'px-3',
-        footer: removeWrapper ? 'px-0' : 'px-3',
-      }}
-    >
+    <Card className="h-full overflow-auto" ref={cardRef} shadow={removeWrapper ? 'none' : 'md'}>
       <CardHeader className="flex items-center justify-between w-full">
         <div className="flex items-center justify-start gap-4">{leftContent}</div>
         <div className="flex items-center justify-end gap-2">
@@ -193,76 +183,89 @@ const AsyncDataTable = (props: AsyncDataTableProps) => {
           <ExtButton isIconOnly disabled={isLoading} variant="light" size="sm" onPress={fetch}>
             <ReloadIcon size={20} />
           </ExtButton>
-          <Dropdown>
-            <DropdownTrigger>
-              <ExtButton isIconOnly disabled={isLoading} variant="light" size="sm" onPress={fetch}>
-                <Settings04Icon size={20} />
-              </ExtButton>
-            </DropdownTrigger>
-            <DropdownMenu
-              aria-label="Dynamic Actions"
-              items={table.getAllLeafColumns()}
-              selectionMode="multiple"
-            >
-              <DropdownItem key={1}>Resize column</DropdownItem>
-              <DropdownItem key={2}>Move column</DropdownItem>
-            </DropdownMenu>
-          </Dropdown>
         </div>
       </CardHeader>
-      <CardBody style={{ height: `${tableHeight}px` }} className="py-0 ">
-        <Table
-          aria-label="Data table"
-          isHeaderSticky
-          classNames={{
-            wrapper: 'p-0 shadow-none rounded-lg',
-            base: 'overflow-scroll',
-          }}
-        >
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableColumn
-                      key={header.id}
-                      colSpan={header.colSpan}
-                      width={header.getSize()}
-                      align={header.column.columnDef.meta?.align}
-                    >
-                      {header.isPlaceholder ? null : (
-                        <div>{flexRender(header.column.columnDef.header, header.getContext())}</div>
-                      )}
-                    </TableColumn>
-                  );
-                })}
-              </>
-            ))}
-          </TableHeader>
-          <TableBody isLoading={isLoading} loadingContent={<Loading />}>
-            {table.getRowModel().rows.map((row) => {
-              return (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => {
+      <CardBody style={{ height: `${tableHeight}px` }} className="py-0">
+        <div className="py-0 relative overflow-auto" style={{ height: `${tableHeight}px` }}>
+          <table aria-label="Data table" className="grid text-sm">
+            <thead className="sticky top-0 z-10 grid">
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id} className="w-full flex shadow-md rounded-md">
+                  {headerGroup.headers.map((header, index) => {
                     return (
-                      <TableCell
-                        key={cell.id}
-                        width={cell.column.getSize()}
-                        className="whitespace-nowrap truncate border-b border-default/50 py-1"
+                      <th
+                        key={header.id}
+                        colSpan={header.colSpan}
+                        className={clsx(
+                          'flex items-center bg-content3 p-3 font-semibold',
+                          index === 0 ? 'rounded-l-md' : '',
+                          index === headerGroup.headers.length - 1 ? 'rounded-r-md' : '',
+                          header.column.columnDef.meta?.align
+                            ? `justify-${header.column.columnDef.meta?.align}`
+                            : '',
+                          header.column.columnDef.meta?.autoSize
+                            ? `flex-auto min-w-[${header.getSize()}px]`
+                            : 'w-[${header.getSize()}px]',
+                        )}
+                        style={{ ...getCommonPinningStyles(header.column) }}
                       >
-                        <div
-                          className={`flex items-center justify-${cell.column.columnDef.meta?.align}`}
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </div>
-                      </TableCell>
+                        {header.isPlaceholder ? null : (
+                          <div>
+                            {flexRender(header.column.columnDef.header, header.getContext())}
+                          </div>
+                        )}
+                      </th>
                     );
                   })}
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
+                </tr>
+              ))}
+            </thead>
+            <tbody className="grid w-full">
+              {isLoading && (
+                <tr className="absolute top-0 left-0 h-full w-full bg-content2/50 flex items-center justify-center z-10">
+                  <td colSpan={table.getVisibleLeafColumns().length}>
+                    <Spinner variant="gradient" />
+                  </td>
+                </tr>
+              )}
+              {table.getRowModel().rows.map((row) => {
+                return (
+                  <tr key={row.id} className="group flex w-full">
+                    {row.getVisibleCells().map((cell, index) => {
+                      return (
+                        <td
+                          key={cell.id}
+                          width={
+                            cell.column.columnDef.meta?.autoSize ? undefined : cell.column.getSize()
+                          }
+                          className={clsx(
+                            'whitespace-nowrap truncate border-b border-default/50 bg-background',
+                            'px-3 py-1 group-hover:bg-content2 min-h-10',
+                            index === 0 ? 'rounded-l-md' : '',
+                            index === row.getVisibleCells().length - 1 ? 'rounded-r-md' : '',
+                            cell.column.columnDef.meta?.autoSize
+                              ? `flex-auto min-w-[${cell.column.getSize()}px]`
+                              : `w-[${cell.column.getSize()}px]`,
+                          )}
+                          style={{ ...getCommonPinningStyles(cell.column) }}
+                        >
+                          <div
+                            className={clsx(
+                              'flex items-center h-full justify-' +
+                                (cell.column.columnDef.meta?.align || 'start'),
+                            )}
+                          >
+                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                          </div>
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </CardBody>
       <CardFooter className="grid grid-cols-6 gap-4">
         <div className="col-span-2 text-sm font-semibold">

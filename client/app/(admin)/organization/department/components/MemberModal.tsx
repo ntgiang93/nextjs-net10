@@ -32,7 +32,7 @@ import { ColumnDef } from '@tanstack/react-table';
 import clsx from 'clsx';
 import { AddTeamIcon, Delete02Icon, UserAccountIcon, ViewIcon, ViewOffIcon } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import AddMemberModal from './AddMemberModal';
 
 interface MemberModalProps {
@@ -86,9 +86,9 @@ export default function MemberModal(props: MemberModalProps) {
             />
           );
         },
-        minSize: 150,
+        size: 150,
         meta: {
-          pinned: 'left',
+          autoSize: true,
         },
       },
       {
@@ -171,15 +171,15 @@ export default function MemberModal(props: MemberModalProps) {
     }
   }, [selectedDepartment, department]);
 
-  const handleDelete = useCallback(async () => {
+  const handleDelete = async () => {
     if (selectedRow.length === 0) return;
     const success = await remove(selectedRow);
+    OnOpenDelChange();
     if (success) {
-      refetch();
-      OnOpenDelChange();
       setSelectedRow([]);
+      await refetch();
     }
-  }, [selectedRow, department]);
+  };
 
   const mapDepartmentToTreeItem = (dept: DepartmentDto): TreeItemType => {
     return {
@@ -363,7 +363,7 @@ export default function MemberModal(props: MemberModalProps) {
             onOpenChange={OnOpenDelChange}
             onConfirm={handleDelete}
             objectName={selectedUserName}
-            loading={isFetching}
+            loading={isPending}
           />
           {isOpenAddMember && (
             <AddMemberModal

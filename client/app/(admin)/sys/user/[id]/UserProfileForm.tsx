@@ -81,7 +81,6 @@ export default function UserProfileForm(props: IUserProfileFormProps) {
                 variant="bordered"
                 value={form.gender}
                 onChange={(e) => {
-                  console.log(e);
                   setForm((prev) => ({ ...prev, gender: e.target.value }));
                 }}
               >

@@ -27,9 +27,9 @@ export const Menu = (props: ISidebarMenuProps) => {
   const GenerateMenu = useCallback(
     (menuData: MenuItem[], parentKey: string = '', level: number = 0) => {
       const getExpandIndex = (data: MenuItem[]): number => {
-        const index = data.findIndex((item) => pathName.includes(`${item.url}/`) && item.url !== '/');
-        if (index !== -1) {
-          return index;
+        const item = data.find((item) => pathName.includes(`${item.url}/`) && item.url !== '/');
+        if (item) {
+          return item.id;
         } else return 0;
       };
 
@@ -59,10 +59,12 @@ export const Menu = (props: ISidebarMenuProps) => {
         };
       };
 
+      console.log('exphand', expandIndex);
+
       return (
         <Accordion
           showDivider={false}
-          defaultExpandedKeys={isCompact ? undefined : [`${parentKey}${expandIndex}`]}
+          defaultExpandedKeys={isCompact ? undefined : ['1']}
           className="px-0"
         >
           {menuData.map((item, index) => {
@@ -73,7 +75,7 @@ export const Menu = (props: ISidebarMenuProps) => {
 
             return (
               <AccordionItem
-                key={key}
+                key={item.id}
                 aria-label={item.name}
                 title={item.name}
                 hideIndicator={!hasChildren || isCompact}
@@ -112,7 +114,7 @@ export const Menu = (props: ISidebarMenuProps) => {
   const menu = useMemo(() => GenerateMenu(data), [data, GenerateMenu]);
 
   return (
-    <ScrollShadow hideScrollBar className="h-[calc(100vh-11rem)] max-w-[calc(256-24px)] w-full" >
+    <ScrollShadow hideScrollBar className="h-[calc(100vh-11rem)] max-w-[calc(256-24px)] w-full">
       {menu}
     </ScrollShadow>
   );

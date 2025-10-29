@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@fingerprintjs/fingerprintjs": "^4.6.2",
+    "@headless-tree/core": "^1.5.1",
+    "@headless-tree/react": "^1.5.1",
     "@heroui/react": "^2.8.5",
     "@heroui/react-utils": "2.1.14",
     "@heroui/theme": "2.4.23",
