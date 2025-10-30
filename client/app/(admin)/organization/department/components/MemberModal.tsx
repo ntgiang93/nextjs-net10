@@ -1,9 +1,8 @@
 import AsyncDataTable from '@/components/ui/data-table/AsyncDataTable';
-import { ListBoxTree } from '@/components/ui/hierarchy/ListBoxTree';
-import { TreeItemType } from '@/components/ui/hierarchy/TreeItem';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { ConfirmModal } from '@/components/ui/overlay/ConfirmModal';
+import TreeList, { TreeListItem } from '@/components/ui/tree/TreeList';
 import { DepartmentHook } from '@/hooks/department';
 import { hasPermission } from '@/libs/AuthHelper';
 import { EPermission } from '@/types/base/Permission';
@@ -181,16 +180,17 @@ export default function MemberModal(props: MemberModalProps) {
     }
   };
 
-  const mapDepartmentToTreeItem = (dept: DepartmentDto): TreeItemType => {
+  const mapDepartmentToTreeItem = (dept: DepartmentDto): TreeListItem => {
     return {
-      value: dept.id,
-      label: dept.name,
+      id: dept.id,
+      title: dept.name,
+      description: '',
       children: dept.children?.map(mapDepartmentToTreeItem) || [],
     };
   };
 
   const departmentTree = useMemo(() => {
-    if (!department) return [] as TreeItemType[];
+    if (!department) return [] as TreeListItem[];
     else return [mapDepartmentToTreeItem(department)];
   }, [department]);
 
@@ -230,11 +230,12 @@ export default function MemberModal(props: MemberModalProps) {
                 <Card>
                   <CardHeader className="font-semibold">{t('organizationChart')}</CardHeader>
                   <CardBody>
-                    <ListBoxTree
-                      anyLevel={true}
+                    <TreeList
+                      selectionStrategy="all"
+                      selectionMode="single"
                       items={departmentTree}
-                      selectedValues={selectedDepartment}
-                      onSelectedChange={(value) => {
+                      selectedIds={selectedDepartment}
+                      onSelectionChange={(value) => {
                         const selected = value as number[];
                         setSelectedDepartment(selected);
                         setFilter((prev) => ({

@@ -90,7 +90,7 @@ export default function MenuDetail(props: MenuDetailProps) {
                 <MenuSelect
                   label={t('parentMenu')}
                   values={form.parentId ? [form.parentId] : []}
-                  onChange={(values) => setForm({ ...form, parentId: values[0] })}
+                  onChange={(values) => setForm((prev) => ({ ...prev, parentId: values[0] }))}
                   isRequired={false}
                   multiple={false}
                   labelPlacement={'outside'}
@@ -101,7 +101,7 @@ export default function MenuDetail(props: MenuDetailProps) {
                   autoFocus
                   name="name"
                   value={form.name}
-                  onValueChange={(value) => setForm({ ...form, name: value })}
+                  onValueChange={(value) => setForm((prev) => ({ ...prev, name: value }))}
                   placeholder={`${msg('enter')} ${msg('name')}`}
                   validate={(value) => {
                     return value === '' || !value ? msg('requiredField') : null;

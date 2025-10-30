@@ -1,7 +1,7 @@
 'use client';
 
-import { TreeItemType } from '@/components/ui/hierarchy/TreeItem';
-import { TreeSelect } from '@/components/ui/hierarchy/TreeSelect';
+import { TreeListItem } from '@/components/ui/tree/TreeList';
+import { TreeSelect } from '@/components/ui/tree/TreeSelect';
 import { DepartmentHook } from '@/hooks/department';
 import { DepartmentDto } from '@/types/sys/Department';
 import { useTranslations } from 'next-intl';
@@ -32,32 +32,32 @@ export default function DepartmentSelect({
   const msg = useTranslations('msg');
   const t = useTranslations('organization');
 
-  const options = useMemo<TreeItemType[]>(() => {
+  const options = useMemo<TreeListItem[]>(() => {
     if (!data) return [];
-
-    const convertToTreeItem = (list: DepartmentDto[]): TreeItemType[] =>
+    const convertToTreeItem = (list: DepartmentDto[]): TreeListItem[] =>
       list.map((item) => ({
-        value: item.id,
-        label: item.name,
+        id: item.id,
+        title: item.name,
+        description: '',
         children: convertToTreeItem(item.children || []),
       }));
-
     return convertToTreeItem(data);
   }, [data]);
 
   return (
     <TreeSelect
       variant="bordered"
-      options={options}
+      items={options}
       label={label}
-      selectedValues={values}
+      selectedIds={values}
       placeholder={`${msg('select')} ${t('department').toLowerCase()}`}
       multiple={multiple}
       isRequired={isRequired}
+      selectionMode={multiple ? 'multiple' : 'single'}
+      selectionStrategy={anyLevel ? 'all' : 'leaf'}
       labelPlacement={labelPlacement}
-      anyLevel={anyLevel}
       isDisabled={isDisabled}
-      onSelectedChange={(selected) => {
+      onSelectionChange={(selected) => {
         onChange(selected as number[]);
       }}
     />

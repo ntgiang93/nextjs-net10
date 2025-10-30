@@ -1,76 +1,66 @@
-import { Button } from '@heroui/react';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight01Icon } from 'hugeicons-react';
 import { useMemo } from 'react';
-
-export type NestedListItem = {
-  id: string;
-  title: string;
-  description?: string;
-  children?: NestedListItem[];
-};
+import { SelectedIcon } from '../icon/SelectedIcon';
+import { TreeListItem } from './TreeList';
 
 interface TreeNodeProps {
-  node: NestedListItem;
+  node: TreeListItem;
   level?: number;
-  onSelect: (node: NestedListItem) => void;
-  selectedId: string | number | undefined;
+  onSelect: (node: TreeListItem) => void;
+  selectedId: Set<string | number>;
   expandedIds: Set<string | number>;
   onToggle: (id: string | number) => void;
+  selectionMode?: 'single' | 'multiple' | 'read-only';
+  selectionStrategy?: 'all' | 'leaf';
+  isExpandAll?: boolean;
 }
 
 const TreeNode = (props: TreeNodeProps) => {
-  const { node, level = 0, onSelect, selectedId, expandedIds, onToggle } = props;
+  const { node, level = 0, onSelect, selectedId, expandedIds, onToggle, isExpandAll } = props;
   const hasChildren = node.children && node.children.length > 0;
-  const isExpanded = expandedIds.has(node.id);
-  const isSelected = useMemo(() => selectedId === node.id, [selectedId]);
-
-  const handleToggle = () => {
-    //e.stopPropagation();
-    if (hasChildren) {
-      onToggle(node.id);
-    }
-  };
+  const isExpanded = expandedIds.has(node.id) || isExpandAll;
+  const isSelected = useMemo(() => selectedId.has(node.id), [selectedId]);
 
   return (
-    <div>
+    <div className="my-0.5">
       <div
         className={clsx(
-          'flex items-center gap-1 h-10 py-1 px-2 cursor-pointer rounded',
+          'flex items-center gap-1 h-8 py-1 px-2 cursor-pointer rounded',
           'transition-colors duration-300',
           isSelected
             ? 'bg-primary-100 has-hover:bg-primary-100'
             : 'bg-transparent has-hover:bg-content2 hover:bg-content2',
         )}
         style={{ paddingLeft: `${level * 20 + 8}px` }}
-        onClick={() => {
-          onSelect(node);
-        }}
       >
         {hasChildren ? (
-          <motion.div
+          <motion.button
             initial={{ rotate: 0 }}
             animate={isExpanded ? { rotate: 90 } : { rotate: 0 }}
             transition={{ duration: 0.4, ease: [0, 0.71, 0.2, 1.01] }}
+            className={clsx(
+              hasChildren ? 'opacity-100' : 'opacity-0',
+              'cursor-pointer rounded-full hover:bg-content3 p-1',
+            )}
+            onClick={() => onToggle(node.id)}
+            disabled={!hasChildren}
           >
-            <Button
-              isIconOnly
-              radius={'full'}
-              size={'sm'}
-              color={'default'}
-              variant="light"
-              className={clsx(hasChildren ? 'opacity-100' : 'opacity-0')}
-              onPress={() => onToggle(node.id)}
-              disabled={!hasChildren}
-            >
-              <ArrowRight01Icon size={16} />
-            </Button>
-          </motion.div>
+            <ArrowRight01Icon size={16} />
+          </motion.button>
         ) : (
           <span className="w-4" />
         )}
-        <span className="ml-1 text-sm select-none">{node.title}</span>
+        <div
+          className="w-full justify-between flex items-center"
+          onClick={() => {
+            onSelect(node);
+          }}
+        >
+          <span className="text-sm select-none">{node.title}</span>
+          <SelectedIcon isSelected={isSelected} size={14} />
+        </div>
       </div>
 
       <AnimatePresence initial={false}>

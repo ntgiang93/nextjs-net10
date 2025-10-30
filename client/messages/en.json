@@ -63,7 +63,8 @@
     "welcomeMessage": "Log in to your account to continue.",
     "haventAccount": "Don't have account? Please contact {admin}",
     "or": "or",
-    "back": "Back"
+    "back": "Back",
+    "noResultsFound": "No results found"
   },
   "role": {
     "title": "Role management",

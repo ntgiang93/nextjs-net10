@@ -40,7 +40,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         className={clsx(
           'transition-all duration-400 ease-in-out flex flex-col hover:w-64 h-screen flex-shrink-0',
           'max-md:hidden',
-          `${isCompact ? 'w-16' : 'w-64'}`,
+          `${isCompact ? 'w-20' : 'w-64'}`,
         )}
         onMouseEnter={() => setShowSidebar(isCompact)}
         onMouseLeave={() => {

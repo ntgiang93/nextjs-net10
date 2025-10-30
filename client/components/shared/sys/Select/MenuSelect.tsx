@@ -1,7 +1,7 @@
 'use client';
 
-import { TreeItemType } from '@/components/ui//hierarchy/TreeItem';
-import { TreeSelect } from '@/components/ui//hierarchy/TreeSelect';
+import { TreeListItem } from '@/components/ui/tree/TreeList';
+import { TreeSelect } from '@/components/ui/tree/TreeSelect';
 import { MenuHook } from '@/hooks/menu';
 import { MenuItem } from '@/types/sys/Menu';
 import { useTranslations } from 'next-intl';
@@ -24,20 +24,20 @@ export default function MenuSelect({
   multiple = false,
   isRequired,
   labelPlacement,
-  anyLevel = true,
 }: IMenuSelectProps) {
   const { data } = MenuHook.useGetMenuTree();
   const msg = useTranslations('msg');
   const t = useTranslations('menu');
   // Flatten menu tree để hiển thị trong select
-  const options = useMemo<TreeItemType[]>(() => {
+  const options = useMemo<TreeListItem[]>(() => {
     if (!data || data == null) return [];
 
-    const convertToTreeItem = (menus: MenuItem[]): TreeItemType[] => {
+    const convertToTreeItem = (menus: MenuItem[]): TreeListItem[] => {
       return menus.map((menu) => {
-        const item: TreeItemType = {
-          value: menu.id,
-          label: menu.name,
+        const item: TreeListItem = {
+          id: menu.id,
+          title: menu.name,
+          description: menu.url,
           children: convertToTreeItem(menu.children || []) || [],
         };
         return item;
@@ -49,15 +49,16 @@ export default function MenuSelect({
   return (
     <TreeSelect
       variant="bordered"
-      options={options}
+      items={options}
       label={label}
-      selectedValues={values}
+      selectedIds={values}
       placeholder={`${msg('select')} ${t('menu')}`}
       multiple={multiple}
       isRequired={isRequired}
+      selectionMode="single"
+      selectionStrategy="all"
       labelPlacement={labelPlacement}
-      anyLevel={anyLevel}
-      onSelectedChange={(values) => {
+      onSelectionChange={(values) => {
         onChange(values as number[]);
       }}
     />

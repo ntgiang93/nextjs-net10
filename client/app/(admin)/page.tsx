@@ -1,11 +1,11 @@
 'use client';
-import AnimatedNestedList, { NestedListItem } from '@/components/ui/list/AnimatedNestedList';
+import { TreeList, TreeListItem } from '@/components/ui/tree/TreeList';
 import { Card, CardBody, CardHeader, Chip, Select, SelectItem } from '@heroui/react';
 import clsx from 'clsx';
 import { useMemo, useState } from 'react';
 
 export default function Home() {
-  const teamStructure = useMemo<NestedListItem[]>(
+  const teamStructure = useMemo<TreeListItem[]>(
     () => [
       {
         id: 'product-ops',
@@ -76,12 +76,14 @@ export default function Home() {
     [],
   );
 
-  const [selectionMode, setSelectionMode] = useState<'single' | 'multiple'>('multiple');
+  const [selectionMode, setSelectionMode] = useState<'single' | 'multiple' | 'read-only'>(
+    'multiple',
+  );
   const [selectionStrategy, setSelectionStrategy] = useState<'leaf' | 'all'>('leaf');
   const [selectedIds, setSelectedIds] = useState<string[]>(['client-experience']);
 
   const itemLookup = useMemo(() => {
-    const map: Record<string, NestedListItem> = {};
+    const map: Record<string, TreeListItem> = {};
     const stack = [...teamStructure];
     while (stack.length) {
       const node = stack.pop();
@@ -112,6 +114,18 @@ export default function Home() {
     if (strategy === 'leaf') {
       setSelectedIds((prev) => prev.filter((id) => !itemLookup[id]?.children?.length));
     }
+  };
+
+  const handleSelectionChange = (values: (string | number)[] | string | number) => {
+    setSelectedIds((prev) => {
+      if (Array.isArray(values)) {
+        return values.map((v) => String(v));
+      }
+      if (selectionMode === 'single') {
+        return [String(values)];
+      }
+      return [...prev, String(values)];
+    });
   };
 
   return (
@@ -158,14 +172,13 @@ export default function Home() {
               <SelectItem key="all">All nodes</SelectItem>
             </Select>
           </div>
-          <AnimatedNestedList
+          <TreeList
             items={teamStructure}
             defaultExpandedIds={['product-ops', 'engineering']}
             selectionMode={selectionMode}
             selectionStrategy={selectionStrategy}
             selectedIds={selectedIds}
-            onSelectionChange={setSelectedIds}
-            searchPlaceholder="Search teams..."
+            onSelectionChange={(values) => handleSelectionChange(values)}
           />
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-foreground">Selected:</span>

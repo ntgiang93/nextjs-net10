@@ -63,7 +63,8 @@
     "welcomeMessage": "Đăng nhập vào tài khoản của bạn để tiếp tục.",
     "haventAccount": "Chưa có tài khoản? Vui lòng liên hệ {admin}",
     "or": "hoặc",
-    "back": "Quay lại"
+    "back": "Quay lại",
+    "noResultsFound": "Không tìm thấy kết quả"
   },
   "role": {
     "title": "Quản lý Vai trò",
