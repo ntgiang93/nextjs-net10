@@ -26,7 +26,7 @@ public class SysCategoryController : ControllerBase
 
     [HttpGet("system-modules")]
     [Policy(ESysModule.SysCategories, EPermission.View)]
-    public async Task<IActionResult> GetAllSysModule()
+    public IActionResult GetAllSysModule()
     {
         var modules = SysModule.Get2SelectOptions();
         return Ok(ApiResponse<IEnumerable<SelectOption<string>>>.Succeed(modules, _sysMsg.Get(EMessage.SuccessMsg)));
@@ -34,7 +34,7 @@ public class SysCategoryController : ControllerBase
     
     [HttpGet("system-permissions")]
     [Policy(ESysModule.SysCategories, EPermission.View)]
-    public async Task<IActionResult> GetAllPermission()
+    public IActionResult GetAllPermission()
     {
         var permisons = Permission.Get2SelectOptions();
         return Ok(ApiResponse<IEnumerable<SelectOption<EPermission>>>.Succeed(permisons, _sysMsg.Get(EMessage.SuccessMsg)));
@@ -46,6 +46,22 @@ public class SysCategoryController : ControllerBase
     {
         var categories = await _categoryService.GetAllAsync<CategoryDto>();
         return Ok(ApiResponse<IEnumerable<CategoryDto>>.Succeed(categories, _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+
+    [HttpGet("tree")]
+    [Policy(ESysModule.SysCategories, EPermission.View)]
+    public async Task<IActionResult> GetCategoryTree()
+    {
+        IEnumerable<CategoryTreeDto>? tree = await _categoryService.GetTreeAsync();
+        return Ok(ApiResponse<IEnumerable<CategoryTreeDto>>.Succeed(tree, _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+
+    [HttpGet("type/{type}")]
+    [Policy(ESysModule.SysCategories, EPermission.View)]
+    public async Task<IActionResult> GetByType(string type)
+    {
+        var categories = await _categoryService.GetByTypeAsync(type);
+        return Ok(ApiResponse<List<CategoryDto>>.Succeed(categories, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpGet("{id}")]
@@ -60,18 +76,18 @@ public class SysCategoryController : ControllerBase
 
     [HttpPost]
     [Policy(ESysModule.SysCategories, EPermission.Create)]
-    public async Task<IActionResult> CreateCategory([FromBody] CreateCategoryDto categoryDto)
+    public async Task<IActionResult> CreateCategory([FromBody] CategoryDto categoryDto)
     {
-        var id = await _categoryService.CreateCategoryAsync(categoryDto);
-        if (id == null)
+        var success = await _categoryService.CreateCategoryAsync(categoryDto);
+        if (!success)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<int>.Succeed(id, _sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     [HttpPut]
     [Policy(ESysModule.SysCategories, EPermission.Edit)]
-    public async Task<IActionResult> UpdateCategory([FromBody] UpdateCategoryDto categoryDto)
+    public async Task<IActionResult> UpdateCategory([FromBody] CategoryDto categoryDto)
     {
         var success = await _categoryService.UpdateCategoryAsync(categoryDto);
         if (!success)

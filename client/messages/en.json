@@ -64,7 +64,8 @@
     "haventAccount": "Don't have account? Please contact {admin}",
     "or": "or",
     "back": "Back",
-    "noResultsFound": "No results found"
+    "noResultsFound": "No results found",
+    "category": "Category"
   },
   "role": {
     "title": "Role management",

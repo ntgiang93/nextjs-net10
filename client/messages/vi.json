@@ -64,7 +64,8 @@
     "haventAccount": "Chưa có tài khoản? Vui lòng liên hệ {admin}",
     "or": "hoặc",
     "back": "Quay lại",
-    "noResultsFound": "Không tìm thấy kết quả"
+    "noResultsFound": "Không tìm thấy kết quả",
+    "category": "Danh mục"
   },
   "role": {
     "title": "Quản lý Vai trò",

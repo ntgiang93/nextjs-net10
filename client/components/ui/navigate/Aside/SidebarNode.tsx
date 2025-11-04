@@ -1,7 +1,7 @@
-import { Button } from '@heroui/react';
+import { Button, Tooltip } from '@heroui/react';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowRight01Icon } from 'hugeicons-react';
+import { ArrowRight01Icon, CircleIcon } from 'hugeicons-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useMemo } from 'react';
 import { HugeIcons } from '../../icon/HugeIcons';
@@ -22,23 +22,32 @@ const SidebarNode = (props: SidebarNodeProps) => {
   const pathName = usePathname();
   const isSelected = useMemo(() => node.url === pathName, [pathName]);
 
+  const isParentOfSelected = useMemo(() => {
+    const checkRecursive = (children?: SidebarNodeType[]): boolean => {
+      if (!children) return false;
+      return children.some((child) => {
+        if (child.url === pathName) return true;
+        return checkRecursive(child.children);
+      });
+    };
+    return hasChildren ? checkRecursive(node.children) : false;
+  }, [node, pathName, hasChildren]);
+
   const isExpanded = useMemo(() => {
-    return (
-      ((node.url && node.url != '' && node.url !== '/' && pathName.includes(node.url)) ||
-        expandedIds.has(node.id)) &&
-      !isCompact
-    );
-  }, [pathName, node, expandedIds, isCompact]);
+    return (isParentOfSelected || expandedIds.has(node.id)) && !isCompact;
+  }, [isParentOfSelected, expandedIds, isCompact]);
 
   return (
     <div className="my-1">
       <div
         className={clsx(
-          'flex justify-between items-center h-10 min-w-10 py-1 px-2 cursor-pointer rounded-lg',
+          'flex justify-between items-center h-10 min-w-8 py-1 px-2 cursor-pointer rounded-lg',
           'transition-colors duration-300',
           isSelected
             ? 'bg-primary has-hover:bg-primary'
-            : 'bg-transparent has-hover:bg-content2 hover:bg-content2',
+            : isCompact && isParentOfSelected
+              ? 'bg-primary'
+              : 'bg-transparent has-hover:bg-content2 hover:bg-content2',
         )}
         onClick={() => {
           hasChildren ? onToggle(node.id) : router.push(node.url);
@@ -46,31 +55,37 @@ const SidebarNode = (props: SidebarNodeProps) => {
       >
         <div
           className={clsx(
-            'w-full justify-start flex items-center gap-2',
+            'w-full flex items-center gap-2',
             isSelected ? 'text-background' : 'text-foreground',
+            isCompact ? 'justify-center' : 'justify-start',
           )}
         >
-          <HugeIcons name={node.icon || 'folder-01'} size={16} />
+          <div>
+            {node.icon && node.icon.trim().length > 0 && <HugeIcons name={node.icon} size={18} />}
+            {(!node.icon || node.icon.trim().length < 1) && <CircleIcon size={10} />}
+          </div>
           {!isCompact && (
-            <motion.span
-              initial={{ opacity: 1, width: 'auto' }}
-              animate={{
-                opacity: 1,
-                width: 'auto',
-              }}
-              exit={{
-                opacity: 0,
-                width: 0,
-              }}
-              transition={{
-                duration: 0.5,
-                ease: [0.4, 0.0, 0.2, 1],
-                opacity: { duration: 0.2 },
-              }}
-              className={clsx(isSelected ? 'text-background' : 'text-foreground', 'truncate')}
-            >
-              {node.name}
-            </motion.span>
+            <Tooltip content={node.name} placement="right-start" showArrow>
+              <motion.span
+                initial={{ opacity: 1, width: 'auto' }}
+                animate={{
+                  opacity: 1,
+                  width: 'auto',
+                }}
+                exit={{
+                  opacity: 0,
+                  width: 0,
+                }}
+                transition={{
+                  duration: 0.5,
+                  ease: [0.4, 0.0, 0.2, 1],
+                  opacity: { duration: 0.2 },
+                }}
+                className={clsx(isSelected ? 'text-background' : 'text-foreground', 'truncate')}
+              >
+                {node.name}
+              </motion.span>
+            </Tooltip>
           )}
         </div>
         {hasChildren && !isCompact && (
