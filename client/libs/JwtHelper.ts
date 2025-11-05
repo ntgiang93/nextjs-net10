@@ -21,11 +21,10 @@ export const JwtHelper = {
         // Custom user claims
         name: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'], // Username
         email: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'], // User email
-        FullName: payload.FullName, // Full name
-        Language: payload.Language, // User language preference
+        fullName: payload.FullName, // Full name
         nameid: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'], // User ID
         role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'], // User roles id
-        RoleCode: payload.RoleCode, // User role codes (optional)
+        roleCode: payload.RoleCode, // User role codes (optional)
       };
     } catch (error) {
       console.error('Error decoding JWT token:', error);

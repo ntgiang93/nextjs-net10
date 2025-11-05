@@ -8,8 +8,9 @@ export type JwtClaim = {
 
   // Custom user claims
   name: string; // Username
-  Language: string; // User language preference
+  email: string; // User email
+  fullName: string; // Full name
   nameid: string; // User ID
   role: number[]; // User roles id
-  RoleCode?: string; // User role codes (optional)
+  roleCode?: string; // User role codes (optional)
 };

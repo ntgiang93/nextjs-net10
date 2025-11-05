@@ -1,6 +1,6 @@
 'use client';
 
-import ForgotPasswordModal from '@/app/(admin)/sys/user/components/ForgotPasswordModal';
+import ForgotPasswordModal from '@/app/[locale]/(admin)/sys/user/components/ForgotPasswordModal';
 import { useAuth } from '@/components/ui//layout/AuthProvider';
 import { ExtButton } from '@/components/ui/button/ExtButton';
 import { defaultLogin, LoginDto } from '@/types/sys/Auth';
@@ -10,10 +10,10 @@ import { Button, Card, Form, Link, Tooltip, useDisclosure } from '@heroui/react'
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowLeft02Icon } from 'hugeicons-react';
+import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useTranslations } from 'use-intl';
 
 const LoginPage = () => {
   const [form, setForm] = useState<LoginDto>({ ...defaultLogin });

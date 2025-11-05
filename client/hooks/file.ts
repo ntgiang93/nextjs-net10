@@ -1,54 +1,46 @@
 'use client';
 
+import { StringHelper } from '@/libs/StringHelper';
 import { ApiResponse } from '@/types/base/ApiResponse';
-import { FileDto, FileUploadDto } from '@/types/sys/File';
-import { defaultMenuItem, MenuItem } from '@/types/sys/Menu';
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  defaultFileDto,
+  FileDto,
+  FileUpdateReferenceDto,
+  FileUploadDto,
+  GetByReferenceDto,
+} from '@/types/sys/File';
+import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
 import { apiService } from '../services/api';
 
 const endpoint = 'file';
 
-export const useGetUserMenu = () => {
-  return useQuery<MenuItem[], Error>({
-    queryKey: [endpoint, 'getUserMenu'],
+export const useGetByReference = (params: GetByReferenceDto) => {
+  return useQuery<FileDto[], Error>({
+    queryKey: [endpoint, 'getByReference', params],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<MenuItem[]>>(`${endpoint}/user`);
+      const response = await apiService.get<ApiResponse<FileDto[]>>(
+        `${endpoint}/reference?${StringHelper.objectToUrlParams(params)}`,
+      );
       if (response.success && response.data) {
         return response.data;
       }
       return [];
     },
     placeholderData: keepPreviousData || [],
+    enabled: params.referenceId !== '' && params.referenceType !== '',
     refetchOnMount: true,
   });
 };
 
-export const useGetMenuTree = () => {
-  const queryClient = useQueryClient();
-  const cachedData = queryClient.getQueryData<MenuItem[]>(['getMenuTree']);
-  return useQuery<MenuItem[], Error>({
-    queryKey: [endpoint, 'getMenuTree'],
-    queryFn: async () => {
-      const response = await apiService.get<ApiResponse<MenuItem[]>>(`${endpoint}`);
-      if (response.success && response.data) {
-        return response.data;
-      }
-      return [];
-    },
-    placeholderData: keepPreviousData || [],
-    enabled: !cachedData || cachedData.length === 0,
-  });
-};
-
 export const useGet = (id: number) => {
-  return useQuery<MenuItem, Error>({
+  return useQuery<FileDto, Error>({
     queryKey: [endpoint, 'get', id],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<MenuItem>>(`${endpoint}/${id}`);
+      const response = await apiService.get<ApiResponse<FileDto>>(`${endpoint}/${id}`);
       if (response.success && response.data) {
         return response.data;
       }
-      return { ...defaultMenuItem };
+      return { ...defaultFileDto };
     },
     enabled: id > 0,
   });
@@ -74,6 +66,18 @@ export const useUpload = () => {
   });
 };
 
+export const useUpdateReference = () => {
+  return useMutation<boolean, Error, FileUpdateReferenceDto>({
+    mutationFn: async (body: FileUpdateReferenceDto) => {
+      const response = await apiService.put<ApiResponse<boolean>>(
+        `${endpoint}/update-reference`,
+        body,
+      );
+      return response.success;
+    },
+  });
+};
+
 export const useDelete = () => {
   return useMutation({
     mutationFn: async (id: number) => {
@@ -84,8 +88,8 @@ export const useDelete = () => {
 };
 
 export const FileHook = {
-  useGetUserMenu,
-  useGetMenuTree,
+  useUpdateReference,
+  useGetByReference,
   useGet,
   useUpload,
   useDelete,

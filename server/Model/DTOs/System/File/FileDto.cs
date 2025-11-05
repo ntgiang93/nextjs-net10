@@ -39,18 +39,11 @@ namespace Model.DTOs.System.File
         public required IFormFile File { get; set; }
     }
 
-    public class FileUpdateDto
+    public class FileUpdateRefenrenceDto
     {
-        [Required]
-        public Guid Id { get; set; }
-
-        public string? FileName { get; set; }
-
-        public string? ReferenceId { get; set; }
-
-        public string? ReferenceType { get; set; }
-
-        public bool? IsPublic { get; set; }
+        public List<int> Ids { get; set; }
+        public required string ReferenceId { get; set; }
+        public required string ReferenceType { get; set; }
     }
 
     public class FileFilterDto
@@ -62,5 +55,12 @@ namespace Model.DTOs.System.File
         public int PageNumber { get; set; } = 1;
 
         public int PageSize { get; set; } = 10;
+    }
+    
+    public class GetByReferenceDto
+    {
+        public string ReferenceId { get; set; } = string.Empty;
+
+        public string ReferenceType { get; set; } = string.Empty;
     }
 }

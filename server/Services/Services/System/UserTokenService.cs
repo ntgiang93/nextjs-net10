@@ -36,7 +36,6 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
         {
             new(JwtRegisteredClaimNames.Jti, tokenId),
             new(ClaimTypes.Name, user.UserName),
-            new("Language", DetectLanguage(user)),
             new(ClaimTypes.NameIdentifier, user.Id),
             new("RoleCode", string.Join(";", roles.Select(r => r.Code)))
         };
@@ -102,16 +101,5 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
 
         if (!success) throw new Exception(SysMsg.Get(EMessage.Error500Msg));
         return new KeyValuePair<string, DateTime>(userToken.RefreshToken, userToken.Expires);
-    }
-
-    private string DetectLanguage(User user)
-    {
-        if (string.IsNullOrEmpty(user.Language))
-        {
-            var currentCulture = "vi";
-            return currentCulture;
-        }
-
-        return user.Language;
     }
 }

@@ -118,7 +118,8 @@
     "inactiveUser": "Vô hiệu hóa người dùng",
     "resetPasswordWarning": "Thao tác này sẽ đặt lại mật khẩu của người dùng. Bạn chắc chắn muốn tiếp tục?",
     "forgotPassword": "Quên mật khẩu",
-    "forgotPasswordDescription": "Nhập email tài khoản để nhận liên kết đặt lại mật khẩu."
+    "forgotPasswordDescription": "Nhập email tài khoản để nhận liên kết đặt lại mật khẩu.",
+    "userDocAttachments": "Hồ sơ đính kèm"
   },
   "menu": {
     "title": "Quản lý Menu",

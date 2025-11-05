@@ -70,7 +70,9 @@ export const useGetByType = (type: string) => {
   return useQuery<CategoryDto[], Error>({
     queryKey: [endpoint + '/type', type],
     queryFn: async () => {
-      const response = await apiService.get<ApiResponse<CategoryDto[]>>(`${endpoint}/type/${type}`);
+      const response = await apiService.get<ApiResponse<CategoryDto[]>>(
+        `${endpoint}/type?type=${type}`,
+      );
       if (response.success && response.data) {
         return response.data;
       }

@@ -185,6 +185,12 @@ public class FileService : GenericService<FileStorage, int>, IFileService
         }
     }
 
+    public Task<bool> UpdateFileRefenrenceAsync(FileUpdateRefenrenceDto dto)
+    {
+        var result = _fileRepository.UpdateReferenceBatch(dto.Ids,dto.ReferenceId, dto.ReferenceType);
+        return result;
+    }
+
     public async Task<(Stream FileStream, string ContentType, string FileName)> GetFileStreamAsync(int id)
     {
         var file = await GetByIdAsync<FileStorage>(id);

@@ -5,13 +5,14 @@ import { Button, Link, Progress, Tooltip, useDisclosure } from '@heroui/react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import {
-  CheckmarkCircle03Icon,
   CloudDownloadIcon,
+  CloudSavingDone01Icon,
   CloudUploadIcon,
   Delete01Icon,
+  FileCloudIcon,
 } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import { Accept, useDropzone } from 'react-dropzone';
 import { ConfirmModal } from '../overlay/ConfirmModal';
 
@@ -25,16 +26,13 @@ interface IExtDropzoneProps {
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input
   accept?: Accept;
   existingFiles?: FileDto[];
-  // Id của bản ghi được tham chiếu đến file này
-  referenceId?: string;
-  // Loại bản ghi được tham chiếu đến file này. Ví dụ: 'user', 'post', ...
-  referenceType?: string;
 }
 
-export const ExtDropzone = (props: IExtDropzoneProps) => {
-  const { maxSize, maxFiles, accept, existingFiles, referenceId, referenceType } = props;
+export const ExtDropzone = forwardRef((props: IExtDropzoneProps, ref) => {
+  const { maxSize, maxFiles, accept, existingFiles } = props;
   const { mutateAsync: uploadFile, isPending } = FileHook.useUpload();
   const { mutateAsync: deleteFile, isPending: isDeleting } = FileHook.useDelete();
+  const { mutateAsync: updateReference } = FileHook.useUpdateReference();
   const [selectedFile, setSelectedFile] = useState<FileDto | undefined>(undefined);
   const [uploadedFile, setUploadedFile] = useState<FileDto[]>([]);
   const {
@@ -54,11 +52,24 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
   });
   const msg = useTranslations('msg');
 
+  useImperativeHandle(ref, () => ({
+    updateReference: async (referenceId: string, referenceType: string) => {
+      await updateReference({
+        ids: uploadedFile.filter((f) => f.id > 0).map((f) => f.id),
+        referenceId: referenceId || '',
+        referenceType: referenceType || '',
+      });
+    },
+  }));
+
   const newListFile = useMemo(() => {
     return uploadedFile.map((file, index) => {
       const uploaded = file.id > 0;
       return (
-        <li className="w-full flex flex-col  border border-default  p-2 rounded-lg" key={index}>
+        <li
+          className="w-full flex flex-col  border border-default px-4 py-1 rounded-lg"
+          key={index}
+        >
           <div className="flex items-center gap-4">
             <div className="w-full flex flex-col">
               <span>{file.fileName}</span>
@@ -76,7 +87,7 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
               className={`flex transition-all ease-in-out duration-400 opacity-0 ${uploaded ? 'opacity-100' : ''}`}
             >
               <Button variant="light" radius="full" color="success" isIconOnly disabled>
-                <CheckmarkCircle03Icon size={20} />
+                <CloudSavingDone01Icon size={20} />
               </Button>
               <Tooltip content={msg('delete')}>
                 <Button
@@ -124,13 +135,22 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
   const listExistingFiles = useMemo(
     () =>
       existingFiles?.map((file, index) => (
-        <li className="w-full flex border border-default gap-4 p-4 rounded" key={index}>
+        <li className="w-full flex border border-default gap-4 py-1 px-4 rounded" key={index}>
           <div className="w-full flex flex-col">
-            <p>
-              <span className="font-semibold mr-2">{file.fileName}</span>
-              <span className="text-default-600"> {Math.ceil(file.fileSize / 1024)} KB</span>
-            </p>
+            <span>{file.fileName}</span>
+            <div className="flex gap-3 text-sm font-light">
+              <span className="text-default-600">{Math.ceil(file.fileSize / 1024)} KB</span>
+              <span className="text-default">•</span>
+              <span className="text-default-600">{dayjs().format('DD/MM/YYYY HH:mm:ss')}</span>
+              <span className="text-default">•</span>
+              <span className="text-default-600">
+                {msg('uploadBy', { userName: user?.userName ?? '' })}
+              </span>
+            </div>
           </div>
+          <Button variant="light" radius="full" color="success" isIconOnly disabled>
+            <FileCloudIcon size={20} />
+          </Button>
           <Button
             variant="light"
             radius="full"
@@ -173,8 +193,6 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
     files.forEach(async (file, index) => {
       const body: FileUploadDto = {
         file: file,
-        referenceId: referenceId || '',
-        referenceType: referenceType || '',
         isPublic: false,
       };
       uploadFile(body).then((response) => {
@@ -220,6 +238,7 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
       </div>
       <aside>
         <ul className="flex flex-col gap-2">{newListFile}</ul>
+        <ul className="flex flex-col gap-2 mt-4">{listExistingFiles}</ul>
       </aside>
       <ConfirmModal
         isOpen={IsOpenConfirm}
@@ -232,4 +251,4 @@ export const ExtDropzone = (props: IExtDropzoneProps) => {
       />
     </section>
   );
-};
+});

@@ -34,3 +34,14 @@ export const defaultFileDto: FileDto = {
   createdAt: new Date().toISOString(),
   queueIndex: 0,
 };
+
+export type GetByReferenceDto = {
+  referenceId: string;
+  referenceType: string;
+};
+
+export type FileUpdateReferenceDto = {
+  ids: number[];
+  referenceId: string;
+  referenceType: string;
+};

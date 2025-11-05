@@ -34,4 +34,5 @@ public enum EMessage
     CodeIsExist,
     VerifyEmailSubject,
     NotPermissionModifyRole,
+    LanguageNotSupported
 }

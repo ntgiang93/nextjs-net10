@@ -1,17 +1,20 @@
 'use client';
 
 import { locales } from '@/i18n/locale-support';
-import { useAuthStore } from '@/store/auth-store';
+import { usePathname, useRouter } from '@/i18n/navigation';
 import { Select, SelectItem } from '@heroui/react';
+import { useLocale } from 'next-intl';
 
 export default function LanguageSwitcher() {
-  const { user, setUser } = useAuthStore();
-  const handleSelectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    if (user) {
-      setUser({
-        ...user,
-        language: e.target.value || 'vi',
-      });
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleSelectionChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value || 'vi';
+    if (locale !== value) {
+      router.replace(pathname, { locale: value });
+      router.refresh();
     }
   };
 
@@ -21,7 +24,7 @@ export default function LanguageSwitcher() {
       aria-label="Select language"
       classNames={{ base: 'w-16', popoverContent: 'w-20' }}
       size="sm"
-      selectedKeys={user ? new Set([user.language]) : new Set(['vi'])}
+      selectedKeys={new Set([locale || 'vi'])}
       onChange={handleSelectionChange}
     >
       {locales.map((lang) => (

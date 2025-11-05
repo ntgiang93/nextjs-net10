@@ -30,5 +30,4 @@ public class User : BaseEntity<string>
     public bool TwoFa { get; set; }
     public bool IsLocked { get; set; }
     public DateTime? LockExprires { get; set; }
-    [StringLength(50)] public string? Language { get; set; }
 }

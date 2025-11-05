@@ -144,10 +144,15 @@ public static class MessageList
                     "Xác minh địa chỉ email của bạn")
             },
             {
-            EMessage.NotPermissionModifyRole,
-            new Translations("You do not have permission to modify this roles.",
-                "Bạn không có quyền thay đổi vai trò này.")
-        }
+                EMessage.NotPermissionModifyRole,
+                new Translations("You do not have permission to modify this roles.",
+                    "Bạn không có quyền thay đổi vai trò này.")
+            },
+            {
+                EMessage.LanguageNotSupported,
+                new Translations("The specified language is not supported.",
+                    "Ngôn ngữ được chỉ định không được hỗ trợ.")
+            }
         };
     }
 

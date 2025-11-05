@@ -1,4 +1,5 @@
 import JobTitleSelect from '@/components/shared/sys/select/JobTitleSelect';
+import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
 import { UserProfileHook } from '@/hooks/userProfile';
 import { defaultUserProfileDto, UserProfileDto } from '@/types/sys/UserProfile';
 import {
@@ -44,6 +45,10 @@ export default function UserProfileForm(props: IUserProfileFormProps) {
       setForm({ ...defaultUserProfileDto });
     }
   }, [data]);
+
+  if (isFetching) {
+    return <FormSkeleton row={4} col={2} />;
+  }
 
   return (
     <Card className="border-none shadow-none h-full">

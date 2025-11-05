@@ -31,13 +31,12 @@ public class FileController : ControllerBase
     }
 
     [HttpGet("reference")]
-    public async Task<IActionResult> GetFilesByReference([FromQuery] string referenceId,
-        [FromQuery] string referenceType)
+    public async Task<IActionResult> GetFilesByReference([FromQuery] GetByReferenceDto dto)
     {
-        if (string.IsNullOrEmpty(referenceId) || string.IsNullOrEmpty(referenceType))
+        if (string.IsNullOrEmpty(dto.ReferenceId) || string.IsNullOrEmpty(dto.ReferenceType))
             return BadRequest(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.Error422Msg)));
 
-        var files = await _fileService.GetFilesByReferenceAsync(referenceId, referenceType);
+        var files = await _fileService.GetFilesByReferenceAsync(dto.ReferenceId, dto.ReferenceType);
         return Ok(ApiResponse<List<FileDto>>.Succeed(files, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
@@ -56,8 +55,8 @@ public class FileController : ControllerBase
         var file = fileDto.File;
 
         var results = await _fileService.UploadFileAsync(fileDto);
-        if(results != null)
-        return Ok(ApiResponse<FileDto>.Succeed(results, _sysMsg.Get(EMessage.SuccessMsg)));
+        if (results != null)
+            return Ok(ApiResponse<FileDto>.Succeed(results, _sysMsg.Get(EMessage.SuccessMsg)));
         else return Ok(ApiResponse<FileDto>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
 
@@ -70,6 +69,17 @@ public class FileController : ControllerBase
 
         var results = await _fileService.UploadMultipleFilesAsync(files, fileDto);
         return Ok(ApiResponse<List<FileDto>>.Succeed(results, _sysMsg.Get(EMessage.SuccessMsg)));
+    }
+
+    [HttpPut("update-reference")]
+    public async Task<IActionResult> UploadFile([FromBody] FileUpdateRefenrenceDto dto)
+    {
+        if (string.IsNullOrEmpty(dto.ReferenceId) || string.IsNullOrEmpty(dto.ReferenceType))
+            return BadRequest(_sysMsg.Get(EMessage.Error400Msg));
+        var results = await _fileService.UpdateFileRefenrenceAsync(dto);
+        if (results)
+            return Ok(ApiResponse<bool>.Succeed(results, _sysMsg.Get(EMessage.SuccessMsg)));
+        else return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
 
     // PUT methods

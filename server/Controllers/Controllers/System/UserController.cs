@@ -22,6 +22,7 @@ public class UserController : ControllerBase
 {
     private readonly ISysMessageService _sysMsg;
     private readonly IUserService _userService;
+
     public UserController(IUserService userService, ISysMessageService sysMsg)
     {
         _userService = userService;
@@ -56,7 +57,7 @@ public class UserController : ControllerBase
         return Ok(ApiResponse<PaginatedResultDto<UserTableDto>>.Succeed(paginatedResult,
             _sysMsg.Get(EMessage.SuccessMsg)));
     }
-    
+
     [HttpGet("pagination-to-select")]
     [Policy(ESysModule.Users, EPermission.View)]
     public async Task<IActionResult> GetPaginationToSelect([FromQuery] PaginationRequest filter)
@@ -65,18 +66,18 @@ public class UserController : ControllerBase
         return Ok(ApiResponse<PaginatedResultDto<UserSelectDto>>.Succeed(paginatedResult,
             _sysMsg.Get(EMessage.SuccessMsg)));
     }
-    
+
     [HttpGet("permission/{id}")]
     [Policy(ESysModule.Users, EPermission.View)]
     public async Task<IActionResult> GetPermission(string id)
     {
         var permissions = await _userService.GetUserPermissionsAsync(id);
-        if (permissions == null) 
+        if (permissions == null)
             return NotFound(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.UserNotFound), HttpStatusCode.NotFound));
 
         return Ok(ApiResponse<List<RolePermission>>.Succeed(permissions, _sysMsg.Get(EMessage.SuccessMsg)));
     }
-    
+
     [HttpGet("current/permissions")]
     public async Task<IActionResult> GetCurrentUserPermissions()
     {
@@ -113,7 +114,7 @@ public class UserController : ControllerBase
         if (!success)
             return Ok(ApiResponse<object>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
 
-        return Ok(ApiResponse<object>.Succeed(null,_sysMsg.Get(EMessage.SuccessMsg)));
+        return Ok(ApiResponse<object>.Succeed(null, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
     // PUT methods
@@ -150,7 +151,7 @@ public class UserController : ControllerBase
         if (result) return Ok(ApiResponse<bool>.Succeed(true, _sysMsg.Get(EMessage.SuccessMsg)));
         return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
-    
+
     [HttpPut("{id}/avatar")]
     public async Task<IActionResult> UpdateAvatar(string id, IFormFile file)
     {

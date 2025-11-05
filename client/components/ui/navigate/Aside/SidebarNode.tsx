@@ -1,8 +1,9 @@
-import { Button, Tooltip } from '@heroui/react';
+import { useRouter } from '@/i18n/navigation';
+import { Button } from '@heroui/react';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight01Icon, CircleIcon } from 'hugeicons-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import { HugeIcons } from '../../icon/HugeIcons';
 import { SidebarNodeType } from './SidebarBody';
@@ -65,27 +66,25 @@ const SidebarNode = (props: SidebarNodeProps) => {
             {(!node.icon || node.icon.trim().length < 1) && <CircleIcon size={10} />}
           </div>
           {!isCompact && (
-            <Tooltip content={node.name} placement="right-start" showArrow>
-              <motion.span
-                initial={{ opacity: 1, width: 'auto' }}
-                animate={{
-                  opacity: 1,
-                  width: 'auto',
-                }}
-                exit={{
-                  opacity: 0,
-                  width: 0,
-                }}
-                transition={{
-                  duration: 0.5,
-                  ease: [0.4, 0.0, 0.2, 1],
-                  opacity: { duration: 0.2 },
-                }}
-                className={clsx(isSelected ? 'text-background' : 'text-foreground', 'truncate')}
-              >
-                {node.name}
-              </motion.span>
-            </Tooltip>
+            <motion.span
+              initial={{ opacity: 1, width: 'auto' }}
+              animate={{
+                opacity: 1,
+                width: 'auto',
+              }}
+              exit={{
+                opacity: 0,
+                width: 0,
+              }}
+              transition={{
+                duration: 0.5,
+                ease: [0.4, 0.0, 0.2, 1],
+                opacity: { duration: 0.2 },
+              }}
+              className={clsx(isSelected ? 'text-background' : 'text-foreground', 'truncate')}
+            >
+              {node.name}
+            </motion.span>
           )}
         </div>
         {hasChildren && !isCompact && (

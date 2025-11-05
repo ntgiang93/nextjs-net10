@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 
-namespace Common.Security;
+namespace Common.Security.User;
 
 public class JwtUserInfoMiddleware
 {
@@ -25,7 +25,7 @@ public class JwtUserInfoMiddleware
             {
                 UserId = GetClaimValue<string>(context.User, ClaimTypes.NameIdentifier),
                 UserName = GetClaimValue<string>(context.User, ClaimTypes.Name),
-                Language = GetClaimValue<string>(context.User, "Language"),
+                Language = context.Request.Cookies["USER_LOCALE"],
                 Roles = roles.Select(role => int.TryParse(role, out int roleId) ? roleId : 0).ToList(),
                 RoleCodes = GetClaimValue<string>(context.User, "RoleCode") ?? string.Empty
             };

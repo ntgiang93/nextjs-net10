@@ -7,8 +7,6 @@ namespace Service.Services.Base;
 
 public class SysMessageService : ISysMessageService
 {
-    private readonly List<string> _supportLanguage = new() { "vi", "en" };
-
     public string Get(EMessage key)
     {
         //get language from UserContext
@@ -26,10 +24,5 @@ public class SysMessageService : ISysMessageService
             }
 
         return $"[{key.ToString()}]";
-    }
-
-    public List<string> GetSupportLanguage()
-    {
-        return _supportLanguage;
     }
 }

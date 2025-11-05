@@ -1,3 +1,4 @@
+import CategoryTypeSelect from '@/components/shared/sys/select/CategoryTypeSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
 import { SysCategoryHook } from '@/hooks/sysCategories';
 import { CategoryDto, defaultCategory } from '@/types/sys/SysCategory';
@@ -39,9 +40,9 @@ export default function DetailModal(props: DetailModalProps) {
 
   useEffect(() => {
     if (!data) {
-      setForm({ ...defaultCategory });
+      setForm({ ...defaultCategory, type: parent?.code || '' });
     }
-  }, [parent?.id]);
+  }, [parent?.code]);
 
   useEffect(() => {
     if (data) {
@@ -99,13 +100,13 @@ export default function DetailModal(props: DetailModalProps) {
                     return value === '' || !value ? msg('requiredField') : null;
                   }}
                 />
-                <Input
-                  label={msg('type')}
-                  name="type"
-                  placeholder={`${msg('enter')} ${msg('type')}`}
-                  value={form.type}
-                  onValueChange={(value) => setForm((prev) => ({ ...prev, type: value }))}
+                <CategoryTypeSelect
                   variant="bordered"
+                  selectionMode="single"
+                  value={[form.type]}
+                  onChange={(values) => {
+                    setForm((prev) => ({ ...prev, type: values[0] }));
+                  }}
                 />
                 <Input
                   label={msg('description')}

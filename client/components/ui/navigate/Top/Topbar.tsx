@@ -20,12 +20,12 @@ import {
   ArrowRight03Icon,
   Logout03Icon,
   Search01Icon,
-  UserAccountIcon
+  UserAccountIcon,
 } from 'hugeicons-react';
-import { useTranslations } from 'use-intl';
+import { useTranslations } from 'next-intl';
+import LanguageSwitcher from '../../../shared/sys/select/LanguageSwitcher';
 import { ThemeSwitch } from '../../button/theme-switch';
 import { useAuth } from '../../layout/AuthProvider';
-import LanguageSwitcher from '../../select-box/LanguageSwitcher';
 
 interface ITopbarProps {
   menuData?: MenuItem[];

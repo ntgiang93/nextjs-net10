@@ -1,3 +1,4 @@
+using Common.Security.User;
 using Microsoft.AspNetCore.Builder;
 
 namespace Common.Security

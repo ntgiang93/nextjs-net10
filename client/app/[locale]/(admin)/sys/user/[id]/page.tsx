@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { use } from 'react';
 import AccountCard from './AccountCard';
 import ActionCard from './ActionCard';
+import UserAttachmentsDocument from './UserAttachmentsDocument';
 import UserProfileForm from './UserProfileForm';
 
 interface IUserDetailPageProps {
@@ -50,6 +51,9 @@ export default function Page({ params }: IUserDetailPageProps) {
             <Tabs aria-label="Options">
               <Tab key="generalInfo" title={t('generalInfo')} className="h-full">
                 <UserProfileForm id={id} />
+              </Tab>
+              <Tab key="attachments" title={t('userDocAttachments')} className="h-full">
+                <UserAttachmentsDocument id={id} />
               </Tab>
             </Tabs>
           </CardBody>

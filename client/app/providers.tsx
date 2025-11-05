@@ -12,6 +12,7 @@ import * as React from 'react';
 export interface ProvidersProps {
   children: React.ReactNode;
   themeProps?: ThemeProviderProps;
+  locale: string;
 }
 
 declare module '@react-types/shared' {
@@ -20,7 +21,7 @@ declare module '@react-types/shared' {
   }
 }
 
-export function Providers({ children, themeProps }: ProvidersProps) {
+export function Providers({ children, themeProps, locale }: ProvidersProps) {
   const router = useRouter();
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -36,7 +37,7 @@ export function Providers({ children, themeProps }: ProvidersProps) {
     <QueryClientProvider client={queryClient}>
       <HeroUIProvider navigate={router.push} labelPlacement="outside">
         <NextThemesProvider {...themeProps}>
-          <I18nProvider locale="vi">{children}</I18nProvider>
+          <I18nProvider locale={locale}>{children}</I18nProvider>
         </NextThemesProvider>
         <ToastProvider placement={'top-right'} toastProps={{ timeout: 3000 }} />
       </HeroUIProvider>

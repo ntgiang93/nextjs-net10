@@ -56,11 +56,11 @@ public class SysCategoryController : ControllerBase
         return Ok(ApiResponse<IEnumerable<CategoryTreeDto>>.Succeed(tree, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
-    [HttpGet("type/{type}")]
+    [HttpGet("type")]
     [Policy(ESysModule.SysCategories, EPermission.View)]
-    public async Task<IActionResult> GetByType(string type)
+    public async Task<IActionResult> GetByType(string? type)
     {
-        var categories = await _categoryService.GetByTypeAsync(type);
+        var categories = await _categoryService.GetByTypeAsync(type ?? string.Empty);
         return Ok(ApiResponse<List<CategoryDto>>.Succeed(categories, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 

@@ -11,4 +11,6 @@ public interface IFileRepository : IGenericRepository<FileStorage, int>
     ///     <param name="referenceType">The type or category of the reference associated with the files.(name of entity)</param>
     /// </summary>
     Task<List<FileStorage>> GetByReferenceAsync(string referenceId, string referenceType);
+
+    Task<bool> UpdateReferenceBatch(List<int> ids, string referenceId, string referenceType);
 }
