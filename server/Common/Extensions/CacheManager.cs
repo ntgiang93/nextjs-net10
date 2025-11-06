@@ -108,11 +108,11 @@ public class CacheManager
         if (parameters == null || parameters.Length == 0)
             return prefix;
 
-        var paramString = string.Join("_", parameters.Select(p =>  JsonConvert.SerializeObject(p) ?? "null"));
-        using (var sha1 = SHA1.Create())
+        var paramString = JsonConvert.SerializeObject(parameters);
+        using (var sha = SHA256.Create())
         {
-            var hashBytes = sha1.ComputeHash(Encoding.UTF8.GetBytes(paramString));
-            var hash = BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+            var hashBytes = sha.ComputeHash(Encoding.UTF8.GetBytes(paramString));
+            var hash = BitConverter.ToString(hashBytes);
             return $"{prefix}:{hash}";
         }
     }

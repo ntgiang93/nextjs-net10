@@ -9,7 +9,7 @@ public class SysMessageService : ISysMessageService
 {
     public string Get(EMessage key)
     {
-        //get language from UserContext
+        //get language from AppContext
         var languageCode = UserContext.Current?.Language;
 
         if (MessageList.MessageDictionary.TryGetValue(key, out var translations))

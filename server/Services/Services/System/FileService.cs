@@ -1,18 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using MimeDetective;
 using MimeDetective.Definitions;
 using Common.Exceptions;
+using Common.Extensions;
 using Common.Security;
 using Model.Constants;
-using Model.DTOs.Base;
 using Model.DTOs.System.File;
 using Model.Entities.System;
+using Model.Models;
 using Repository.Interfaces.System;
 using Service.Interfaces.System;
 using Service.Services.Base;
@@ -32,16 +28,23 @@ public class FileService : GenericService<FileStorage, int>, IFileService
     private readonly long _maxFileSize = 32 * 1024 * 1024;
     private readonly string _uploadDirectory;
     private readonly string _uploadFolder = "uploads";
-
+    private readonly AppSettings _appSettings;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly string _domain;
+    
     public FileService(
         IFileRepository fileRepository,
-        IServiceProvider serviceProvider) : base(fileRepository, serviceProvider)
+        IServiceProvider serviceProvider,
+        AppSettings appSettings,
+        IHttpContextAccessor httpContextAccessor) : base(fileRepository, serviceProvider)
     {
         _fileRepository = fileRepository;
         _uploadDirectory = Path.Combine(Directory.GetCurrentDirectory(),_uploadFolder);
-
+        _appSettings = appSettings;
+        _httpContextAccessor = httpContextAccessor;
         // Create directory if it doesn't exist
         if (!Directory.Exists(_uploadDirectory)) Directory.CreateDirectory(_uploadDirectory);
+        _domain = HttpContextExtensions.GetAppDomain(httpContextAccessor, appSettings);
     }
 
     public async Task<FileDto> UploadFileAsync(FileUploadDto fileDto)
@@ -84,6 +87,7 @@ public class FileService : GenericService<FileStorage, int>, IFileService
         var newFile = await GetByIdAsync<FileStorage>(id);
         // Map to DTO
         var result = newFile.Adapt<FileDto>();
+        result.FilePath = $"{_domain}{newFile.FilePath.Replace("\\", "/")}";
         return result;
     }
 
@@ -104,31 +108,11 @@ public class FileService : GenericService<FileStorage, int>, IFileService
         var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetFilesByReference", referenceId, referenceType);
         var cachedResult = await CacheManager.GetOrCreateAsync(cacheKey, async () =>
         {
-            var files = await _fileRepository.GetByReferenceAsync(referenceId, referenceType);
+            
+            var files = await _fileRepository.GetByReferenceAsync(referenceId, referenceType, _domain);
             return files.Adapt<List<FileDto>>();
         });
         return cachedResult;
-    }
-
-    public async Task<PaginatedResultDto<FileDto>> GetPaginatedAsync(FileFilterDto filter)
-    {
-        //var cacheKey = CacheManager.GenerateCacheKey($"{_cachePrefix}GetPaginatedFiles", filter);
-        //var cachedResult = await CacheManager.GetOrCreateAsync(cacheKey, async () =>
-        //{
-        //    var paginatedResult = await GetAllAsync<FileDto>(
-        //        f => f.FileName.Contains(filter.SearchTerm ?? string.Empty) && f.ReferenceType == filter.ReferenceType,
-        //        filter.PageNumber, filter.PageSize, true);
-
-        //    return new PaginatedResultDto<FileDto>
-        //    {
-        //        Items = paginatedResult.Items.ToList(),
-        //        TotalCount = paginatedResult.TotalCount,
-        //        PageIndex = filter.PageNumber,
-        //        PageSize = filter.PageSize
-        //    };
-        //});
-        //return cachedResult;
-        return null;
     }
 
     public async Task<bool> DeleteFileAsync(int id)
@@ -211,7 +195,7 @@ public class FileService : GenericService<FileStorage, int>, IFileService
 
         if (file.Length > _maxFileSize)
             throw new BusinessException(SysMsg.Get(EMessage.LimitFileSize), "FILE_SIZE_EXCEEDED");
-        var DocInspector = new ContentInspectorBuilder
+        var docInspector = new ContentInspectorBuilder
         {
             Definitions = DefaultDefinitions.FileTypes.Documents.All()
                 .Concat(DefaultDefinitions.FileTypes.Images.All())
@@ -219,9 +203,9 @@ public class FileService : GenericService<FileStorage, int>, IFileService
                 .Concat(DefaultDefinitions.FileTypes.Archives.All())
                 .ToList()
         }.Build();
-        var Results = DocInspector.Inspect(file.OpenReadStream());
-        var ResultsByMimeType = Results.ByFileExtension();
-        if (!ResultsByMimeType.Any(match => AllowedFileTypes.Contains(match.Extension.ToLower())))
+        var results = docInspector.Inspect(file.OpenReadStream());
+        var resultsByMimeType = results.ByFileExtension();
+        if (!resultsByMimeType.Any(match => AllowedFileTypes.Contains(match.Extension.ToLower())))
             throw new BusinessException(SysMsg.Get(EMessage.FileTypeNotAllowed), "FILE_TYPE_NOT_ALLOWED");
     }
 }

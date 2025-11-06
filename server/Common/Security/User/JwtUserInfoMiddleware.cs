@@ -30,7 +30,7 @@ public class JwtUserInfoMiddleware
                 RoleCodes = GetClaimValue<string>(context.User, "RoleCode") ?? string.Empty
             };
 
-            // Store the current user in the UserContext
+            // Store the current user in the AppContext
             UserContext.Current = currentUser;
         }
 

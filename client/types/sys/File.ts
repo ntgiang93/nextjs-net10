@@ -16,7 +16,7 @@ export type FileDto = {
   container?: string | null;
   isPublic: boolean;
   uploadedByName: string;
-  createdAt: string; // ISO 8601 date string
+  createdAt: string;
   queueIndex: number;
 };
 

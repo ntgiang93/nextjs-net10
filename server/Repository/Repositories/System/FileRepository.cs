@@ -17,13 +17,29 @@ public class FileRepository : GenericRepository<FileStorage, int>, IFileReposito
     {
     }
 
-    public async Task<List<FileStorage>> GetByReferenceAsync(string referenceId, string referenceType)
+    public async Task<List<FileStorage>> GetByReferenceAsync(string referenceId, string referenceType, string domain)
     {
+        
         var query = new Query(_table)
-            .Where("IsDeleted", false)
-            .Where("ReferenceId", referenceId)
-            .Where("ReferenceType", referenceType)
-            .OrderByDesc("CreatedAt");
+            .Select(
+                nameof(FileStorage.Id),
+                nameof(FileStorage.FileName),
+                nameof(FileStorage.FileSize),
+                nameof(FileStorage.MimeType)
+            )
+            .SelectRaw("CONCAT(?, " + nameof(FileStorage.FilePath) + ") as " + nameof(FileStorage.FilePath), domain)
+            .Select(
+                nameof(FileStorage.ReferenceId),
+                nameof(FileStorage.ReferenceType),
+                nameof(FileStorage.Container),
+                nameof(FileStorage.IsPublic),
+                nameof(FileStorage.CreatedAt),
+                nameof(FileStorage.UpdatedAt)
+            )   
+            .Where(nameof(FileStorage.IsDeleted), false)
+            .Where(nameof(FileStorage.ReferenceId), referenceId)
+            .Where(nameof(FileStorage.ReferenceType), referenceType)
+            .OrderByDesc(nameof(FileStorage.CreatedAt));
 
         var compiledQuery = _compiler.Compile(query);
         

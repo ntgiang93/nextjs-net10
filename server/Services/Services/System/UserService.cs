@@ -18,6 +18,7 @@ using Service.Interfaces;
 using Service.Interfaces.Base;
 using Service.Interfaces.System;
 using Service.Services.Base;
+
 namespace Service.Services.System;
 
 public class UserService : GenericService<User, string>, IUserService
@@ -28,10 +29,13 @@ public class UserService : GenericService<User, string>, IUserService
     private readonly IPermissionService _permissionService;
     private readonly IFileService _fileService;
     private readonly AppSettings _appSettings;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly string _domain;
 
     public UserService(IUserRepository repository, IServiceProvider serviceProvider, IEmailSmsService emailSmsService,
         IUserRoleService userRoleService, IPermissionService permissionService, IFileService fileService,
-        AppSettings appSettings) : base(repository,
+        AppSettings appSettings,
+        IHttpContextAccessor httpContextAccessor) : base(repository,
         serviceProvider)
     {
         _userRepository = repository;
@@ -40,6 +44,8 @@ public class UserService : GenericService<User, string>, IUserService
         _permissionService = permissionService;
         _fileService = fileService;
         _appSettings = appSettings;
+        _httpContextAccessor = httpContextAccessor;
+        _domain = HttpContextExtensions.GetAppDomain(httpContextAccessor, appSettings);
     }
 
     public async Task<PaginatedResultDto<UserTableDto>> GetPaginationAsync(UserTableRequestDto request)
@@ -63,10 +69,9 @@ public class UserService : GenericService<User, string>, IUserService
         var user = await _userRepository.GetDetailAsync(userId);
         if (user != null)
         {
-            var domain = _appSettings.AppDomain;
             user.Avatar = string.IsNullOrEmpty(user.Avatar)
                 ? user.Avatar
-                : $"{domain}{user.Avatar}";
+                : $"{_domain}{user.Avatar}";
         }
 
         return user;
@@ -90,7 +95,7 @@ public class UserService : GenericService<User, string>, IUserService
 
     public async Task<string> CreateUserAsync(CreateUserDto model)
     {
-        if(!string.IsNullOrWhiteSpace(model.UserName))
+        if (!string.IsNullOrWhiteSpace(model.UserName))
         {
             await ValidateUniqueUser(model.Email, model.PhoneNumber, model.UserName);
         }
@@ -302,7 +307,8 @@ public class UserService : GenericService<User, string>, IUserService
             ReferenceType = nameof(User) + "_avatar",
             File = file
         };
-        if (!string.IsNullOrWhiteSpace(user.Avatar)) await _fileService.DeleteFileByReference(dto.ReferenceType, dto.ReferenceId);
+        if (!string.IsNullOrWhiteSpace(user.Avatar))
+            await _fileService.DeleteFileByReference(dto.ReferenceType, dto.ReferenceId);
         var newFile = await _fileService.UploadFileAsync(dto);
         user.Avatar = newFile.FilePath.Replace(Path.DirectorySeparatorChar, '/');
         return await UpdateAsync(user);

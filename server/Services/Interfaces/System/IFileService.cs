@@ -27,11 +27,6 @@ public interface IFileService : IGenericService<FileStorage, int>
     Task<List<FileDto>> GetFilesByReferenceAsync(string referenceId, string referenceType);
 
     /// <summary>
-    ///     Gets paginated list of files based on filter criteria
-    /// </summary>
-    Task<PaginatedResultDto<FileDto>> GetPaginatedAsync(FileFilterDto filter);
-
-    /// <summary>
     ///     Deletes a file
     /// </summary>
     Task<bool> DeleteFileAsync(int id);

@@ -1,7 +1,6 @@
-using Common.Security.User;
 using Microsoft.AspNetCore.Builder;
 
-namespace Common.Security
+namespace Common.Security.User
 {
     public static class JwtUserInfoMiddlewareExtensions
     {

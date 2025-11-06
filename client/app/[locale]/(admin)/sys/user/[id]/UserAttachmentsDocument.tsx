@@ -2,7 +2,7 @@ import { ExtDropzone } from '@/components/ui/input/ExtDropZone';
 import { FileHook } from '@/hooks/file';
 import { Button, Card, CardBody, CardFooter } from '@heroui/react';
 import { useTranslations } from 'next-intl';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 
 interface IUserAttachmentsDocumentProps {
   id: string;
@@ -14,7 +14,8 @@ export default function UserAttachmentsDocument(props: IUserAttachmentsDocumentP
   const REFERENCE_TYPE = 'userProfile';
   const dropzoneRef = useRef<any>(null);
   const [loading, setLoading] = useState(false);
-  const { data: attachments, isFetching } = FileHook.useGetByReference({
+  const cardRef = useRef<HTMLDivElement>(null);
+  const { data: attachments, refetch } = FileHook.useGetByReference({
     referenceId: id,
     referenceType: REFERENCE_TYPE,
   });
@@ -29,15 +30,23 @@ export default function UserAttachmentsDocument(props: IUserAttachmentsDocumentP
     }
   };
 
+  const dropzoneHeight = useMemo(() => {
+    if (cardRef.current) {
+      const cardHeight = cardRef.current.clientHeight;
+      return cardHeight - 128; // Subtract footer height
+    }
+  }, [cardRef.current]);
+
   return (
-    <Card className="h-full" shadow="none">
-      <CardBody>
+    <Card shadow="none" className="h-full p-0" ref={cardRef}>
+      <CardBody className="overflow-auto" style={{ height: dropzoneHeight }}>
         <ExtDropzone
           ref={dropzoneRef}
           maxSize={10}
           maxFiles={20}
-          accept={{ 'image/*': [] }}
+          accept={{ 'image/*': [], 'application/pdf': [], 'text/plain': ['.txt'] }}
           existingFiles={attachments}
+          refetch={refetch}
         />
       </CardBody>
       <CardFooter className="flex justify-end">

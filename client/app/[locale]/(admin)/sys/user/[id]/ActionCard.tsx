@@ -91,7 +91,7 @@ export default function ActionCard(props: IActionCardProps) {
   }, [loginUser, user]);
 
   return (
-    <Card className="md:col-span-2">
+    <Card className="md:col-span-2 h-full">
       <CardHeader>
         <h4 className="text-lg font-semibold">{t('changeAccountInfo')}</h4>
       </CardHeader>

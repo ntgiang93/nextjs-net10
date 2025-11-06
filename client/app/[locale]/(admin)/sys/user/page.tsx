@@ -118,7 +118,7 @@ export default function Menu() {
             </Chip>
           );
         },
-        size: 100,
+        size: 120,
       },
       {
         id: 'actions',

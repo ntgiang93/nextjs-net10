@@ -1,7 +1,15 @@
 import { FileHook } from '@/hooks/file';
 import { useAuthStore } from '@/store/auth-store';
 import { defaultFileDto, FileDto, FileUploadDto } from '@/types/sys/File';
-import { Button, Link, Progress, Tooltip, useDisclosure } from '@heroui/react';
+import {
+  Button,
+  Divider,
+  Link,
+  Progress,
+  ScrollShadow,
+  Tooltip,
+  useDisclosure,
+} from '@heroui/react';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
 import {
@@ -12,7 +20,7 @@ import {
   FileCloudIcon,
 } from 'hugeicons-react';
 import { useTranslations } from 'next-intl';
-import { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { Accept, useDropzone } from 'react-dropzone';
 import { ConfirmModal } from '../overlay/ConfirmModal';
 
@@ -23,18 +31,21 @@ interface IExtDropzoneProps {
   // Chỉ PDF và Word: { 'application/pdf': [], 'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'] }
   // Theo đuôi file: { 'text/plain': ['.txt'], 'application/vnd.ms-excel': ['.xls', '.xlsx'] }
   // Hoặc kết hợp: { 'image/*': [], 'application/pdf': [], 'text/plain': ['.txt'] }
-  // https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input
+  // https://react-dropzone.js.org/#section-accepting-specific-file-types
   accept?: Accept;
   existingFiles?: FileDto[];
+  height?: number;
+  refetch?: () => void;
 }
 
 export const ExtDropzone = forwardRef((props: IExtDropzoneProps, ref) => {
-  const { maxSize, maxFiles, accept, existingFiles } = props;
+  const { maxSize, maxFiles, accept, existingFiles, refetch } = props;
   const { mutateAsync: uploadFile, isPending } = FileHook.useUpload();
   const { mutateAsync: deleteFile, isPending: isDeleting } = FileHook.useDelete();
   const { mutateAsync: updateReference } = FileHook.useUpdateReference();
   const [selectedFile, setSelectedFile] = useState<FileDto | undefined>(undefined);
   const [uploadedFile, setUploadedFile] = useState<FileDto[]>([]);
+  const dropBoxRef = useRef<HTMLDivElement | null>(null);
   const {
     isOpen: IsOpenConfirm,
     onOpen: onOpenConfirm,
@@ -54,11 +65,16 @@ export const ExtDropzone = forwardRef((props: IExtDropzoneProps, ref) => {
 
   useImperativeHandle(ref, () => ({
     updateReference: async (referenceId: string, referenceType: string) => {
-      await updateReference({
+      console.log('uploadedFile', uploadedFile);
+      var response = await updateReference({
         ids: uploadedFile.filter((f) => f.id > 0).map((f) => f.id),
         referenceId: referenceId || '',
         referenceType: referenceType || '',
       });
+      if (response) {
+        setUploadedFile([]);
+        refetch && refetch();
+      }
     },
   }));
 
@@ -148,47 +164,55 @@ export const ExtDropzone = forwardRef((props: IExtDropzoneProps, ref) => {
               </span>
             </div>
           </div>
-          <Button variant="light" radius="full" color="success" isIconOnly disabled>
-            <FileCloudIcon size={20} />
-          </Button>
-          <Button
-            variant="light"
-            radius="full"
-            color="danger"
-            isIconOnly
-            onPress={() => {
-              setSelectedFile(file);
-              onOpenConfirm();
-            }}
-          >
-            <Delete01Icon size={16} />
-          </Button>
-          <Button
-            as={Link}
-            variant="light"
-            radius="full"
-            color="primary"
-            isIconOnly
-            href="https://github.com/heroui-inc/heroui"
-            target="_blank"
-          >
-            <CloudDownloadIcon size={16} />
-          </Button>
+          <div className={`flex`}>
+            <Button variant="light" radius="full" color="default" isIconOnly disabled>
+              <FileCloudIcon size={20} />
+            </Button>
+            <Tooltip content={msg('delete')}>
+              <Button
+                variant="light"
+                radius="full"
+                color="danger"
+                isIconOnly
+                onPress={() => {
+                  setSelectedFile(file);
+                  onOpenConfirm();
+                }}
+              >
+                <Delete01Icon size={16} />
+              </Button>
+            </Tooltip>
+            <Tooltip content={msg('download')}>
+              <Button
+                as={Link}
+                variant="light"
+                radius="full"
+                color="primary"
+                isIconOnly
+                href={file.filePath}
+                target="_blank"
+              >
+                <CloudDownloadIcon size={16} />
+              </Button>
+            </Tooltip>
+          </div>
         </li>
       )),
     [existingFiles],
   );
 
   const handleUploadFiles = (files: File[]) => {
+    const startIndex = uploadedFile.length;
     const uploadingFiles: FileDto[] = files.map((file, index) => {
       return {
         ...defaultFileDto,
         fileName: file.name,
         fileSize: file.size,
         fileType: file.type,
-        queueIndex: index,
+        queueIndex: startIndex + index,
       };
     });
+
     setUploadedFile((prev) => [...prev, ...uploadingFiles]);
     files.forEach(async (file, index) => {
       const body: FileUploadDto = {
@@ -197,15 +221,24 @@ export const ExtDropzone = forwardRef((props: IExtDropzoneProps, ref) => {
       };
       uploadFile(body).then((response) => {
         setUploadedFile((prev) =>
-          prev.map((f) => (f.queueIndex === index ? { ...response, queueIndex: index } : f)),
+          prev.map((f) =>
+            f.queueIndex === startIndex + index
+              ? { ...response, queueIndex: startIndex + index }
+              : f,
+          ),
         );
       });
     });
   };
 
   const handleDeleteFile = async () => {
-    await deleteFile(selectedFile?.id || 0);
-    setUploadedFile((prev) => prev.filter((f) => f.id !== selectedFile?.id));
+    const response = await deleteFile(selectedFile?.id || 0);
+    if (response) {
+      setUploadedFile((prev) => prev.filter((f) => f.id !== selectedFile?.id));
+      if (selectedFile?.referenceId && selectedFile?.referenceId !== '') {
+        refetch && refetch();
+      }
+    }
     OnOpenConfirmChange();
   };
 
@@ -220,26 +253,29 @@ export const ExtDropzone = forwardRef((props: IExtDropzoneProps, ref) => {
   }, [maxFiles, maxSize, msg]);
 
   return (
-    <section className="w-full flex flex-col p-2 gap-6">
+    <section className="w-full h-full flex flex-col p-2 gap-6">
       <div
         {...getRootProps({
           className: clsx(
-            'w-full h-56 border-2 border-dashed rounded-lg flex flex-col justify-center items-center gap-3 cursor-pointer p-4 transition-colors',
+            'w-full border-2 border-dashed rounded-lg cursor-pointer p-8 transition-colors',
+            'flex flex-col justify-center items-center gap-3 flex-shrink-0 ',
             isDragActive || isFileDialogActive
               ? 'border-primary-500 bg-primary-50'
               : 'border-default',
           ),
         })}
+        ref={dropBoxRef}
       >
         <input {...getInputProps()} />
         <CloudUploadIcon size={48} className="text-default" />
         <p className="font-semibold text-lg">{msg('dropzoneDescription')}</p>
         <p className="text-sm text-default-600">{detailDescription}</p>
       </div>
-      <aside>
+      <ScrollShadow className="flex-1">
         <ul className="flex flex-col gap-2">{newListFile}</ul>
-        <ul className="flex flex-col gap-2 mt-4">{listExistingFiles}</ul>
-      </aside>
+        <Divider className="my-4" />
+        <ul className="flex flex-col gap-2">{listExistingFiles}</ul>
+      </ScrollShadow>
       <ConfirmModal
         isOpen={IsOpenConfirm}
         title={msg('delete')}

@@ -51,66 +51,68 @@ export default function UserProfileForm(props: IUserProfileFormProps) {
   }
 
   return (
-    <Card className="border-none shadow-none h-full">
+    <Card className="border-none shadow-none h-full w-full">
       <CardBody>
-        <Form
-          className="w-full max-w-[700px] justify-start"
-          onSubmit={onSubmit}
-          id="user-profile-form"
-        >
-          <div className="flex flex-col gap-4 w-full">
-            <Input
-              label={msg('address')}
-              name="address"
-              variant="bordered"
-              placeholder={msg('address')}
-              value={form.address}
-              onValueChange={(value) => setForm((prev) => ({ ...prev, address: value }))}
-            />
-            <div className="flex gap-4">
-              <DatePicker
-                showMonthAndYearPickers
-                aria-label="Date of Birth"
-                variant="bordered"
-                className=""
-                label={t('dateOfBirth')}
-                value={form.dateOfBirth ? parseDateTime(form.dateOfBirth) : null}
-                onChange={(date) => setForm((prev) => ({ ...prev, dateOfBirth: date?.toString() }))}
-                granularity="day"
-                maxValue={today(getLocalTimeZone())}
-              />
-              <Select
-                label={t('gender')}
-                name="gender"
-                placeholder={t('gender')}
-                variant="bordered"
-                value={form.gender}
-                onChange={(e) => {
-                  setForm((prev) => ({ ...prev, gender: e.target.value }));
-                }}
-              >
-                <SelectItem key="01">Nam</SelectItem>
-                <SelectItem key="02">Nữ</SelectItem>
-              </Select>
-            </div>
-            <div className="flex gap-4">
-              <JobTitleSelect
-                value={form.jobTitleId && form.jobTitleId > 0 ? form.jobTitleId : undefined}
-                onChange={(value) => setForm((prev) => ({ ...prev, jobTitleId: value ?? 0 }))}
-                variant="bordered"
-                labelPlacement="outside"
-              />
+        {isFetching ? (
+          <FormSkeleton row={4} col={2} />
+        ) : (
+          <Form className="w-full justify-start" onSubmit={onSubmit} id="user-profile-form">
+            <div className="flex flex-col gap-4 w-full">
               <Input
-                label={org('department')}
-                name="department"
+                label={msg('address')}
+                name="address"
                 variant="bordered"
-                placeholder={org('department')}
-                value={form.departmentName}
-                readOnly
+                placeholder={msg('address')}
+                value={form.address}
+                onValueChange={(value) => setForm((prev) => ({ ...prev, address: value }))}
               />
+              <div className="flex gap-4">
+                <DatePicker
+                  showMonthAndYearPickers
+                  aria-label="Date of Birth"
+                  variant="bordered"
+                  className=""
+                  label={t('dateOfBirth')}
+                  value={form.dateOfBirth ? parseDateTime(form.dateOfBirth) : null}
+                  onChange={(date) =>
+                    setForm((prev) => ({ ...prev, dateOfBirth: date?.toString() }))
+                  }
+                  granularity="day"
+                  maxValue={today(getLocalTimeZone())}
+                />
+                <Select
+                  label={t('gender')}
+                  name="gender"
+                  placeholder={t('gender')}
+                  variant="bordered"
+                  value={form.gender}
+                  onChange={(e) => {
+                    setForm((prev) => ({ ...prev, gender: e.target.value }));
+                  }}
+                >
+                  <SelectItem key="01">Nam</SelectItem>
+                  <SelectItem key="02">Nữ</SelectItem>
+                </Select>
+              </div>
+              <div className="flex gap-4">
+                <JobTitleSelect
+                  value={form.jobTitleId && form.jobTitleId > 0 ? form.jobTitleId : undefined}
+                  onChange={(value) => setForm((prev) => ({ ...prev, jobTitleId: value ?? 0 }))}
+                  variant="bordered"
+                  labelPlacement="outside"
+                />
+                <Input
+                  label={org('department')}
+                  name="department"
+                  variant="bordered"
+                  placeholder={org('department')}
+                  value={form.departmentName}
+                  readOnly
+                />
+              </div>
             </div>
-          </div>
-        </Form>
+          </Form>
+        )}
       </CardBody>
       <CardFooter className="flex gap-4 justify-end">
         <Button color="primary" type="submit" form="user-profile-form" isLoading={isPending}>

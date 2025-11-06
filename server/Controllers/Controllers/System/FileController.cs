@@ -40,14 +40,6 @@ public class FileController : ControllerBase
         return Ok(ApiResponse<List<FileDto>>.Succeed(files, _sysMsg.Get(EMessage.SuccessMsg)));
     }
 
-    [HttpGet]
-    [Policy(ESysModule.Files, EPermission.View)]
-    public async Task<IActionResult> GetPaginated([FromQuery] FileFilterDto filter)
-    {
-        var result = await _fileService.GetPaginatedAsync(filter);
-        return Ok(ApiResponse<PaginatedResultDto<FileDto>>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
-    }
-
     // POST methods
     [HttpPost("upload")]
     public async Task<IActionResult> UploadFile([FromForm] FileUploadDto fileDto)

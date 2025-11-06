@@ -1,4 +1,4 @@
-namespace Common.Security;
+namespace Common.Security.User;
 
 public class CurrentUser
 {

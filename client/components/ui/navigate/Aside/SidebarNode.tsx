@@ -1,8 +1,10 @@
 import { useRouter } from '@/i18n/navigation';
+import { useNavivationStore } from '@/store/navigation-store';
 import { Button } from '@heroui/react';
 import clsx from 'clsx';
 import { AnimatePresence, motion } from 'framer-motion';
 import { ArrowRight01Icon, CircleIcon } from 'hugeicons-react';
+import { useLocale } from 'next-intl';
 import { usePathname } from 'next/navigation';
 import { useMemo } from 'react';
 import { HugeIcons } from '../../icon/HugeIcons';
@@ -19,15 +21,17 @@ interface SidebarNodeProps {
 const SidebarNode = (props: SidebarNodeProps) => {
   const { node, expandedIds, onToggle, isCompact } = props;
   const hasChildren = node.children && node.children.length > 0;
+  const { setNavigating } = useNavivationStore();
+  const locale = useLocale();
   const router = useRouter();
   const pathName = usePathname();
-  const isSelected = useMemo(() => node.url === pathName, [pathName]);
+  const isSelected = useMemo(() => `/${locale}${node.url}` === pathName, [pathName]);
 
   const isParentOfSelected = useMemo(() => {
     const checkRecursive = (children?: SidebarNodeType[]): boolean => {
       if (!children) return false;
       return children.some((child) => {
-        if (child.url === pathName) return true;
+        if (`/${locale}${child.url}` === pathName) return true;
         return checkRecursive(child.children);
       });
     };
@@ -37,6 +41,11 @@ const SidebarNode = (props: SidebarNodeProps) => {
   const isExpanded = useMemo(() => {
     return (isParentOfSelected || expandedIds.has(node.id)) && !isCompact;
   }, [isParentOfSelected, expandedIds, isCompact]);
+
+  const handleNavigation = (url: string) => {
+    setNavigating(true);
+    router.push(url);
+  };
 
   return (
     <div className="my-1">
@@ -51,7 +60,7 @@ const SidebarNode = (props: SidebarNodeProps) => {
               : 'bg-transparent has-hover:bg-content2 hover:bg-content2',
         )}
         onClick={() => {
-          hasChildren ? onToggle(node.id) : router.push(node.url);
+          hasChildren ? onToggle(node.id) : handleNavigation(node.url);
         }}
       >
         <div
@@ -77,9 +86,9 @@ const SidebarNode = (props: SidebarNodeProps) => {
                 width: 0,
               }}
               transition={{
-                duration: 0.5,
+                duration: 0.3,
                 ease: [0.4, 0.0, 0.2, 1],
-                opacity: { duration: 0.2 },
+                opacity: { duration: 0.3 },
               }}
               className={clsx(isSelected ? 'text-background' : 'text-foreground', 'truncate')}
             >

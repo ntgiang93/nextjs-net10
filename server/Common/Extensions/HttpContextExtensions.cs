@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Options;
+using Model.Models;
 
 namespace Common.Extensions;
 
@@ -18,6 +20,22 @@ public static class HttpContextExtensions
 
         return ip ?? "";
     }
+    
+    public static string GetAppDomain(IHttpContextAccessor contextAccessor, AppSettings appSettings)
+    {
+        // Prefer configured domain if set; else build from current request
+        if (!string.IsNullOrWhiteSpace(appSettings.FileDomain))
+            return appSettings.FileDomain.TrimEnd('/');
+
+        var request = contextAccessor.HttpContext?.Request;
+        string domain =  request == null
+            ? string.Empty
+            : $"{request.Scheme}://{request.Host.Value}";
+        return NormalizeDomain(domain);
+    }
+
+    private static string NormalizeDomain(string domain)
+        => domain.Trim().TrimEnd('/');
 
     public static string GetDevice(this HttpContext context)
     {
