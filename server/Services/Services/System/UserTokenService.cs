@@ -44,7 +44,7 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
         var token = new JwtSecurityToken(
             _appSettings.Jwt.Issuer,
             _appSettings.Jwt.Audience,
-            expires: DateTime.UtcNow.AddMinutes(_appSettings.Jwt.TokenExpiresIn),
+            expires: DateTime.Now.AddMinutes(_appSettings.Jwt.TokenExpiresIn),
             claims: claims,
             signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
         );
@@ -59,7 +59,6 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
         if (session == null) return true;
         session.Expires = DateTime.Now.AddYears(-1);
         session.RefreshToken = string.Empty;
-        session.IsDeleted = true;
         return await _repository.UpdateAsync(session);
     }
 
@@ -77,7 +76,7 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
         if (userToken != null)
         {
             userToken.RefreshToken = refreshToken;
-            userToken.Expires = DateTime.UtcNow.AddDays(_appSettings.Jwt.RefreshTokenExpiresIn);
+            userToken.Expires = DateTime.Now.AddDays(_appSettings.Jwt.RefreshTokenExpiresIn);
             userToken.AccessTokenId = accessTokenId;
             userToken.IpAddress = ipAddress;
             success = await UpdateAsync(userToken);
@@ -93,7 +92,7 @@ public class UserTokenService : GenericService<UserToken, long>, IUserTokenServi
                 IpAddress = ipAddress,
                 AccessTokenId = accessTokenId,
                 RefreshToken = refreshToken,
-                Expires = DateTime.UtcNow.AddDays(_appSettings.Jwt.RefreshTokenExpiresIn)
+                Expires = DateTime.Now.AddDays(_appSettings.Jwt.RefreshTokenExpiresIn)
             };
             var id = await CreateAsync(userToken, user.UserName);
             success = id > 0;

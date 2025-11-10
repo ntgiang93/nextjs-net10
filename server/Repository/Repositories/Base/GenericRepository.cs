@@ -54,7 +54,7 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
 
     public virtual async Task<TKey> InsertAsync(TEntity entity)
     {
-        entity.CreatedAt = DateTime.UtcNow;
+        entity.CreatedAt = DateTime.Now;
         entity.IsDeleted = false;        
         if (typeof(TKey) == typeof(string))
         {
@@ -74,7 +74,7 @@ public class GenericRepository<TEntity, TKey> : IGenericRepository<TEntity, TKey
 
     public virtual async Task<bool> UpdateAsync(TEntity entity)
     {
-        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedAt = DateTime.Now;
         var result = await _dbFactory.Connection.UpdateAsync(entity);
         return result;
     }

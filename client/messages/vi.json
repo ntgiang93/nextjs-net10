@@ -65,7 +65,8 @@
     "or": "hoặc",
     "back": "Quay lại",
     "noResultsFound": "Không tìm thấy kết quả",
-    "category": "Danh mục"
+    "category": "Danh mục",
+    "invalidJson": "Định dạng JSON không hợp lệ"
   },
   "role": {
     "title": "Quản lý Vai trò",
@@ -137,5 +138,35 @@
     "showSubDepartmentsMembers": "Hiển thị thành viên của các bộ phận con",
     "hideSubDepartmentsMembers": "Ẩn thành viên của các bộ phận con",
     "organizationChart": "Sơ đồ tổ chức"
+  },
+  "jobSchedule": {
+    "title": "Quản lý bộ lập lịch công việc",
+    "jobSchedule": "Lập lịch công việc",
+    "jobName": "Tên công việc",
+    "jobGroup": "Nhóm công việc",
+    "jobType": "Loại công việc",
+    "cronExpression": "Biểu thức Cron",
+    "description": "Mô tả",
+    "jobDataJson": "Dữ liệu công việc (JSON)",
+    "isActive": "Đang hoạt động",
+    "addJobSchedule": "Thêm lịch công việc",
+    "editJobSchedule": "Sửa lịch công việc",
+    "deleteJobScheduleWarning": "Bạn có chắc chắn muốn xóa lịch công việc này không?",
+    "cronExpressionHelper": "Ví dụ: 0 0 12 * * ? (Mỗi ngày lúc 12:00)",
+    "cronExpressionDescription": "Định dạng Cron: [giây] [phút] [giờ] [ngày] [tháng] [ngàyTrongTuần] [năm]",
+    "buildExpression": "Tạo biểu thức",
+    "cronExpressionInvalid": "Biểu thức Cron không hợp lệ",
+    "jobTypeHelper": "Tên class đầy đủ với assembly (vd: MyApp.Jobs.EmailJob, MyApp)",
+    "jobGroupHelper": "Nhóm mặc định là 'DEFAULT'",
+    "lastExecutionTime": "Lần chạy cuối",
+    "nextExecutionTime": "Lần chạy tiếp theo",
+    "executionStatus": "Trạng thái thực thi",
+    "jsonDataDescription": "Cung cấp một đối tượng JSON hợp lệ để cấu hình dữ liệu cụ thể cho công việc.",
+    "startJob": "Bắt đầu công việc",
+    "pauseJob": "Tạm dừng công việc",
+    "resumeJob": "Tiếp tục công việc",
+    "triggerJobWarning": "Bạn có chắc chắn muốn chạy công việc này ngay lập tức không?",
+    "pauseJobWarning": "Bạn có chắc chắn muốn tạm dừng công việc này không?",
+    "resumeJobWarning": "Bạn có chắc chắn muốn tiếp tục công việc này không?"
   }
 }

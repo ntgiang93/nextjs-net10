@@ -63,7 +63,7 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
         entity.CreatedAt = existingEntity.CreatedAt;
         entity.IsDeleted = existingEntity.IsDeleted;
         entity.UpdatedBy = UserContext.Current?.UserName ?? username;
-        entity.UpdatedAt = DateTime.UtcNow;
+        entity.UpdatedAt = DateTime.Now;
         var result = await _repository.UpdateAsync(entity);
         if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return result;
@@ -78,7 +78,7 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
         {
             existingEntity.IsDeleted = true;
             existingEntity.UpdatedBy = UserContext.Current?.UserName ?? "";
-            existingEntity.UpdatedAt = DateTime.UtcNow;
+            existingEntity.UpdatedAt = DateTime.Now;
             var result = await _repository.UpdateAsync(existingEntity);
             if (result) CacheManager.RemoveCacheByPrefix(_cachePrefix);
             return result;
@@ -116,7 +116,7 @@ public class GenericService<TEntity, TKey> : IGenericService<TEntity, TKey>
     public virtual async Task<TKey?> CreateAsync(TEntity entity, string username = "System")
     {
         entity.CreatedBy = UserContext.Current?.UserName ?? username;
-        entity.CreatedAt = DateTime.UtcNow;
+        entity.CreatedAt = DateTime.Now;
         var id = await _repository.InsertAsync(entity);
         CacheManager.RemoveCacheByPrefix(_cachePrefix);
         return id;

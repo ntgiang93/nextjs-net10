@@ -1,6 +1,12 @@
-namespace Common.Security.User;
+using Microsoft.AspNetCore.Builder;
 
-public class JwtBlacklistMiddlewareExtensions
+namespace Common.Security.User
 {
-    
+    public static class JwtBlacklistMiddlewareExtensions
+    {
+        public static IApplicationBuilder UseJwtBlacklist(this IApplicationBuilder builder)
+        {
+            return builder.UseMiddleware<JwtBlacklistMiddleware>();
+        }
+    }
 }

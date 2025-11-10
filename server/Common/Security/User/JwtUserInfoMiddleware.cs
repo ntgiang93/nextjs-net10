@@ -45,8 +45,6 @@ public class JwtUserInfoMiddleware
 
         try
         {
-            if (typeof(T) == typeof(Guid) && Guid.TryParse(claim.Value, out var guidValue)) return (T)(object)guidValue;
-
             return (T)Convert.ChangeType(claim.Value, typeof(T));
         }
         catch

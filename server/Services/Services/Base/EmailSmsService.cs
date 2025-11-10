@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Net;
-using System.Net.Http;
 using System.Net.Mail;
-using System.Threading.Tasks;
 using Model.Models;
-using Service.Interfaces.Base;
 using Serilog;
+using Service.Interfaces.Base;
 
 namespace Service.Services.System;
 

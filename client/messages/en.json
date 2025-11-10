@@ -65,7 +65,8 @@
     "or": "or",
     "back": "Back",
     "noResultsFound": "No results found",
-    "category": "Category"
+    "category": "Category",
+    "invalidJson": "Invalid JSON format"
   },
   "role": {
     "title": "Role Management",
@@ -137,5 +138,35 @@
     "showSubDepartmentsMembers": "Show Members of Sub-Departments",
     "hideSubDepartmentsMembers": "Hide Members of Sub-Departments",
     "organizationChart": "Organization Chart"
+  },
+  "jobSchedule": {
+    "title": "Job Schedule Management",
+    "jobSchedule": "Job Schedule",
+    "jobName": "Job Name",
+    "jobGroup": "Job Group",
+    "jobType": "Job Type",
+    "cronExpression": "Cron Expression",
+    "description": "Description",
+    "jobDataJson": "Job Data (JSON)",
+    "isActive": "Is Active",
+    "addJobSchedule": "Add Job Schedule",
+    "editJobSchedule": "Edit Job Schedule",
+    "deleteJobScheduleWarning": "Are you sure you want to delete this job schedule?",
+    "cronExpressionHelper": "Example: 0 0 12 * * ? (Every day at 12:00 PM)",
+    "cronExpressionDescription": "Cron format: [second] [minute] [hour] [day] [month] [dayOfWeek] [year]",
+    "buildExpression": "build expression",
+    "cronExpressionInvalid": "Invalid Cron expression format",
+    "jobTypeHelper": "Full class name with assembly (e.g., MyApp.Jobs.EmailJob, MyApp)",
+    "jobGroupHelper": "Default group is 'DEFAULT'",
+    "lastExecutionTime": "Last Execution",
+    "nextExecutionTime": "Next Execution",
+    "executionStatus": "Execution Status",
+    "jsonDataDescription": "Provide a valid JSON object to configure job-specific data.",
+    "startJob": "Start Job",
+    "pauseJob": "Pause Job",
+    "resumeJob": "Resume Job",
+    "triggerJobWarning": "Are you sure you want to trigger this job immediately?",
+    "pauseJobWarning": "Are you sure you want to pause this job?",
+    "resumeJobWarning": "Are you sure you want to resume this job?"
   }
 }

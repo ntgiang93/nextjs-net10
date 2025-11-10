@@ -81,7 +81,7 @@ public class AuthService : IAuthService
     public async Task<TokenDto?> RefreshTokenAsync(RefreshTokenDto dto)
     {
         var session = await _userTokenService.GetSingleAsync<UserToken>(x =>
-            x.RefreshToken == dto.RefreshToken && x.Expires > DateTime.UtcNow && x.IsDeleted == false);
+            x.RefreshToken == dto.RefreshToken && x.Expires > DateTime.Now && x.IsDeleted == false);
         if (session == null) return null;
         var user = await _userService.GetByIdAsync<User>(session.UserId);
         var token = new TokenDto();
@@ -276,7 +276,7 @@ public class AuthService : IAuthService
                 .Replace("{{NewPassword}}", password)
                 .Replace("{{ActionUrl}}", loginUrl)
                 .Replace("{{SupportEmail}}", supportEmail)
-                .Replace("{{Year}}", DateTime.UtcNow.Year.ToString());
+                .Replace("{{Year}}", DateTime.Now.Year.ToString());
 
             await _emailSmsService.SendSMTPEmailAsync(new EmailMessage
             {

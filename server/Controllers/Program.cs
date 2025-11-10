@@ -14,6 +14,8 @@ using Repository.Repositories.Base;
 using Serilog;
 using System.Text;
 using Common.Security.User;
+using Quartz;
+using Services.Services.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -76,6 +78,29 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionHandler>();
 builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
 builder.Services.AddSingleton<CacheManager>();
 
+// Add Quartz.NET services
+builder.Services.AddQuartz(q =>
+{
+    q.UseInMemoryStore();
+    q.UseDefaultThreadPool();
+    
+    // Example: Add default jobs here if needed
+    // var sampleJobKey = new JobKey("SampleJob", "DEFAULT");
+    // q.AddJob<Services.Jobs.SampleJob>(opts => opts.WithIdentity(sampleJobKey));
+    // q.AddTrigger(opts => opts
+    //     .ForJob(sampleJobKey)
+    //     .WithIdentity("SampleJob-trigger", "DEFAULT")
+    //     .WithCronSchedule("0 */5 * * * ?")); // Run every 5 minutes
+});
+
+// Add Quartz hosted service
+builder.Services.AddQuartzHostedService(options =>
+{
+    options.WaitForJobsToComplete = true;
+});
+
+builder.Services.AddHostedService<JobLoaderService>();
+
 // Add controllers with filters
 builder.Services.AddControllers(options => { options.Filters.Add<GlobalExceptionFilter>(); });
 
@@ -85,6 +110,7 @@ builder.Services.AddOpenApi();
 // Read serilog configuration from appsetting.json
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -107,7 +133,8 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = "/uploads"
 });
 
-app.UseAuthentication(); // Add authentication middleware
+app.UseAuthentication();
+app.UseJwtBlacklist();// Add authentication middleware
 app.UseJwtUserInfo(); // Add our custom JWT user info middleware
 app.UseAuthorization();
 

@@ -40,7 +40,7 @@ namespace Model.Entities.System
 
         [JsonIgnore]
         [Column(TypeName = "datetime2")]
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         [JsonIgnore]
         [StringLength(30)]

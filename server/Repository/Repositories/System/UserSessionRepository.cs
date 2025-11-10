@@ -36,7 +36,7 @@ public class UserSessionRepository : GenericRepository<UserToken, long>, IUserSe
         var query = new Query($"{nameof(UserToken)}")
             .Where(nameof(UserToken.UserId), userId)
             .Where(nameof(UserToken.IsDeleted), false)
-            .Where(nameof(UserToken.Expires), ">", DateTime.UtcNow)
+            .Where(nameof(UserToken.Expires), ">", DateTime.Now)
             .OrderByDesc(nameof(UserToken.CreatedAt));
 
         var compiledQuery = _compiler.Compile(query);
@@ -58,7 +58,7 @@ public class UserSessionRepository : GenericRepository<UserToken, long>, IUserSe
                 WHERE {nameof(UserToken.AccessTokenId)} = @token");
 
             var rowsAffected = await connection.ExecuteAsync(_sqlBuilder.ToString(), 
-                new { token, updatedAt = DateTime.UtcNow }, transaction);
+                new { token, updatedAt = DateTime.Now }, transaction);
 
             return rowsAffected > 0;
         });
@@ -75,7 +75,7 @@ public class UserSessionRepository : GenericRepository<UserToken, long>, IUserSe
                 WHERE {nameof(UserToken.UserId)} = @userId");
 
             await connection.ExecuteAsync(_sqlBuilder.ToString(), 
-                new { userId, updatedAt = DateTime.UtcNow }, transaction);
+                new { userId, updatedAt = DateTime.Now }, transaction);
 
             return true;
         });
@@ -92,7 +92,7 @@ public class UserSessionRepository : GenericRepository<UserToken, long>, IUserSe
                 WHERE {nameof(UserToken.Expires)} < @now AND {nameof(UserToken.IsDeleted)} = 0");
 
             await connection.ExecuteAsync(_sqlBuilder.ToString(), 
-                new { now = DateTime.UtcNow, updatedAt = DateTime.UtcNow }, transaction);
+                new { now = DateTime.Now, updatedAt = DateTime.Now }, transaction);
 
             return true;
         });
