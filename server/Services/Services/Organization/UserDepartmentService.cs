@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Common.Security;
+using Common.Security.User;
 using Model.DTOs.Base;
 using Model.DTOs.Organization;
 using Model.DTOs.System.User;

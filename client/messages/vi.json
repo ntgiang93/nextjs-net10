@@ -32,6 +32,7 @@
     "description": "Mô tả",
     "confirmWarning": "Bạn có chắc chắn muốn thực hiện thao tác này không?",
     "name": "Tên",
+    "engName": "Tên tiếng Anh",
     "code": "Mã",
     "type": "Loại",
     "path": "Đường dẫn",
@@ -66,7 +67,13 @@
     "back": "Quay lại",
     "noResultsFound": "Không tìm thấy kết quả",
     "category": "Danh mục",
-    "invalidJson": "Định dạng JSON không hợp lệ"
+    "invalidJson": "Định dạng JSON không hợp lệ",
+    "notification": "Thông báo",
+    "markSeeAll": "Đánh dấu tất cả đã đọc",
+    "showAll": "Hiển thị tất cả",
+    "showRead": "Hiển thị đã đọc",
+    "showUnread": "Hiển thị chưa đọc",
+    "openLink": "Mở liên kết"
   },
   "role": {
     "title": "Quản lý Vai trò",

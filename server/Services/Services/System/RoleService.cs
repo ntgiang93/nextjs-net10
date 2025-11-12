@@ -1,5 +1,6 @@
 using Common.Exceptions;
 using Common.Security;
+using Common.Security.User;
 using Mapster;
 using Model.Constants;
 using Model.DTOs.Base;

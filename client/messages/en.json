@@ -32,6 +32,7 @@
     "description": "Description",
     "confirmWarning": "Are you sure you want to perform this action?",
     "name": "Name",
+    "engName": "English Name",
     "code": "Code",
     "type": "Type",
     "path": "Path",
@@ -66,7 +67,13 @@
     "back": "Back",
     "noResultsFound": "No results found",
     "category": "Category",
-    "invalidJson": "Invalid JSON format"
+    "invalidJson": "Invalid JSON format",
+    "notification": "Notification",
+    "markSeeAll": "Mark all as read",
+    "showAll": "Show all",
+    "showRead": "Show read",
+    "showUnread": "Show unread",
+    "openLink": "Open Link"
   },
   "role": {
     "title": "Role Management",

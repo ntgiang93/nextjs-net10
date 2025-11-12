@@ -24,7 +24,7 @@ namespace Controllers.Controllers.System
         }
         
         [HttpGet()]
-        [Policy(ESysModule.Files, EPermission.All)]
+        [Policy(ESysModule.JobScheduler, EPermission.View)]
         public async Task<IActionResult> GetJobs()
         {
             var jobs = await _scheduler.GetAllJobsAsync();
@@ -32,7 +32,7 @@ namespace Controllers.Controllers.System
         }
         
         [HttpGet("{id}")]
-        [Policy(ESysModule.Files, EPermission.All)]
+        [Policy(ESysModule.JobScheduler, EPermission.View)]
         public async Task<IActionResult> GetJobs(int id)
         {
             var jobs = await _scheduler.GetSingleAsync<DetailCJobConfigurationDto>(j => j.Id == id && j.IsDeleted == false);
@@ -42,7 +42,7 @@ namespace Controllers.Controllers.System
         }
         
         [HttpGet("types")]
-        [Policy(ESysModule.Files, EPermission.All)]
+        [Policy(ESysModule.JobScheduler, EPermission.View)]
         public async Task<IActionResult> GetJobTypes()
         {
             var jobTypes = await _scheduler.GetJobTypeAsync();
@@ -50,6 +50,7 @@ namespace Controllers.Controllers.System
         }
         
         [HttpPost()]
+        [Policy(ESysModule.JobScheduler, EPermission.Create)]
         public async Task<IActionResult> CreateJob(DetailCJobConfigurationDto dto)
         {
             var result = await _scheduler.CreateJobAsync(dto);
@@ -58,6 +59,7 @@ namespace Controllers.Controllers.System
         }
 
         [HttpPost("trigger")]
+        [Policy(ESysModule.JobScheduler, EPermission.Edit)]
         public async Task<IActionResult> TriggerJob([FromBody] string jobName)
         {
             await _scheduler.TriggerJobAsync(jobName);
@@ -65,6 +67,7 @@ namespace Controllers.Controllers.System
         }
 
         [HttpPost("pause")]
+        [Policy(ESysModule.JobScheduler, EPermission.Edit)]
         public async Task<IActionResult> PauseJob([FromBody] string jobName)
         {
             await _scheduler.PauseJobAsync(jobName);
@@ -72,6 +75,7 @@ namespace Controllers.Controllers.System
         }
 
         [HttpPost("resume")]
+        [Policy(ESysModule.JobScheduler, EPermission.Edit)]
         public async Task<IActionResult> ResumeJob([FromBody] string jobName)
         {
             await _scheduler.ResumeJobAsync(jobName);
@@ -79,9 +83,19 @@ namespace Controllers.Controllers.System
         }
         
         [HttpPut()]
+        [Policy(ESysModule.JobScheduler, EPermission.Edit)]
         public async Task<IActionResult> UpdateJobAsync(UpdateJobScheduleDto dto)
         {
             var result = await _scheduler.UpdateJobAsync(dto);
+            if (result) return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
+            return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
+        }
+        
+        [HttpDelete("{id}")]
+        [Policy(ESysModule.JobScheduler, EPermission.Delete)]
+        public async Task<IActionResult> DeleteJobAsync(int id)
+        {
+            var result = await _scheduler.SoftDeleteAsync(id);
             if (result) return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
             return Ok(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
         }

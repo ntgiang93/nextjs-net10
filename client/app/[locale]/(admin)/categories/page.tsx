@@ -30,7 +30,7 @@ export default function Categories() {
   const columns = useMemo<ColumnDef<CategoryTreeDto>[]>(
     () => [
       {
-        accessorFn: (row) => row.name,
+        accessorKey: 'name',
         id: 'name',
         header: () => msg('name'),
         size: 300,

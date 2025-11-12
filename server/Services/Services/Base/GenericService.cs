@@ -4,6 +4,7 @@ using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Common.Exceptions;
 using Common.Security;
+using Common.Security.User;
 using Model.Constants;
 using Model.Entities.System;
 using Repository.Interfaces.Base;

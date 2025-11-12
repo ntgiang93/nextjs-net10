@@ -7,6 +7,7 @@ public class MenuDto
     public int Id { get; set; }
 
     public string Name { get; set; } = string.Empty;
+    public string EngName { get; set; } = string.Empty;
 
     public string Url { get; set; } = string.Empty;
 
@@ -26,7 +27,7 @@ public class MenuDto
 public class CreateMenuDto
 {
     [Required] [StringLength(100)] public string Name { get; set; } = string.Empty;
-
+    [Required] [StringLength(100)] public string EngName { get; set; } = string.Empty;
     [Required] [StringLength(200)] public string Url { get; set; } = string.Empty;
 
     public string? Icon { get; set; }

@@ -110,6 +110,16 @@ export default function MenuDetail(props: MenuDetailProps) {
                   variant={'bordered'}
                 />
                 <Input
+                  label={msg('engName')}
+                  autoFocus
+                  name="engName"
+                  value={form.engName}
+                  onValueChange={(value) => setForm((prev) => ({ ...prev, engName: value }))}
+                  placeholder={`${msg('enter')} ${msg('engName')}`}
+                  type="text"
+                  variant={'bordered'}
+                />
+                <Input
                   isRequired
                   label={msg('path')}
                   name="url"

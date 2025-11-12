@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Common.Security;
+using Common.Security.User;
 using Model.Constants;
 using Service.Interfaces.Base;
 

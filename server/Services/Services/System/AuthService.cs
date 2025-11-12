@@ -10,6 +10,7 @@ using Service.DTOs.System.Auth;
 using Service.Interfaces;
 using Service.Interfaces.Base;
 using System.IdentityModel.Tokens.Jwt;
+using Common.Security.User;
 using Newtonsoft.Json;
 using RestSharp;
 

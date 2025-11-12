@@ -6,6 +6,9 @@ import { SearchInput } from '@/components/ui/input/SearchInput';
 import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
 import { UserHook } from '@/hooks/user';
+import { hasPermission } from '@/libs/AuthHelper';
+import { EPermission } from '@/types/base/Permission';
+import { ESysModule } from '@/types/constant/SysModule';
 import { defaultUserTableRequest, UserTableDto, UserTableRequestDto } from '@/types/sys/User';
 import { Button, Chip, Select, SelectItem, Tooltip, useDisclosure, User } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
@@ -37,6 +40,10 @@ export default function Menu() {
   const [selectUser, setSelectUser] = useState<UserTableDto | undefined>(undefined);
   const { mutateAsync: changeActive } = UserHook.useChangeActive(selectUser?.id || '');
   const { navigate } = useAuth();
+  const canCreateUser = hasPermission(ESysModule.Users, EPermission.Create);
+  const canEditUser = hasPermission(ESysModule.Users, EPermission.Edit);
+  const canDeleteUser = hasPermission(ESysModule.Users, EPermission.Delete);
+  const canViewUser = hasPermission(ESysModule.Users, EPermission.View);
 
   const columns = useMemo<ColumnDef<UserTableDto>[]>(
     () => [
@@ -129,38 +136,42 @@ export default function Menu() {
         cell: ({ row }) => {
           return (
             <div className="relative flex items-center gap-2">
-              <Tooltip content={t('userDetails')}>
-                <Button
-                  isIconOnly
-                  aria-label="user-details-button"
-                  color="primary"
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                  onPress={() => {
-                    navigate(`/sys/user/${row.original.id}`);
-                  }}
-                >
-                  <UserAccountIcon size={16} />
-                </Button>
-              </Tooltip>
-              <Tooltip content={t('editUser')}>
-                <Button
-                  isIconOnly
-                  aria-label="edit-button"
-                  color="primary"
-                  variant="light"
-                  radius="full"
-                  size="sm"
-                  onPress={() => {
-                    setSelectUser(row.original);
-                    onOpen();
-                  }}
-                >
-                  <Edit01Icon size={16} />
-                </Button>
-              </Tooltip>
-              {row.original.isActive && (
+              {canViewUser && (
+                <Tooltip content={t('userDetails')}>
+                  <Button
+                    isIconOnly
+                    aria-label="user-details-button"
+                    color="primary"
+                    variant="light"
+                    radius="full"
+                    size="sm"
+                    onPress={() => {
+                      navigate(`/sys/user/${row.original.id}`);
+                    }}
+                  >
+                    <UserAccountIcon size={16} />
+                  </Button>
+                </Tooltip>
+              )}
+              {canEditUser && (
+                <Tooltip content={t('editUser')}>
+                  <Button
+                    isIconOnly
+                    aria-label="edit-button"
+                    color="primary"
+                    variant="light"
+                    radius="full"
+                    size="sm"
+                    onPress={() => {
+                      setSelectUser(row.original);
+                      onOpen();
+                    }}
+                  >
+                    <Edit01Icon size={16} />
+                  </Button>
+                </Tooltip>
+              )}
+              {canEditUser && row.original.isActive && (
                 <Tooltip color="danger" content={t('inactiveUser')}>
                   <Button
                     isIconOnly
@@ -178,7 +189,7 @@ export default function Menu() {
                   </Button>
                 </Tooltip>
               )}
-              {!row.original.isActive && (
+              {canEditUser && !row.original.isActive && (
                 <Tooltip color="success" content={t('activeUser')}>
                   <Button
                     isIconOnly
@@ -204,7 +215,7 @@ export default function Menu() {
         },
       },
     ],
-    [navigate, onOpenActive],
+    [canEditUser, canViewUser, msg, navigate, onOpen, onOpenActive, t],
   );
 
   const handleChangeActive = () => {
@@ -223,17 +234,20 @@ export default function Menu() {
         title={'Danh sách người dùng'}
         toolbar={
           <>
-            <ExtButton
-              color="primary"
-              startContent={<Add01Icon size={16} />}
-              variant="shadowSmall"
-              onPress={() => {
-                setSelectUser(undefined);
-                onOpen();
-              }}
-            >
-              {msg('add')}
-            </ExtButton>
+            {canCreateUser && (
+              <ExtButton
+                color="primary"
+                startContent={<Add01Icon size={16} />}
+                variant="shadowSmall"
+                onPress={() => {
+                  if (!canCreateUser) return;
+                  setSelectUser(undefined);
+                  onOpen();
+                }}
+              >
+                {msg('add')}
+              </ExtButton>
+            )}
           </>
         }
       ></PageHeader>

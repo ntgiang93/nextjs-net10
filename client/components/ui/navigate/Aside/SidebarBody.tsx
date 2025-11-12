@@ -9,6 +9,7 @@ import SidebarNode from './SidebarNode';
 export type SidebarNodeType = {
   id: number;
   name: string;
+  engName?: string;
   url: string;
   icon?: string;
   children?: SidebarNodeType[];

@@ -83,14 +83,6 @@ builder.Services.AddQuartz(q =>
 {
     q.UseInMemoryStore();
     q.UseDefaultThreadPool();
-    
-    // Example: Add default jobs here if needed
-    // var sampleJobKey = new JobKey("SampleJob", "DEFAULT");
-    // q.AddJob<Services.Jobs.SampleJob>(opts => opts.WithIdentity(sampleJobKey));
-    // q.AddTrigger(opts => opts
-    //     .ForJob(sampleJobKey)
-    //     .WithIdentity("SampleJob-trigger", "DEFAULT")
-    //     .WithCronSchedule("0 */5 * * * ?")); // Run every 5 minutes
 });
 
 // Add Quartz hosted service

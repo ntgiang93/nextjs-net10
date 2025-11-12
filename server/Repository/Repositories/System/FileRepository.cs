@@ -19,7 +19,6 @@ public class FileRepository : GenericRepository<FileStorage, int>, IFileReposito
 
     public async Task<List<FileStorage>> GetByReferenceAsync(string referenceId, string referenceType, string domain)
     {
-        
         var query = new Query(_table)
             .Select(
                 nameof(FileStorage.Id),

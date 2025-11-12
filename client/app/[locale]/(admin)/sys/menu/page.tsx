@@ -13,7 +13,7 @@ import { MenuItem } from '@/types/sys/Menu';
 import { Button, Tooltip, useDisclosure } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { Add01Icon, Delete02Icon, Edit01Icon } from 'hugeicons-react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import { useMemo, useState } from 'react';
 import MenuDetail from './components/MenuDetailModal';
 
@@ -28,14 +28,16 @@ export default function Menu() {
   const canCreate = hasPermission(ESysModule.Menu, EPermission.Create);
   const canEdit = hasPermission(ESysModule.Menu, EPermission.Edit);
   const canDelete = hasPermission(ESysModule.Menu, EPermission.Delete);
+  const locale = useLocale();
   const t = useTranslations('menu');
   const msg = useTranslations('msg');
 
   const columns = useMemo<ColumnDef<MenuItem>[]>(
     () => [
       {
-        accessorFn: (row) => row.name,
+        accessorFn: (row) => (locale === 'en' ? row.engName : row.name),
         id: 'name',
+        accessorKey: 'name',
         header: () => msg('name'),
         size: 300,
         meta: {
@@ -132,7 +134,7 @@ export default function Menu() {
         },
       },
     ],
-    [canCreate, canEdit, canDelete, msg],
+    [canCreate, canEdit, canDelete, msg, locale],
   );
 
   const filteredData = useMemo(() => {

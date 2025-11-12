@@ -30,7 +30,7 @@ namespace Services.Services.Jobs
         private async Task<IScheduler> GetSchedulerAsync() => await _schedulerFactory.GetScheduler();
         public async Task<IEnumerable<JobScheduleDto>> GetAllJobsAsync()
         {
-            var jobConfigs = await GetAllAsync<JobConfiguration>();
+            var jobConfigs = await FindAsync<JobConfiguration>(j => j.IsDeleted == false);
             var scheduler = await GetSchedulerAsync();
             var jobKeys = await scheduler.GetJobKeys(GroupMatcher<JobKey>.AnyGroup());
 
@@ -60,7 +60,7 @@ namespace Services.Services.Jobs
         }
         public async Task<List<string>> GetJobTypeAsync()
         {
-            var baseType = typeof(BaseJob);
+            var baseType = typeof(BaseJob<>);
             var jobTypes = new List<string>();
     
             // Lấy assembly chứa BaseJob

@@ -101,7 +101,7 @@ export const Topbar = (props: ITopbarProps) => {
             <Avatar
               isBordered
               as="button"
-              className="transition-transform"
+              className="transition-transform hover:cursor-pointer"
               color="secondary"
               name="Jason Hughes"
               size="sm"

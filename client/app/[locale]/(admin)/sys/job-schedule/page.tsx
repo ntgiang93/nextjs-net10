@@ -52,9 +52,9 @@ export default function Roles() {
   const { mutateAsync: resume, isPending: resumeLoading } = JobScheduleHook.useResume();
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [tableData, setTableData] = useState<JobScheduleDto[]>(jobs || []);
-  const canCreateRole = hasPermission(ESysModule.Roles, EPermission.Create);
-  const canEditRole = hasPermission(ESysModule.Roles, EPermission.Edit);
-  const canDeleteRole = hasPermission(ESysModule.Roles, EPermission.Delete);
+  const canCreateRole = hasPermission(ESysModule.JobScheduler, EPermission.Create);
+  const canEditRole = hasPermission(ESysModule.JobScheduler, EPermission.Edit);
+  const canDeleteRole = hasPermission(ESysModule.JobScheduler, EPermission.Delete);
 
   const columns = useMemo<ColumnDef<JobScheduleDto>[]>(
     () => [

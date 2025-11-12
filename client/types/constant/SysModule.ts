@@ -11,4 +11,5 @@ export enum ESysModule {
   Department = 'Department',
   DepartmentType = 'DepartmentType',
   JobTitle = 'JobTitle',
+  JobScheduler = 'JobScheduler',
 }

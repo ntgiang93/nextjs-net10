@@ -92,7 +92,7 @@ const SidebarNode = (props: SidebarNodeProps) => {
               }}
               className={clsx(isSelected ? 'text-background' : 'text-foreground', 'truncate')}
             >
-              {node.name}
+              {locale === 'vi' ? node.name : node.engName}
             </motion.span>
           )}
         </div>

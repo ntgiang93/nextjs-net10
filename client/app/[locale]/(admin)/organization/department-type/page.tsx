@@ -33,7 +33,7 @@ export default function Menu() {
   const columns = useMemo<ColumnDef<DepartmentTypeDto>[]>(
     () => [
       {
-        accessorFn: (row) => row.name,
+        accessorKey: 'name',
         id: 'name',
         header: () => msg('name'),
         footer: (props) => props.column.id,

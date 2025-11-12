@@ -1,6 +1,7 @@
 ﻿using Common.Exceptions;
 using Common.Extensions;
 using Common.Security;
+using Common.Security.User;
 using Mapster.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;

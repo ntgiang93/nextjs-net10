@@ -9,7 +9,7 @@ namespace Model.Entities.System;
 public class Menu : BaseEntity<int>
 {
     [Required] [StringLength(100)] public string Name { get; set; } = string.Empty;
-
+    [Required] [StringLength(100)] public string EngName { get; set; } = string.Empty;
     [Required] [StringLength(200)] public string Url { get; set; } = string.Empty;
 
     [Required] [StringLength(100)] public string? Icon { get; set; }

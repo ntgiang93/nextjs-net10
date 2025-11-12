@@ -1,5 +1,6 @@
 using Common.Security;
 using Common.Security.Policies;
+using Common.Security.User;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,7 +1,4 @@
-using System.Threading;
-using Common.Security.User;
-
-namespace Common.Security
+namespace Common.Security.User
 {
     public class UserContext
     {

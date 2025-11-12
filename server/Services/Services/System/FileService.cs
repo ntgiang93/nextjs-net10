@@ -5,6 +5,7 @@ using MimeDetective.Definitions;
 using Common.Exceptions;
 using Common.Extensions;
 using Common.Security;
+using Common.Security.User;
 using Model.Constants;
 using Model.DTOs.System.File;
 using Model.Entities.System;

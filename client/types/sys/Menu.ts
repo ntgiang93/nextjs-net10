@@ -1,6 +1,7 @@
 export type MenuItem = {
   id: number;
   name: string;
+  engName?: string;
   url: string;
   icon?: string;
   displayOrder: number;
@@ -13,6 +14,7 @@ export type MenuItem = {
 export const defaultMenuItem: MenuItem = {
   id: 0,
   name: '',
+  engName: '',
   url: '',
   icon: '',
   displayOrder: 0,
@@ -25,6 +27,7 @@ export const defaultMenuItem: MenuItem = {
 export type SaveMenuDto = {
   id: number;
   name: string;
+  engName?: string;
   url: string;
   icon?: string;
   displayOrder: number;
@@ -36,6 +39,7 @@ export type SaveMenuDto = {
 export const defaultSaveMenuDto: SaveMenuDto = {
   id: 0,
   name: '',
+  engName: '',
   url: '',
   icon: '',
   displayOrder: 0,

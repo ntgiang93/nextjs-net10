@@ -1,4 +1,6 @@
+using Common.Security;
 using Common.Security.Policies;
+using Common.Security.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Model.Constants;
@@ -28,7 +30,8 @@ public class SysCategoryController : ControllerBase
     [Policy(ESysModule.SysCategories, EPermission.View)]
     public IActionResult GetAllSysModule()
     {
-        var modules = SysModule.Get2SelectOptions();
+        var languagesCode = UserContext.Current.Language;
+        var modules = SysModule.Get2SelectOptions(languagesCode);
         return Ok(ApiResponse<IEnumerable<SelectOption<string>>>.Succeed(modules, _sysMsg.Get(EMessage.SuccessMsg)));
     }
     

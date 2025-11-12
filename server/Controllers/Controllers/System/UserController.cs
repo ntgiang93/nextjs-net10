@@ -2,6 +2,7 @@ using System.Net;
 using Common.Exceptions;
 using Common.Security;
 using Common.Security.Policies;
+using Common.Security.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Model.Constants;
@@ -40,7 +41,6 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("me")]
-    [Policy(ESysModule.Users, EPermission.View)]
     public async Task<IActionResult> GetMe()
     {
         var currentUser = UserContext.Current;

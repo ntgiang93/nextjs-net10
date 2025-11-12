@@ -13,7 +13,6 @@ namespace Repository.Repositories.Organization;
 
 public class DepartmentRepository : GenericRepository<Department, int>, IDepartmentRepository
 {
-    private readonly StringBuilder _sqlBuilder;     
     private readonly string _tableName;
     private readonly string _departmentTypeTableName;
 
