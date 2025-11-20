@@ -24,6 +24,17 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
     onClose();
   }, [onClose, pathName]);
 
+  const toggleSidebar = () => {
+    if (isOpen) {
+      onClose();
+    } else {
+      onOpen();
+    }
+    if (isCompact) {
+      setIsCompact(false);
+    }
+  };
+
   if (isLoading) {
     return <AdminLayoutSkeleton />;
   }
@@ -39,7 +50,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       <aside
         className={clsx(
           'transition-all duration-400 ease-in-out flex flex-col hover:w-64 h-screen flex-shrink-0',
-          'max-md:hidden',
+          'max-lg:hidden',
           `${isCompact ? 'w-20' : 'w-64'}`,
         )}
         onMouseEnter={() => setShowSidebar(isCompact)}
@@ -54,7 +65,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         isOpen={isOpen}
         size={'sm'}
         onClose={onClose}
-        className={'md:hidden w-fit'}
+        className={'lg:hidden w-fit'}
         placement={'left'}
         backdrop={'blur'}
         radius={'sm'}
@@ -62,7 +73,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
         <DrawerContent>
           {(onClose) => (
             <>
-              <DrawerBody>
+              <DrawerBody className="p-2">
                 <Sidebar isCompact={isCompact && !showSidebar} />
               </DrawerBody>
             </>
@@ -74,7 +85,7 @@ export const AdminLayout = ({ children }: { children: ReactNode }) => {
       <div className="w-full flex flex-col min-w-0 overflow-hidden">
         {/* Header */}
         <Topbar
-          toggleSidebar={onOpen}
+          toggleSidebar={toggleSidebar}
           setCompactMode={() => setIsCompact(!isCompact)}
           isCompact={isCompact}
         />

@@ -122,8 +122,8 @@ export const useMarkAllAsRead = () => {
 export const useDeleteNotification = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (id: number) => {
-      const response = await apiService.delete<ApiResponse<boolean>>(`${endpoint}/${id}`);
+    mutationFn: async (ids: number[]) => {
+      const response = await apiService.delete<ApiResponse<boolean>>(`${endpoint}`, ids);
       return response.success;
     },
     onSuccess: () => {

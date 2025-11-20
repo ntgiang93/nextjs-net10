@@ -96,5 +96,22 @@ public class NotificationRepository : GenericRepository<Notification, int>, INot
         var excuted = await connection.ExecuteAsync(compiledQuery.Sql, compiledQuery.NamedBindings);
         return excuted > 0;
     }
+
+    public async Task<bool> BulkDeleteAsync(List<int> ids)
+    {
+        if (ids == null || ids.Count == 0)
+            return false;
+
+        var query = new Query(_table)
+            .WhereIn(nameof(Notification.Id), ids)
+            .AsUpdate(new
+            {
+                IsDeleted = true
+            });
+        var compiledQuery = _compiler.Compile(query);
+        var connection = _dbFactory.Connection;
+        var rowsAffected = await connection.ExecuteAsync(compiledQuery.Sql, compiledQuery.NamedBindings);
+        return rowsAffected > 0;
+    }
 }
 

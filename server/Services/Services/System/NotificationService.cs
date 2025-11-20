@@ -64,6 +64,11 @@ public class NotificationService : GenericService<Notification, int>,INotificati
         var currentUser = UserContext.Current;
         return await _notificationRepository.BulkCreateAsync(notifications, currentUser.UserName);
     }
+
+    public async Task<bool> BulkDeleteNotificationsAsync(List<int> ids)
+    {
+        return await _notificationRepository.BulkDeleteAsync(ids);
+    }
 }
 
 

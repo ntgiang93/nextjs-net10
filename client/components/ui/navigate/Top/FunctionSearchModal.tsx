@@ -1,26 +1,33 @@
 import { HugeIcons } from '@/components/ui//icon/HugeIcons';
 import { SearchInput } from '@/components/ui/input/SearchInput';
+import { MenuHook } from '@/hooks/menu';
+import { useNavivationStore } from '@/store/navigation-store';
 import { MenuItem } from '@/types/sys/Menu';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/modal';
 import { Listbox, ListboxItem, ScrollShadow } from '@heroui/react';
-import { ArrowRight01Icon } from 'hugeicons-react';
+import { LinkSquare02Icon } from 'hugeicons-react';
+import { useLocale, useTranslations } from 'next-intl';
 import { useEffect, useMemo, useState } from 'react';
 
 interface IFunctionSearchModalProps {
   isOpen: boolean;
   onOpenChange: () => void;
-  menuData: MenuItem[];
 }
 
 export const FunctionSearchModal = (props: IFunctionSearchModalProps) => {
-  const { isOpen, menuData, onOpenChange } = props;
+  const { isOpen, onOpenChange } = props;
   const [searchTerm, setSearchTerm] = useState('');
-  const [functions, setFunction] = useState(menuData);
+  const [functions, setFunction] = useState<MenuItem[]>([]);
+  const { data } = MenuHook.useGetUserMenu();
+  const { setNavigating } = useNavivationStore();
+
+  const locale = useLocale();
+  const msg = useTranslations('msg');
 
   const flattenMenuData = (data: MenuItem[]): MenuItem[] =>
     data.flatMap((item) => (item.children?.length ? flattenMenuData(item.children) : item));
 
-  const dataSource = useMemo(() => flattenMenuData(menuData), [menuData]);
+  const dataSource = useMemo(() => flattenMenuData(data || []), [data]);
 
   useEffect(() => {
     setFunction(dataSource);
@@ -28,11 +35,14 @@ export const FunctionSearchModal = (props: IFunctionSearchModalProps) => {
 
   useEffect(() => {
     const filteredData = searchTerm
-      ? dataSource.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      ? dataSource.filter((item) => {
+          const displayName = locale === 'vi' ? item.name : item.engName;
+          return displayName?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false;
+        })
       : dataSource;
 
     setFunction(filteredData);
-  }, [dataSource, searchTerm]);
+  }, [dataSource, searchTerm, locale]);
 
   return (
     <Modal
@@ -45,9 +55,9 @@ export const FunctionSearchModal = (props: IFunctionSearchModalProps) => {
       <ModalContent>
         {(onClose) => (
           <>
-            <ModalHeader className="flex flex-col gap-1">
+            <ModalHeader className="flex flex-col gap-1 pt-8">
               <SearchInput
-                placeholder={'Tìm kiếm ...'}
+                placeholder={`${msg('search')} ...`}
                 value={searchTerm}
                 onValueChange={(value) => setSearchTerm(value)}
               />
@@ -66,11 +76,16 @@ export const FunctionSearchModal = (props: IFunctionSearchModalProps) => {
                       description={item.url}
                       className={'bg-default bg-opacity-30'}
                       href={item.url}
-                      onPress={onClose}
+                      onPress={() => {
+                        setNavigating(true);
+                        onClose();
+                      }}
                       startContent={<HugeIcons name={item.icon || 'command'} size={20} />}
-                      endContent={<ArrowRight01Icon size={16} />}
+                      endContent={<LinkSquare02Icon size={16} />}
                     >
-                      <span className={'text-medium'}>{item.name}</span>
+                      <span className={'text-medium'}>
+                        {locale === 'vi' ? item.name : item.engName}
+                      </span>
                     </ListboxItem>
                   )}
                 </Listbox>

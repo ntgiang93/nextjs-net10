@@ -1,4 +1,3 @@
-using System.Reflection;
 using Common.Exceptions;
 using Mapster;
 using Model.Constants;
@@ -7,11 +6,9 @@ using Model.Entities.System;
 using Quartz;
 using Quartz.Impl.Matchers;
 using Repository.Interfaces.System;
-using Serilog;
 using Service.Interfaces.Base;
 using Service.Services.Base;
 using Services.Interfaces.System;
-using Services.Jobs;
 
 namespace Services.Services.Jobs
 {

@@ -2,7 +2,8 @@ using Microsoft.Extensions.Logging;
 using Model.Entities.System;
 using Quartz;
 using Service.Interfaces.System;
-using Services.Jobs;
+
+namespace Services.Services.Jobs;
 
 public class CleanTempFilesJob: BaseJob<CleanTempFilesJob>
 {

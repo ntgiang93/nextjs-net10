@@ -41,7 +41,10 @@ export const SidebarBody = (props: SidebarBodyProps) => {
       return null;
     }
     return (
-      <ScrollShadow hideScrollBar className="h-[calc(100vh-11rem)] max-w-[calc(256-24px)] w-full">
+      <ScrollShadow
+        hideScrollBar
+        className="lg:h-[calc(100vh-11rem)] max-lg:h-[calc(100vh-12rem)] max-w-[calc(256-24px)] w-full"
+      >
         {nodes.map((node, index) => (
           <motion.div
             key={node.id}
@@ -65,11 +68,7 @@ export const SidebarBody = (props: SidebarBodyProps) => {
 
   return (
     <div className={clsx('flex flex-col gap-3')}>
-      <motion.div
-        initial="initial"
-        animate="animate"
-        className="rounded-large border border-default/20 bg-content1/60 p-2"
-      >
+      <motion.div initial="initial" animate="animate" className="rounded-large p-2">
         {content}
       </motion.div>
     </div>

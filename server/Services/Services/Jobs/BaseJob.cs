@@ -1,8 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Quartz;
-using Serilog;
 
-namespace Services.Jobs;
+namespace Services.Services.Jobs;
 
 public abstract class BaseJob<T> : IJob
 {

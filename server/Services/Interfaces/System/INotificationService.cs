@@ -55,4 +55,11 @@ public interface INotificationService : IGenericService<Notification, int>
     /// <param name="notifications">List of CreateNotificationDto to insert.</param>
     /// <returns>True when bulk insert succeeded; otherwise false.</returns>
     Task<bool> BulkCreateNotificationsAsync(List<CreateNotificationDto> notifications);
+
+    /// <summary>
+    /// Soft-deletes multiple notifications by their IDs.
+    /// </summary>
+    /// <param name="ids">List of notification IDs to delete.</param>
+    /// <returns>True when one or more notifications were deleted; false if the list is empty or no rows were affected.</returns>
+    Task<bool> BulkDeleteNotificationsAsync(List<int> ids);
 }

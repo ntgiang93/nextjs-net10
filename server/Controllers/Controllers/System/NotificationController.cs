@@ -83,10 +83,13 @@ public class NotificationController : ControllerBase
         return BadRequest(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.FailureMsg)));
     }
 
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
+    [HttpDelete()]
+    public async Task<IActionResult> Delete([FromBody] List<int> ids)
     {
-        var result = await _notificationService.DeleteNotificationAsync(id);
+        if (ids.Count == 0)
+            return BadRequest(ApiResponse<bool>.Fail(_sysMsg.Get(EMessage.Error400Msg)));
+
+        var result = await _notificationService.BulkDeleteNotificationsAsync(ids);
         if (result)
             return Ok(ApiResponse<bool>.Succeed(result, _sysMsg.Get(EMessage.SuccessMsg)));
 

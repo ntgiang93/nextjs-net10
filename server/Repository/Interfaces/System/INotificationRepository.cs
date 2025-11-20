@@ -11,5 +11,6 @@ public interface INotificationRepository : IGenericRepository<Notification, int>
     Task<bool> MarkAllAsReadAsync(string userId);
     Task<CursorPaginatedResultDto<NotificationDto, DateTime>> GetUserNotificationsAsync(NotificationsFilterDto filter);
     Task<bool> BulkCreateAsync(List<CreateNotificationDto> notifications, string createdBy);
+    Task<bool> BulkDeleteAsync(List<int> ids);
 }
 
