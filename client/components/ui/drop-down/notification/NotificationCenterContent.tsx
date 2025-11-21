@@ -1,4 +1,4 @@
-import { NotificationHook } from '@/hooks/notification';
+import { NotificationHook } from '@/hooks/sys/notification';
 import { TimeHelper } from '@/libs/TimeHelper';
 import { NotificationDto, NotificationsFilterDto } from '@/types/sys/Notification';
 import {

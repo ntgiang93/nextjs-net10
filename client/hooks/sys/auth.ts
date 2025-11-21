@@ -3,7 +3,7 @@
 import { ApiResponse } from '@/types/base/ApiResponse';
 import { ChangePasswordDto, ForgotPasswordDto } from '@/types/sys/User';
 import { useMutation } from '@tanstack/react-query';
-import { apiService } from '../services/api';
+import { apiService } from '../../services/api';
 
 const endpoint = 'auth';
 

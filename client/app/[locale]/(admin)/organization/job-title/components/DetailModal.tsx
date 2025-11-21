@@ -1,5 +1,5 @@
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
-import { JobTitleHook } from '@/hooks/jobTitle';
+import { JobTitleHook } from '@/hooks/orgazination/jobTitle';
 import { defaultJobTitleDto, JobTitleDto } from '@/types/sys/JobTitle';
 import {
   Button,

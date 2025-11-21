@@ -5,7 +5,7 @@ import { ConfirmModal } from '@/components/ui//overlay/ConfirmModal';
 import { ExtButton } from '@/components/ui/button/ExtButton';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
-import { MenuHook } from '@/hooks/menu';
+import { MenuHook } from '@/hooks/sys/menu';
 import { hasPermission } from '@/libs/AuthHelper';
 import { EPermission } from '@/types/base/Permission';
 import { ESysModule } from '@/types/constant/SysModule';

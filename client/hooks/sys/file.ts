@@ -10,7 +10,7 @@ import {
   GetByReferenceDto,
 } from '@/types/sys/File';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
-import { apiService } from '../services/api';
+import { apiService } from '../../services/api';
 
 const endpoint = 'file';
 

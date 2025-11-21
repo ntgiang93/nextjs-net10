@@ -1,6 +1,6 @@
 'use client';
 
-import { RoleHook } from '@/hooks/role';
+import { RoleHook } from '@/hooks/sys/role';
 import { Select, SelectItem, Selection } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';

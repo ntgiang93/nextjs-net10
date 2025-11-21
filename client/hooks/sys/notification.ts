@@ -13,7 +13,7 @@ import {
 } from '@/types/sys/Notification';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dayjs from 'dayjs';
-import { apiService } from '../services/api';
+import { apiService } from '../../services/api';
 
 const endpoint = 'notifications';
 

@@ -1,6 +1,6 @@
 import { ConfirmModal } from '@/components/ui/overlay/ConfirmModal';
-import { AuthHook } from '@/hooks/auth';
-import { UserHook } from '@/hooks/user';
+import { AuthHook } from '@/hooks/sys/auth';
+import { UserHook } from '@/hooks/sys/user';
 import { hasPermission } from '@/libs/AuthHelper';
 import { useAuthStore } from '@/store/auth-store';
 import { EPermission } from '@/types/base/Permission';

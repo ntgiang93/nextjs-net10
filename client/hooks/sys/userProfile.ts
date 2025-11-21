@@ -8,7 +8,7 @@ import { MenuItem } from '@/types/sys/Menu';
 import { defaultUserDto, UserDto, UserSelectDto } from '@/types/sys/User';
 import { defaultUserProfileDto, UserProfileDto } from '@/types/sys/UserProfile';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { apiService } from '../services/api';
+import { apiService } from '../../services/api';
 
 const endpoint = 'user-profile';
 

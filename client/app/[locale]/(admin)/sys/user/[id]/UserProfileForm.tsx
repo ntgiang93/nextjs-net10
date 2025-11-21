@@ -1,6 +1,6 @@
 import JobTitleSelect from '@/components/shared/sys/select/JobTitleSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
-import { UserProfileHook } from '@/hooks/userProfile';
+import { UserProfileHook } from '@/hooks/sys/userProfile';
 import { defaultUserProfileDto, UserProfileDto } from '@/types/sys/UserProfile';
 import {
   Button,

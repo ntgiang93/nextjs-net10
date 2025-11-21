@@ -1,5 +1,5 @@
 import { SearchInput } from '@/components/ui/input/SearchInput';
-import { DepartmentHook } from '@/hooks/department';
+import { DepartmentHook } from '@/hooks/orgazination/department';
 import {
   AddDepartmentMemberDto,
   defaultUserDepartmentCursorFilterDto,

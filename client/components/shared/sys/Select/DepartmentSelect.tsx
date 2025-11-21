@@ -2,7 +2,7 @@
 
 import { TreeListItem } from '@/components/ui/tree/TreeList';
 import { TreeSelect } from '@/components/ui/tree/TreeSelect';
-import { DepartmentHook } from '@/hooks/department';
+import { DepartmentHook } from '@/hooks/orgazination/department';
 import { DepartmentDto } from '@/types/sys/Department';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';

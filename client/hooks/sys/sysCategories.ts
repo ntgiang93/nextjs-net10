@@ -4,7 +4,7 @@ import { ApiResponse } from '@/types/base/ApiResponse';
 import { SelectOption } from '@/types/base/SelectOption';
 import { CategoryDto, defaultCategory } from '@/types/sys/SysCategory';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiService } from '../services/api';
+import { apiService } from '../../services/api';
 
 const endpoint = 'categories';
 

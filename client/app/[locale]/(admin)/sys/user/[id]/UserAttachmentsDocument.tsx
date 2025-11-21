@@ -1,5 +1,5 @@
 import { ExtDropzone } from '@/components/ui/input/ExtDropZone';
-import { FileHook } from '@/hooks/file';
+import { FileHook } from '@/hooks/sys/file';
 import { Button, Card, CardBody, CardFooter } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useMemo, useRef, useState } from 'react';

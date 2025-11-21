@@ -1,5 +1,5 @@
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
-import { DepartmentTypeHook } from '@/hooks/departmentType';
+import { DepartmentTypeHook } from '@/hooks/orgazination/departmentType';
 import { defaultDepartmentTypeDto, DepartmentTypeDto } from '@/types/sys/DepartmentType';
 import {
   Button,

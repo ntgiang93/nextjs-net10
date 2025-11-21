@@ -5,7 +5,7 @@ import { ConfirmModal } from '@/components/ui//overlay/ConfirmModal';
 import { ExtButton } from '@/components/ui/button/ExtButton';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
-import { SysCategoryHook } from '@/hooks/sysCategories';
+import { SysCategoryHook } from '@/hooks/sys/sysCategories';
 import { CategoryDto, CategoryTreeDto } from '@/types/sys/SysCategory';
 import { Button, Tooltip, useDisclosure } from '@heroui/react';
 import { ColumnDef } from '@tanstack/react-table';

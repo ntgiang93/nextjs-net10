@@ -1,8 +1,8 @@
 import DepartmentSelect from '@/components/shared/sys/select/DepartmentSelect';
 import DepartmentTypeSelect from '@/components/shared/sys/select/DepartmentTypeSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
-import { DepartmentHook } from '@/hooks/department';
-import { DepartmentTypeHook } from '@/hooks/departmentType';
+import { DepartmentHook } from '@/hooks/orgazination/department';
+import { DepartmentTypeHook } from '@/hooks/orgazination/departmentType';
 import {
   defaultDetailDepartmentDto,
   DepartmentDto,

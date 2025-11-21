@@ -1,6 +1,6 @@
 'use client';
 
-import { SysCategoryHook } from '@/hooks/sysCategories';
+import { SysCategoryHook } from '@/hooks/sys/sysCategories';
 import { Select, SelectItem, Selection } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';

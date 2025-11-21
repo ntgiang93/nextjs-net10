@@ -2,7 +2,7 @@ import AsyncDataTable from '@/components/ui/data-table/AsyncDataTable';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { ConfirmModal } from '@/components/ui/overlay/ConfirmModal';
-import { RoleHook } from '@/hooks/role';
+import { RoleHook } from '@/hooks/sys/role';
 import { hasPermission } from '@/libs/AuthHelper';
 import { EPermission } from '@/types/base/Permission';
 import { ESysModule } from '@/types/constant/SysModule';

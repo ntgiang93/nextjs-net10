@@ -1,7 +1,7 @@
 'use client';
 import { Brand } from '@/components/ui/navigate/Brand';
-import { MenuHook } from '@/hooks/menu';
-import { UserHook } from '@/hooks/user';
+import { MenuHook } from '@/hooks/sys/menu';
+import { UserHook } from '@/hooks/sys/user';
 import { useAuthStore } from '@/store/auth-store';
 import { CardBody, CardFooter, CardHeader } from '@heroui/card';
 import { Avatar, Button, Card, Skeleton, Tooltip } from '@heroui/react';

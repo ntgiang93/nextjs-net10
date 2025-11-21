@@ -1,6 +1,6 @@
 'use client';
 
-import { JobTitleHook } from '@/hooks/jobTitle';
+import { JobTitleHook } from '@/hooks/orgazination/jobTitle';
 import { Select, SelectItem, Selection } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';

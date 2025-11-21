@@ -1,6 +1,6 @@
 'use client';
 
-import { DepartmentTypeHook } from '@/hooks/departmentType';
+import { DepartmentTypeHook } from '@/hooks/orgazination/departmentType';
 import { Select, SelectItem, Selection } from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';

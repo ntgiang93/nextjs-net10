@@ -1,7 +1,7 @@
 import DataTable from '@/components/ui/data-table/Datatable';
 import { SearchInput } from '@/components/ui/input/SearchInput';
-import { RoleHook } from '@/hooks/role';
-import { SysCategoryHook } from '@/hooks/sysCategories';
+import { RoleHook } from '@/hooks/sys/role';
+import { SysCategoryHook } from '@/hooks/sys/sysCategories';
 import { EPermission } from '@/types/base/Permission';
 import { RoleDto, RolePermissionDto } from '@/types/sys/Role';
 import {

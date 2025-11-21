@@ -1,6 +1,15 @@
-import { AuthHook } from '@/hooks/auth';
+import { AuthHook } from '@/hooks/sys/auth';
 import { ChangePasswordDto, defaultChangePasswordDto } from '@/types/sys/User';
-import { Button, Form, Input, Modal, ModalBody, ModalContent, ModalFooter, ModalHeader } from '@heroui/react';
+import {
+  Button,
+  Form,
+  Input,
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalFooter,
+  ModalHeader,
+} from '@heroui/react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 

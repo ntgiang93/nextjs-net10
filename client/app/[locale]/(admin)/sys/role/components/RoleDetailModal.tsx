@@ -1,5 +1,5 @@
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
-import { RoleHook } from '@/hooks/role';
+import { RoleHook } from '@/hooks/sys/role';
 import { defaultRoleDto, RoleDto } from '@/types/sys/Role';
 import {
   Button,

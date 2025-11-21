@@ -1,5 +1,5 @@
 import { SearchInput } from '@/components/ui/input/SearchInput';
-import { RoleHook } from '@/hooks/role';
+import { RoleHook } from '@/hooks/sys/role';
 import {
   AddRoleMemberDto,
   defaultUserRoleCursorFilterDto,

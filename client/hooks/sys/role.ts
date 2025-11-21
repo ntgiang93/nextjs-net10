@@ -15,11 +15,11 @@ import {
   RoleMemberFilter,
   RoleMembersDto,
   RolePermissionDto,
-  UserRoleCursorFilterDto
+  UserRoleCursorFilterDto,
 } from '@/types/sys/Role';
 import { UserSelectDto } from '@/types/sys/User';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiService } from '../services/api';
+import { apiService } from '../../services/api';
 
 const endpoint = 'role';
 

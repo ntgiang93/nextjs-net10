@@ -2,7 +2,7 @@ import MenuSelect from '@/components/shared/sys/select/MenuSelect';
 import SysModuleSelect from '@/components/shared/sys/select/SysModuleSelect';
 import { IconSelect } from '@/components/ui//icon/IconSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
-import { MenuHook } from '@/hooks/menu';
+import { MenuHook } from '@/hooks/sys/menu';
 import { defaultSaveMenuDto, MenuItem, SaveMenuDto } from '@/types/sys/Menu';
 import {
   Button,

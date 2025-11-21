@@ -4,7 +4,7 @@ import DataTable from '@/components/ui/data-table/Datatable';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
 import { ConfirmModal } from '@/components/ui/overlay/ConfirmModal';
-import { JobScheduleHook } from '@/hooks/jobSchedule';
+import { JobScheduleHook } from '@/hooks/sys/jobSchedule';
 import { hasPermission } from '@/libs/AuthHelper';
 import { EPermission } from '@/types/base/Permission';
 import { ESysModule } from '@/types/constant/SysModule';

@@ -1,4 +1,4 @@
-import { FileHook } from '@/hooks/file';
+import { FileHook } from '@/hooks/sys/file';
 import { useAuthStore } from '@/store/auth-store';
 import { defaultFileDto, FileDto, FileUploadDto } from '@/types/sys/File';
 import {

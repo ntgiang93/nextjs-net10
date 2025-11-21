@@ -1,5 +1,5 @@
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
-import { JobScheduleHook } from '@/hooks/jobSchedule';
+import { JobScheduleHook } from '@/hooks/sys/jobSchedule';
 import { defaultJobConfiguration, DetailJobConfigurationDto } from '@/types/sys/JobConfiguration';
 import {
   Button,

@@ -1,7 +1,7 @@
 'use client';
 import { ExtButton } from '@/components/ui/button/ExtButton';
 import PageLayout from '@/components/ui/layout/PageContentLayout';
-import { UserHook } from '@/hooks/user';
+import { UserHook } from '@/hooks/sys/user';
 import { defaultUserDto } from '@/types/sys/User';
 import { Card, CardBody, Tab, Tabs } from '@heroui/react';
 import { ArrowLeft01Icon } from 'hugeicons-react';

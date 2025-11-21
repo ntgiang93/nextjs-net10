@@ -1,6 +1,6 @@
 import AsyncDataTable from '@/components/ui/data-table/AsyncDataTable';
 import { SearchInput } from '@/components/ui/input/SearchInput';
-import { UserHook } from '@/hooks/user';
+import { UserHook } from '@/hooks/sys/user';
 import { defaultPaginationFilter, PaginationFilter } from '@/types/base/PaginationFilter';
 import { UserSelectDto } from '@/types/sys/User';
 import { User } from '@heroui/react';

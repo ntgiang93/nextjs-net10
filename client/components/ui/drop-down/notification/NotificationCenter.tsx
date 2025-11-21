@@ -1,4 +1,4 @@
-import { NotificationHook } from '@/hooks/notification';
+import { NotificationHook } from '@/hooks/sys/notification';
 import { defaultNotificationsFilterDto, NotificationsFilterDto } from '@/types/sys/Notification';
 import { Badge, Popover, PopoverContent, PopoverTrigger } from '@heroui/react';
 import clsx from 'clsx';

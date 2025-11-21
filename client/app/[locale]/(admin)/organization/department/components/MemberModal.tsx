@@ -3,7 +3,7 @@ import { SearchInput } from '@/components/ui/input/SearchInput';
 import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { ConfirmModal } from '@/components/ui/overlay/ConfirmModal';
 import TreeList, { TreeListItem } from '@/components/ui/tree/TreeList';
-import { DepartmentHook } from '@/hooks/department';
+import { DepartmentHook } from '@/hooks/orgazination/department';
 import { hasPermission } from '@/libs/AuthHelper';
 import { EPermission } from '@/types/base/Permission';
 import { ESysModule } from '@/types/constant/SysModule';

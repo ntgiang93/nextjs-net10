@@ -17,7 +17,7 @@ import {
   UserTableRequestDto,
 } from '@/types/sys/User';
 import { keepPreviousData, useMutation, useQuery } from '@tanstack/react-query';
-import { apiService } from '../services/api';
+import { apiService } from '../../services/api';
 
 const endpoint = 'user';
 

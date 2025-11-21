@@ -2,7 +2,7 @@
 
 import { TreeListItem } from '@/components/ui/tree/TreeList';
 import { TreeSelect } from '@/components/ui/tree/TreeSelect';
-import { MenuHook } from '@/hooks/menu';
+import { MenuHook } from '@/hooks/sys/menu';
 import { MenuItem } from '@/types/sys/Menu';
 import { useTranslations } from 'next-intl';
 import { useMemo } from 'react';

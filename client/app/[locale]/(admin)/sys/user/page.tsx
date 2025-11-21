@@ -5,7 +5,7 @@ import AsyncDataTable from '@/components/ui/data-table/AsyncDataTable';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { useAuth } from '@/components/ui/layout/AuthProvider';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
-import { UserHook } from '@/hooks/user';
+import { UserHook } from '@/hooks/sys/user';
 import { hasPermission } from '@/libs/AuthHelper';
 import { EPermission } from '@/types/base/Permission';
 import { ESysModule } from '@/types/constant/SysModule';

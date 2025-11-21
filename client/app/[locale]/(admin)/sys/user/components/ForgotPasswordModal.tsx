@@ -1,6 +1,6 @@
 'use client';
 
-import { AuthHook } from '@/hooks/auth';
+import { AuthHook } from '@/hooks/sys/auth';
 import { defaultForgotPasswordDto, ForgotPasswordDto } from '@/types/sys/User';
 import {
   Button,

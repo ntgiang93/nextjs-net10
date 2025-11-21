@@ -1,6 +1,6 @@
 import CategoryTypeSelect from '@/components/shared/sys/select/CategoryTypeSelect';
 import FormSkeleton from '@/components/ui/skeleton/FormSkeleton';
-import { SysCategoryHook } from '@/hooks/sysCategories';
+import { SysCategoryHook } from '@/hooks/sys/sysCategories';
 import { CategoryDto, defaultCategory } from '@/types/sys/SysCategory';
 import {
   Button,

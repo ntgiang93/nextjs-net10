@@ -3,7 +3,7 @@
 import { ApiResponse } from '@/types/base/ApiResponse';
 import { defaultMenuItem, MenuItem, SaveMenuDto } from '@/types/sys/Menu';
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiService } from '../services/api';
+import { apiService } from '../../services/api';
 
 const endpoint = 'menu';
 

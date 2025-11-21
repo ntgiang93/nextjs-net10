@@ -4,7 +4,7 @@ import { ExtButton } from '@/components/ui/button/ExtButton';
 import DataTable from '@/components/ui/data-table/Datatable';
 import { SearchInput } from '@/components/ui/input/SearchInput';
 import { PageHeader } from '@/components/ui/navigate/PageHeader';
-import { RoleHook } from '@/hooks/role';
+import { RoleHook } from '@/hooks/sys/role';
 import { hasPermission } from '@/libs/AuthHelper';
 import { EPermission } from '@/types/base/Permission';
 import { ESysModule } from '@/types/constant/SysModule';

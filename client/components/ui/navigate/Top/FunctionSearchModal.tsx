@@ -1,6 +1,6 @@
 import { HugeIcons } from '@/components/ui//icon/HugeIcons';
 import { SearchInput } from '@/components/ui/input/SearchInput';
-import { MenuHook } from '@/hooks/menu';
+import { MenuHook } from '@/hooks/sys/menu';
 import { useNavivationStore } from '@/store/navigation-store';
 import { MenuItem } from '@/types/sys/Menu';
 import { Modal, ModalBody, ModalContent, ModalHeader } from '@heroui/modal';
